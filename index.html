@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>LA Peptides — Market Analysis</title>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<style>
+  body{font-family:-apple-system,system-ui,sans-serif;background:#0b1220;color:#e2e8f0;max-width:1100px;margin:0 auto;padding:24px;line-height:1.5}
+  h1{color:#00C4A7;font-size:26px}
+  h2{color:#fff;border-bottom:1px solid #1a2b3e;padding-bottom:6px;margin-top:36px}
+  table{border-collapse:collapse;width:100%;margin:14px 0;font-size:13px;display:block;overflow-x:auto}
+  th,td{border:1px solid #1a2b3e;padding:7px 9px;text-align:left;white-space:nowrap}
+  th{background:#060c18;color:#94a3b8}
+  td strong{color:#00C4A7}
+  blockquote{background:rgba(248,113,113,.08);border-left:3px solid #f87171;padding:10px 14px;color:#f87171;margin:14px 0}
+  a{color:#38bdf8}
+  .tabs{display:flex;gap:8px;margin:20px 0}
+  .tabs button{background:#0e1829;border:1px solid #1a2b3e;color:#cbd5e1;padding:8px 16px;border-radius:7px;font-weight:600;cursor:pointer}
+  .tabs button.on{background:#00C4A7;color:#0b1220;border-color:#00C4A7}
+</style>
+</head>
+<body>
+<div class="tabs">
+  <button id="b1" class="on" onclick="load('MDlapeptides-market-analysis.md',this)">US-Synthesized</button>
+  <button id="b2" onclick="load('MDlapeptides-grey-market-analysis.md',this)">Grey-Market</button>
+</div>
+<div id="content">Loading…</div>
+<script>
+async function load(file,btn){
+  document.querySelectorAll('.tabs button').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  try{
+    const r=await fetch(file);
+    const t=await r.text();
+    document.getElementById('content').innerHTML=marked.parse(t);
+  }catch(e){
+    document.getElementById('content').textContent='Could not load '+file;
+  }
+}
+load('MDlapeptides-market-analysis.md',document.getElementById('b1'));
+</script>
+</body>
+</html>
