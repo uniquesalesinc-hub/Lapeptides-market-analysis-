@@ -107,6 +107,23 @@ export async function getCatalog(
     .filter((p) => p.variants.length > 0);
 }
 
+/**
+ * The wizard's quotable catalog: injectables from the chosen ladder (Bulk Retail vs Bulk
+ * Wholesale) plus sprays, creams, and capsules, which always price from their own dedicated
+ * sheets. The four queries are disjoint by category, so a plain concat cannot duplicate.
+ */
+export async function getWizardCatalog(ladderCode: PriceListCode): Promise<CatalogProduct[]> {
+  const injectableLadder: PriceListCode =
+    ladderCode === "BULK_RETAIL" || ladderCode === "BULK_WHOLESALE" ? ladderCode : "BULK_RETAIL";
+  const [injectables, sprays, creams, capsules] = await Promise.all([
+    getCatalog(injectableLadder),
+    getCatalog("WHOLESALE_SPRAYS"),
+    getCatalog("WHOLESALE_CREAMS"),
+    getCatalog("WHOLESALE_CAPSULES"),
+  ]);
+  return [...injectables, ...sprays, ...creams, ...capsules];
+}
+
 export async function getVariantWithPricing(variantId: string, priceListCode: PriceListCode) {
   const priceList = await getActivePriceList(priceListCode);
   if (!priceList) return null;

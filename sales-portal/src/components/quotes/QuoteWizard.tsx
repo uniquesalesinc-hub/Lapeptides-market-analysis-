@@ -7,7 +7,7 @@ import type { CatalogProduct } from "@/lib/data/catalog";
 import { fetchCatalogForWizard } from "@/lib/actions/catalog-actions";
 import { saveQuoteDraft, finalizeAndSendQuote } from "@/lib/actions/quote-actions";
 import { calculateQuoteTotals } from "@/lib/pricing/engine";
-import type { CartLine, CustomerOption, WizardAdjustment, WizardStep } from "./wizard-types";
+import type { CartLine, CustomerOption, WizardAdjustment, WizardStep, QuoteLadderCode } from "./wizard-types";
 import { StepTabs } from "./StepTabs";
 import { CustomerStep } from "./steps/CustomerStep";
 import { ProductsStep } from "./steps/ProductsStep";
@@ -18,7 +18,7 @@ export interface QuoteWizardInitialData {
   quoteId: string | null;
   quoteNumber: string | null;
   customerId: string | null;
-  priceListCode: PriceListCode;
+  priceListCode: QuoteLadderCode;
   cart: CartLine[];
   adjustments: WizardAdjustment[];
   depositPercent: number | null;
@@ -46,7 +46,7 @@ export function QuoteWizard({
   const router = useRouter();
   const [step, setStep] = useState<WizardStep>(initial.customerId ? "products" : "customer");
   const [customerId, setCustomerId] = useState<string | null>(initial.customerId);
-  const [priceListCode, setPriceListCode] = useState<PriceListCode>(initial.priceListCode);
+  const [priceListCode, setPriceListCode] = useState<QuoteLadderCode>(initial.priceListCode);
   const [catalog, setCatalog] = useState<CatalogProduct[]>([]);
   const [catalogLoading, setCatalogLoading] = useState(false);
   const [cart, setCart] = useState<CartLine[]>(initial.cart);
@@ -85,7 +85,8 @@ export function QuoteWizard({
 
   function selectCustomer(customer: CustomerOption) {
     setCustomerId(customer.id);
-    if (cart.length === 0) setPriceListCode(customer.defaultPriceListCode);
+    if (cart.length === 0)
+      setPriceListCode(customer.defaultPriceListCode === "BULK_WHOLESALE" ? "BULK_WHOLESALE" : "BULK_RETAIL");
     setStep("products");
   }
 

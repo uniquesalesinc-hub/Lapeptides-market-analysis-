@@ -98,14 +98,20 @@ export function selectPricingTier(
  * or not the line currently qualifies — the next cheaper tier the rep could reach, when one
  * exists in the source data. Never returns a price that isn't backed by an explicit
  * `tierPrices` entry.
+ *
+ * `quantity` is what the customer is billed for (unitPrice × quantity). `qualifyingQuantity`
+ * is what tier selection is measured against — under the confirmed mix-and-match rule, that
+ * is the POOLED total of all units on the quote, so a 20-bottle line on a 300-bottle order
+ * earns the 300-bottle tier. Defaults to `quantity` (per-SKU behavior) when no pool is given.
  */
 export function calculateLineItemPricing(
   quantity: number,
   tierDefs: TierDefinition[],
-  tierPrices: Map<number, number>
+  tierPrices: Map<number, number>,
+  qualifyingQuantity: number = quantity
 ): LineItemPricingResult {
   const minimumRequired = Math.min(...tierDefs.map((t) => t.minQty));
-  const { tier, nextEligible } = selectPricingTier(quantity, tierDefs);
+  const { tier, nextEligible } = selectPricingTier(qualifyingQuantity, tierDefs);
 
   if (!tier) {
     const nextPrice = nextEligible ? tierPrices.get(nextEligible.tier) : undefined;
@@ -117,12 +123,14 @@ export function calculateLineItemPricing(
       null
     );
     const overCeiling =
-      highestCeiling != null && quantity > highestCeiling && tierDefs.every((t) => t.maxQty != null);
+      highestCeiling != null &&
+      qualifyingQuantity > highestCeiling &&
+      tierDefs.every((t) => t.maxQty != null);
     const warning = overCeiling
-      ? `Quantity ${quantity} exceeds the ${highestCeiling}-unit ceiling priced on this list. Larger orders require a custom quote — no price is on file for this volume.`
-      : `Quantity ${quantity} is below the ${minimumRequired}-unit minimum for this price list. Add ${Math.max(
+      ? `Quantity ${qualifyingQuantity} exceeds the ${highestCeiling}-unit ceiling priced on this list. Larger orders require a custom quote — no price is on file for this volume.`
+      : `Quantity ${qualifyingQuantity} is below the ${minimumRequired}-unit minimum for this price list. Add ${Math.max(
           0,
-          minimumRequired - quantity
+          minimumRequired - qualifyingQuantity
         )} more unit(s) to qualify for ${nextEligible?.label ?? "the entry tier"}.`;
     return {
       qualifies: false,
@@ -130,10 +138,10 @@ export function calculateLineItemPricing(
       unitPrice: null,
       lineTotal: null,
       minimumRequired,
-      shortfall: overCeiling ? null : Math.max(0, minimumRequired - quantity),
+      shortfall: overCeiling ? null : Math.max(0, minimumRequired - qualifyingQuantity),
       nextEligibleTier:
         nextEligible && nextPrice != null
-          ? { tier: nextEligible, unitPrice: nextPrice, unitsNeeded: nextEligible.minQty - quantity }
+          ? { tier: nextEligible, unitPrice: nextPrice, unitsNeeded: nextEligible.minQty - qualifyingQuantity }
           : null,
       warning,
     };
@@ -145,7 +153,7 @@ export function calculateLineItemPricing(
   }
 
   const betterTier = tierDefs
-    .filter((t) => t.minQty > quantity && t.tier !== tier.tier)
+    .filter((t) => t.minQty > qualifyingQuantity && t.tier !== tier.tier)
     .sort((a, b) => a.minQty - b.minQty)[0];
   const betterPrice = betterTier ? tierPrices.get(betterTier.tier) : undefined;
 
@@ -158,7 +166,7 @@ export function calculateLineItemPricing(
     shortfall: null,
     nextEligibleTier:
       betterTier && betterPrice != null
-        ? { tier: betterTier, unitPrice: betterPrice, unitsNeeded: betterTier.minQty - quantity }
+        ? { tier: betterTier, unitPrice: betterPrice, unitsNeeded: betterTier.minQty - qualifyingQuantity }
         : null,
     warning: null,
   };

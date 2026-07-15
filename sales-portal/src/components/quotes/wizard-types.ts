@@ -1,6 +1,9 @@
 import type { LineItemPricingResult } from "@/lib/pricing/engine";
 import type { PriceListCode } from "@prisma/client";
 
+/** Quote-level pricing choice = the INJECTABLE ladder. Format products route themselves. */
+export type QuoteLadderCode = Extract<PriceListCode, "BULK_RETAIL" | "BULK_WHOLESALE">;
+
 export interface CartLine {
   variantId: string;
   sku: string;

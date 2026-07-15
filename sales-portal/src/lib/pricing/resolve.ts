@@ -4,6 +4,8 @@ import type { PriceListCode } from "@prisma/client";
 
 export interface ResolvedLine extends LineItemPricingResult {
   variantId: string;
+  /** The list this line actually priced from (format categories override the quote ladder). */
+  effectivePriceListCode: PriceListCode;
   productName: string;
   sku: string;
   strength: string;
@@ -14,29 +16,52 @@ export interface ResolvedLine extends LineItemPricingResult {
 }
 
 /**
+ * Format categories always price from their own dedicated sheet, regardless of which
+ * injectable ladder (Bulk Retail vs Bulk Wholesale) the quote is on. This is what makes
+ * mixed-category quotes possible: the quote-level code chooses the INJECTABLE ladder only.
+ */
+const CATEGORY_LIST_OVERRIDES: Partial<Record<string, PriceListCode>> = {
+  NASAL_SPRAY: "WHOLESALE_SPRAYS",
+  TOPICAL_CREAM: "WHOLESALE_CREAMS",
+  CAPSULE: "WHOLESALE_CAPSULES",
+};
+
+/**
  * The single authoritative place quote/invoice line pricing is computed server-side. Never
  * trust a unit price submitted by the client — always re-derive it here from the active
  * PriceList in the database so a tampered request can't apply an arbitrary price.
+ *
+ * `pooledQuantity` is the total unit count across the whole quote. Per the confirmed
+ * mix-and-match rule, tier qualification is measured against the pool, not the single
+ * line — EXCEPT capsules: their sheet prices a hard per-SKU band (1–49 bottles), so a
+ * capsule line qualifies on its own quantity. Pooling a 300-unit order into a 10-capsule
+ * line must not trip the 49-cap ceiling, and capsules gain nothing from pooling anyway
+ * (one band, one price).
  */
 export async function resolveLineItemPricing(
   variantId: string,
   quantity: number,
-  priceListCode: PriceListCode
+  priceListCode: PriceListCode,
+  pooledQuantity: number = quantity
 ): Promise<ResolvedLine | null> {
+  const variant = await prisma.productVariant.findUnique({
+    where: { id: variantId },
+    include: { product: true },
+  });
+  if (!variant) return null;
+
+  const effectiveCode = CATEGORY_LIST_OVERRIDES[variant.product.category] ?? priceListCode;
+  const qualifyingQuantity = effectiveCode === "WHOLESALE_CAPSULES" ? quantity : pooledQuantity;
+
   const priceList = await prisma.priceList.findFirst({
-    where: { code: priceListCode, isActive: true },
+    where: { code: effectiveCode, isActive: true },
     include: { tiers: { orderBy: { tierNumber: "asc" } } },
   });
   if (!priceList) return null;
 
-  const variant = await prisma.productVariant.findUnique({
-    where: { id: variantId },
-    include: {
-      product: true,
-      priceListEntries: { where: { priceListId: priceList.id } },
-    },
+  const entries = await prisma.priceListEntry.findMany({
+    where: { productVariantId: variantId, priceListId: priceList.id },
   });
-  if (!variant) return null;
 
   const tierDefs: TierDefinition[] = priceList.tiers.map((t) => ({
     tier: t.tierNumber,
@@ -45,12 +70,12 @@ export async function resolveLineItemPricing(
     minQty: t.minQty,
     maxQty: t.maxQty,
   }));
-  const priceMap = new Map(variant.priceListEntries.map((e) => [
+  const priceMap = new Map(entries.map((e) => [
     priceList.tiers.find((t) => t.id === e.pricingTierId)?.tierNumber ?? -1,
     Number(e.unitPrice),
   ]));
 
-  const result = calculateLineItemPricing(quantity, tierDefs, priceMap);
+  const result = calculateLineItemPricing(quantity, tierDefs, priceMap, qualifyingQuantity);
 
   return {
     ...result,
@@ -59,6 +84,7 @@ export async function resolveLineItemPricing(
     sku: variant.sku,
     strength: variant.size,
     quantity,
+    effectivePriceListCode: effectiveCode,
     priceListId: priceList.id,
     priceListName: priceList.name,
     effectiveDate: priceList.effectiveDate,

@@ -31,7 +31,8 @@ export default async function NewQuotePage({
     quoteId: null,
     quoteNumber: null,
     customerId: preselected?.id ?? null,
-    priceListCode: preselected?.defaultPriceListCode ?? "BULK_RETAIL",
+    priceListCode:
+      preselected?.defaultPriceListCode === "BULK_WHOLESALE" ? "BULK_WHOLESALE" : "BULK_RETAIL",
     cart: [],
     adjustments: [],
     depositPercent: 100,

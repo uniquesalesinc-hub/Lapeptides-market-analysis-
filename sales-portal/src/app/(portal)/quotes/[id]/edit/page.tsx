@@ -65,7 +65,7 @@ export default async function EditQuotePage({ params }: { params: Promise<{ id: 
     quoteId: quote.id,
     quoteNumber: quote.quoteNumber,
     customerId: quote.customerId,
-    priceListCode: quote.priceListCode,
+    priceListCode: quote.priceListCode === "BULK_WHOLESALE" ? "BULK_WHOLESALE" : "BULK_RETAIL",
     cart,
     adjustments: quote.adjustments.map((a) => ({
       id: a.id,

@@ -26,7 +26,9 @@ export const quoteLineInputSchema = z.object({
 export const quoteDraftSchema = z.object({
   quoteId: z.string().nullable(),
   customerId: z.string().min(1, "Select a customer."),
-  priceListCode: z.enum(["BULK_RETAIL", "BULK_WHOLESALE", "WHOLESALE_SPRAYS", "WHOLESALE_CREAMS", "WHOLESALE_CAPSULES"]),
+  priceListCode: // The quote-level code picks the INJECTABLE ladder; sprays/creams/capsules always route
+  // to their own price lists in resolveLineItemPricing.
+  z.enum(["BULK_RETAIL", "BULK_WHOLESALE"]),
   lineItems: z.array(quoteLineInputSchema).min(1, "Add at least one product."),
   adjustments: z.array(adjustmentInputSchema),
   depositPercent: z.number().min(0).max(100).nullable(),

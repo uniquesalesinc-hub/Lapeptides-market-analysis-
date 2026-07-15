@@ -61,8 +61,13 @@ export async function saveQuoteDraft(rawInput: QuoteDraftInput): Promise<SaveQuo
   // normal error instead of letting the whole action reject with an unhandled exception.
   let resolvedLines;
   try {
+    // Mix-and-match pooling (confirmed business rule): every unit on the quote counts
+    // toward tier qualification for every line, across categories.
+    const pooledQuantity = input.lineItems.reduce((sum, li) => sum + li.quantity, 0);
     resolvedLines = await Promise.all(
-      input.lineItems.map((li) => resolveLineItemPricing(li.variantId, li.quantity, input.priceListCode))
+      input.lineItems.map((li) =>
+        resolveLineItemPricing(li.variantId, li.quantity, input.priceListCode, pooledQuantity)
+      )
     );
   } catch (err) {
     return {
@@ -98,7 +103,7 @@ export async function saveQuoteDraft(rawInput: QuoteDraftInput): Promise<SaveQuo
       unitPrice: line.unitPrice ?? 0,
       lineTotal: line.lineTotal ?? 0,
       pricingTierLabel: line.appliedTier?.label ?? "Below minimum — not priced",
-      priceListCode: input.priceListCode,
+      priceListCode: line.effectivePriceListCode,
       priceListName: line.priceListName,
       effectiveDate: line.effectiveDate,
       minimumMet: line.qualifies,
@@ -299,7 +304,7 @@ export async function duplicateQuote(quoteId: string): Promise<SaveQuoteResult> 
   return saveQuoteDraft({
     quoteId: null,
     customerId: original.customerId,
-    priceListCode: original.priceListCode,
+    priceListCode: original.priceListCode === "BULK_WHOLESALE" ? "BULK_WHOLESALE" : "BULK_RETAIL",
     lineItems: original.lineItems
       .filter((li) => li.productVariantId)
       .map((li) => ({ variantId: li.productVariantId as string, quantity: li.quantity })),

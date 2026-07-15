@@ -320,6 +320,38 @@ describe("Bulk_Wholesale_Capsules_Draft.pdf — one priced band; MSRP is metadat
   });
 });
 
+describe("Mix-and-match pooling — the pool qualifies the tier, the line bills its own units", () => {
+  it("a 60-unit line on a 120-unit pooled order earns the 100–299 wholesale tier", () => {
+    const r = calculateLineItemPricing(60, bulkWholesaleTiers, bpc10Wholesale, 120);
+    expect(r.qualifies).toBe(true);
+    expect(r.appliedTier?.tier).toBe(2);
+    expect(r.unitPrice).toBe(22); // Tier 2 sheet price
+    expect(r.lineTotal).toBe(round(60 * 22)); // billed on this line's 60 units, not the pool
+  });
+
+  it("a 30-unit spray line qualifies through a 110-unit cross-format pool (floor 50)", () => {
+    const sprayPrices = priceMap("BPC157SPRAY-SPRAY", PRICE_LIST_CODES.WHOLESALE_SPRAYS);
+    const r = calculateLineItemPricing(30, sprayTiers, sprayPrices, 110);
+    expect(r.qualifies).toBe(true);
+    expect(r.appliedTier?.tier).toBe(2); // 100+ tier reached via the pool
+    expect(r.unitPrice).toBe(32.5);
+    expect(r.lineTotal).toBe(round(30 * 32.5));
+  });
+
+  it("still warns when even the pooled quantity misses the minimum", () => {
+    const sprayPrices = priceMap("BPC157SPRAY-SPRAY", PRICE_LIST_CODES.WHOLESALE_SPRAYS);
+    const r = calculateLineItemPricing(10, sprayTiers, sprayPrices, 30);
+    expect(r.qualifies).toBe(false);
+    expect(r.warning).toMatch(/30 is below the 50-unit minimum/);
+  });
+
+  it("omitting the pool preserves per-SKU behavior exactly (default parameter)", () => {
+    const explicit = calculateLineItemPricing(250, bulkWholesaleTiers, bpc10Wholesale, 250);
+    const legacy = calculateLineItemPricing(250, bulkWholesaleTiers, bpc10Wholesale);
+    expect(legacy).toEqual(explicit);
+  });
+});
+
 function round(v: number) {
   return Math.round((v + Number.EPSILON) * 100) / 100;
 }

@@ -4,10 +4,10 @@ import { useEffect, useMemo, useState } from "react";
 import type { PriceListCode } from "@prisma/client";
 import type { CatalogProduct } from "@/lib/data/catalog";
 import { PRICE_LIST_LABELS } from "@/lib/data/catalog";
-import { previewLinePricing } from "@/lib/pricing/clientPreview";
+import { previewLinePricing, repriceCart, cartPooledQuantity } from "@/lib/pricing/clientPreview";
 import { formatMoney } from "@/lib/format";
 import { QuantityInput } from "../QuantityInput";
-import type { CartLine } from "../wizard-types";
+import type { CartLine, QuoteLadderCode } from "../wizard-types";
 
 const RECENT_KEY = "lap-sales-portal:recent-variants";
 
@@ -38,8 +38,8 @@ export function ProductsStep({
 }: {
   catalog: CatalogProduct[];
   loading: boolean;
-  priceListCode: PriceListCode;
-  onPriceListChange: (code: PriceListCode) => void;
+  priceListCode: QuoteLadderCode;
+  onPriceListChange: (code: QuoteLadderCode) => void;
   cart: CartLine[];
   setCart: React.Dispatch<React.SetStateAction<CartLine[]>>;
   lineWarnings: Array<{ sku: string; warning: string }>;
@@ -67,85 +67,81 @@ export function ProductsStep({
     [recent, catalog]
   );
 
+  // Every cart mutation goes through repriceCart: under mix-and-match pooling, changing ANY
+  // line's quantity can move EVERY line's tier, so per-line repricing would leave the rest
+  // of the cart stale.
   function addToCart(product: CatalogProduct, variantId: string, quantity: number) {
     const variant = product.variants.find((v) => v.id === variantId);
     if (!variant || quantity <= 0) return;
     pushRecent(variant.sku);
     setRecent(readRecent());
-    const pricing = previewLinePricing(variant, quantity);
     setCart((prev) => {
       const existingIdx = prev.findIndex((l) => l.variantId === variantId);
-      if (existingIdx >= 0) {
-        const next = [...prev];
-        const newQty = next[existingIdx]!.quantity + quantity;
-        next[existingIdx] = { ...next[existingIdx]!, quantity: newQty, pricing: previewLinePricing(variant, newQty) };
-        return next;
-      }
-      return [
-        ...prev,
-        {
-          variantId,
-          sku: variant.sku,
-          productName: product.name,
-          strength: variant.size,
-          quantity,
-          pricing,
-        },
-      ];
+      const next =
+        existingIdx >= 0
+          ? prev.map((l, i) => (i === existingIdx ? { ...l, quantity: l.quantity + quantity } : l))
+          : [
+              ...prev,
+              {
+                variantId,
+                sku: variant.sku,
+                productName: product.name,
+                strength: variant.size,
+                quantity,
+                pricing: previewLinePricing(variant, quantity),
+              },
+            ];
+      return repriceCart(catalog, next);
     });
   }
 
   function updateQuantity(variantId: string, quantity: number) {
     setCart((prev) =>
-      prev.map((line) => {
-        if (line.variantId !== variantId) return line;
-        const product = catalog.find((p) => p.variants.some((v) => v.id === variantId));
-        const variant = product?.variants.find((v) => v.id === variantId);
-        if (!variant) return { ...line, quantity };
-        return { ...line, quantity, pricing: previewLinePricing(variant, quantity) };
-      })
+      repriceCart(
+        catalog,
+        prev.map((line) => (line.variantId === variantId ? { ...line, quantity } : line))
+      )
     );
   }
 
   function removeLine(variantId: string) {
-    setCart((prev) => prev.filter((l) => l.variantId !== variantId));
+    // Removing a line shrinks the pool — the remaining lines may drop a tier, so reprice.
+    setCart((prev) => repriceCart(catalog, prev.filter((l) => l.variantId !== variantId)));
   }
 
   // Doubles this line's quantity rather than adding a second independent line for the same
-  // SKU — cart lines are always keyed one-per-variant so per-SKU volume tiers are computed on
-  // the true combined quantity. Two separate $16.50/unit lines at 250 units each must become
+  // SKU — cart lines are always keyed one-per-variant so volume tiers are computed on the
+  // true combined quantity. Two separate $16.50/unit lines at 250 units each must become
   // one 500-unit line at whatever tier 500 actually qualifies for, not stay split and
   // under-priced at the 250-unit tier.
   function duplicateLine(variantId: string) {
-    setCart((prev) => {
-      const line = prev.find((l) => l.variantId === variantId);
-      if (!line) return prev;
-      const product = catalog.find((p) => p.variants.some((v) => v.id === variantId));
-      const variant = product?.variants.find((v) => v.id === variantId);
-      const newQty = line.quantity * 2;
-      return prev.map((l) =>
-        l.variantId === variantId
-          ? { ...l, quantity: newQty, pricing: variant ? previewLinePricing(variant, newQty) : l.pricing }
-          : l
-      );
-    });
+    setCart((prev) =>
+      repriceCart(
+        catalog,
+        prev.map((l) => (l.variantId === variantId ? { ...l, quantity: l.quantity * 2 } : l))
+      )
+    );
   }
 
   return (
     <div className="space-y-4">
       <div>
-        <label className="label-text">Price list for this quote</label>
+        <label className="label-text">Injectable pricing ladder for this quote</label>
         <select
           className="input-field"
           value={priceListCode}
-          onChange={(e) => onPriceListChange(e.target.value as PriceListCode)}
+          onChange={(e) => onPriceListChange(e.target.value as QuoteLadderCode)}
         >
-          {(Object.keys(PRICE_LIST_LABELS) as PriceListCode[]).map((code) => (
+          {(["BULK_RETAIL", "BULK_WHOLESALE"] as QuoteLadderCode[]).map((code) => (
             <option key={code} value={code}>
               {PRICE_LIST_LABELS[code]}
             </option>
           ))}
         </select>
+        <p className="mt-1 text-xs text-brand-slate-400">
+          Sprays, creams, and capsules always price from their own sheets. Every unit on the
+          quote counts toward volume tiers (mix &amp; match), except capsules (priced per SKU, 1–49).
+        </p>
       </div>
 
       <input
@@ -227,7 +223,7 @@ export function ProductsStep({
       ) : (
         <div className="space-y-3">
           {filtered.map((product) => (
-            <ProductAddCard key={product.id} product={product} onAdd={addToCart} />
+            <ProductAddCard key={product.id} product={product} onAdd={addToCart} pooledBase={cartPooledQuantity(cart)} />
           ))}
         </div>
       )}
@@ -244,16 +240,21 @@ export function ProductsStep({
 function ProductAddCard({
   product,
   onAdd,
+  pooledBase,
 }: {
   product: CatalogProduct;
   onAdd: (product: CatalogProduct, variantId: string, quantity: number) => void;
+  pooledBase: number;
 }) {
   const [variantId, setVariantId] = useState(product.variants[0]?.id);
   const [quantity, setQuantity] = useState(product.variants[0]?.tierPrices[0]?.minQty ?? 1);
   const variant = product.variants.find((v) => v.id === variantId) ?? product.variants[0];
   if (!variant) return null;
 
-  const preview = previewLinePricing(variant, quantity);
+  // Preview what this line would cost if added NOW: the pool includes the current cart plus
+  // this candidate quantity (capsules qualify on their own quantity - per-SKU 1-49 band).
+  const qualifying = product.category === "CAPSULE" ? quantity : pooledBase + quantity;
+  const preview = previewLinePricing(variant, quantity, qualifying);
 
   return (
     <div className="card p-4">
