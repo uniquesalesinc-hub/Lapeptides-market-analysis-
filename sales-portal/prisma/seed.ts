@@ -19,6 +19,7 @@ import {
 import { tiersFor, buildFullCatalogEntries } from "../src/lib/pricing/priceLists";
 import { calculateLineItemPricing, calculateQuoteTotals } from "../src/lib/pricing/engine";
 import { formatDocumentNumber, nextSequenceNumber } from "../src/lib/numbering";
+import { generatePublicToken } from "../src/lib/security/token";
 
 const prisma = new PrismaClient();
 const DEMO_PASSWORD = "ChangeMe123!";
@@ -274,6 +275,7 @@ async function main() {
   const quote = await prisma.quote.create({
     data: {
       quoteNumber,
+      publicToken: generatePublicToken(),
       customerId: customerAcme.id,
       ownerId: rep1.id,
       priceListCode: "BULK_RETAIL",
@@ -366,6 +368,7 @@ async function main() {
   const quote2 = await prisma.quote.create({
     data: {
       quoteNumber: quoteNumber2,
+      publicToken: generatePublicToken(),
       customerId: customerSummit.id,
       ownerId: rep2.id,
       priceListCode: "BULK_WHOLESALE",
@@ -430,6 +433,7 @@ async function main() {
   const invoice = await prisma.invoice.create({
     data: {
       invoiceNumber,
+      publicToken: generatePublicToken(),
       quoteId: quote2.id,
       customerId: customerSummit.id,
       ownerId: rep2.id,

@@ -6,6 +6,7 @@ import type { CatalogProduct } from "@/lib/data/catalog";
 import { PRICE_LIST_LABELS } from "@/lib/data/catalog";
 import { previewLinePricing } from "@/lib/pricing/clientPreview";
 import { formatMoney } from "@/lib/format";
+import { QuantityInput } from "../QuantityInput";
 import type { CartLine } from "../wizard-types";
 
 const RECENT_KEY = "lap-sales-portal:recent-variants";
@@ -110,11 +111,23 @@ export function ProductsStep({
     setCart((prev) => prev.filter((l) => l.variantId !== variantId));
   }
 
+  // Doubles this line's quantity rather than adding a second independent line for the same
+  // SKU — cart lines are always keyed one-per-variant so per-SKU volume tiers are computed on
+  // the true combined quantity. Two separate $16.50/unit lines at 250 units each must become
+  // one 500-unit line at whatever tier 500 actually qualifies for, not stay split and
+  // under-priced at the 250-unit tier.
   function duplicateLine(variantId: string) {
     setCart((prev) => {
       const line = prev.find((l) => l.variantId === variantId);
       if (!line) return prev;
-      return [...prev, { ...line }];
+      const product = catalog.find((p) => p.variants.some((v) => v.id === variantId));
+      const variant = product?.variants.find((v) => v.id === variantId);
+      const newQty = line.quantity * 2;
+      return prev.map((l) =>
+        l.variantId === variantId
+          ? { ...l, quantity: newQty, pricing: variant ? previewLinePricing(variant, newQty) : l.pricing }
+          : l
+      );
     });
   }
 
@@ -190,14 +203,7 @@ export function ProductsStep({
                     </p>
                   </div>
                   <div className="mt-2 flex items-center gap-2">
-                    <input
-                      type="number"
-                      inputMode="numeric"
-                      min={1}
-                      value={line.quantity}
-                      onChange={(e) => updateQuantity(line.variantId, Math.max(1, Number(e.target.value) || 1))}
-                      className="input-field w-24 text-center"
-                    />
+                    <QuantityInput value={line.quantity} onChange={(qty) => updateQuantity(line.variantId, qty)} />
                     <button type="button" className="btn-secondary !min-h-0 !px-3 !py-1.5 text-xs" onClick={() => duplicateLine(line.variantId)}>
                       Duplicate
                     </button>
@@ -283,14 +289,7 @@ function ProductAddCard({
         )}
         <div className="w-24">
           <label className="label-text">Qty</label>
-          <input
-            type="number"
-            inputMode="numeric"
-            min={1}
-            value={quantity}
-            onChange={(e) => setQuantity(Math.max(1, Number(e.target.value) || 1))}
-            className="input-field text-center"
-          />
+          <QuantityInput value={quantity} onChange={setQuantity} className="input-field text-center" />
         </div>
         <button type="button" className="btn-primary !min-h-0 flex-1 !py-2.5" onClick={() => onAdd(product, variant.id, quantity)}>
           Add

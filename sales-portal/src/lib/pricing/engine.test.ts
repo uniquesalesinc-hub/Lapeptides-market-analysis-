@@ -4,6 +4,7 @@ import {
   calculateQuoteTotals,
   authorizeDiscount,
   selectPricingTier,
+  round2,
   type AdjustmentInput,
 } from "./engine";
 import { tiersFor, buildFullCatalogEntries, findCatalogEntry } from "./priceLists";
@@ -191,6 +192,35 @@ describe("Discount permission enforcement", () => {
     // $150 off a $1,000 subtotal = 15%, over a 10% rep limit.
     const result = authorizeDiscount(fixed, 1000, 10);
     expect(result.requiresApproval).toBe(true);
+  });
+});
+
+describe("round2() currency rounding", () => {
+  // `Math.round((value + Number.EPSILON) * 100) / 100` is a common "fix" for binary-float
+  // currency rounding, but Number.EPSILON (~2.22e-16) is only large enough to correct drift for
+  // values near magnitude 1 — at realistic dollar amounts the float error itself is often
+  // bigger than EPSILON, so that version silently rounds the wrong way. This pins down a
+  // concrete case found during review: a 10% fee on a $48.95 subtotal.
+  it("rounds 48.95 * 10% to $4.90, not $4.89", () => {
+    expect(round2((48.95 * 10) / 100)).toBe(4.9);
+  });
+
+  it("matches exact-decimal rounding across a sweep of subtotal/percentage combinations", () => {
+    let mismatches = 0;
+    for (let subtotal = 1; subtotal < 2000; subtotal += 0.37) {
+      for (const pct of [3, 5, 7, 7.5, 8, 10, 12.5, 15, 18, 20, 25]) {
+        const raw = (subtotal * pct) / 100;
+        const subtotalCents = Math.round(subtotal * 100);
+        const pctScaled = Math.round(pct * 100);
+        const numerator = BigInt(subtotalCents) * BigInt(pctScaled);
+        const denominator = 10000n;
+        const floor = numerator / denominator;
+        const remainder = numerator % denominator;
+        const exactCents = remainder * 2n >= denominator ? floor + 1n : floor;
+        if (BigInt(Math.round(round2(raw) * 100)) !== exactCents) mismatches++;
+      }
+    }
+    expect(mismatches).toBe(0);
   });
 });
 

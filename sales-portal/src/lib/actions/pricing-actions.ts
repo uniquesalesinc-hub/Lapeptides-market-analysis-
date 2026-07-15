@@ -77,6 +77,20 @@ export async function previewPricingUpload(priceListCode: PriceListCode, csvText
   });
   if (!activeList) return { ok: false, message: "No active price list found for this code." };
 
+  // A CSV whose columns are in the wrong order (or from the wrong price list, or missing a
+  // column) would otherwise map row.prices[idx] to the wrong tier silently — every price
+  // still parses as a plausible dollar figure, so nothing else here would catch it. Column
+  // *count* mismatches are the fraction of that failure mode we can actually detect
+  // mechanically; a same-count reordering still relies on an admin reviewing the diff labels.
+  const expectedColumns = activeList.tiers.length;
+  const columnMismatches = rows.filter((r) => r.prices.length !== expectedColumns);
+  if (columnMismatches.length > 0) {
+    return {
+      ok: false,
+      message: `This price list has ${expectedColumns} tiers, but ${columnMismatches.length} row(s) have a different number of price columns (found ${columnMismatches[0]!.prices.length} for SKU ${columnMismatches[0]!.sku}). Check the CSV matches the selected price list before retrying.`,
+    };
+  }
+
   const variantsBySku = new Map(
     (await prisma.productVariant.findMany({ where: { sku: { in: rows.map((r) => r.sku) } }, include: { product: true } })).map((v) => [v.sku, v])
   );
@@ -119,17 +133,34 @@ export async function publishPricingUpload(
   const { rows } = parsePricingCsv(csvText);
   if (rows.length === 0) return { ok: false, message: "No valid rows to publish." };
 
-  const currentList = await prisma.priceList.findFirst({
-    where: { code: priceListCode, isActive: true },
-    include: { tiers: { orderBy: { tierNumber: "asc" } }, entries: true },
-  });
-  if (!currentList) return { ok: false, message: "No active price list found for this code." };
-
   const variantsBySku = new Map(
     (await prisma.productVariant.findMany({ where: { sku: { in: rows.map((r) => r.sku) } } })).map((v) => [v.sku, v])
   );
 
-  await prisma.$transaction(async (tx) => {
+  try {
+    await prisma.$transaction(async (tx) => {
+    // Re-fetched inside the transaction (not passed in from an earlier read) so this
+    // transaction's view of "what's currently active" is as fresh as possible right before
+    // it tries to publish. That alone doesn't fully close the race — two admins publishing
+    // within the same instant can still both see the same current list — but the partial
+    // unique index on PriceList(code) WHERE isActive (migration
+    // 20260715171000_price_list_one_active_per_code) means only one of their INSERTs can
+    // succeed; the loser's transaction fails atomically and is caught below instead of
+    // silently leaving two active price lists for the same code.
+    const currentList = await tx.priceList.findFirst({
+      where: { code: priceListCode, isActive: true },
+      include: { tiers: { orderBy: { tierNumber: "asc" } }, entries: true },
+    });
+    if (!currentList) throw new Error("NO_ACTIVE_LIST");
+
+    const expectedColumns = currentList.tiers.length;
+    const columnMismatches = rows.filter((r) => r.prices.length !== expectedColumns);
+    if (columnMismatches.length > 0) {
+      throw new Error(
+        `COLUMN_MISMATCH:This price list has ${expectedColumns} tiers, but ${columnMismatches.length} row(s) have a different number of price columns.`
+      );
+    }
+
     const source = await tx.uploadedPricingSource.create({
       data: {
         fileName,
@@ -202,7 +233,24 @@ export async function publishPricingUpload(
         description: `Published new ${priceListCode} price list (${rows.length} SKUs updated) effective ${effectiveDate}`,
       },
     });
-  });
+    });
+  } catch (err) {
+    if (err instanceof Error && err.message === "NO_ACTIVE_LIST") {
+      return { ok: false, message: "No active price list found for this code." };
+    }
+    if (err instanceof Error && err.message.startsWith("COLUMN_MISMATCH:")) {
+      return { ok: false, message: err.message.slice("COLUMN_MISMATCH:".length) };
+    }
+    // Prisma's unique-constraint violation code — thrown when another publish for the same
+    // price list code committed first and claimed the one-active-per-code slot.
+    if (typeof err === "object" && err !== null && "code" in err && err.code === "P2002") {
+      return {
+        ok: false,
+        message: "Someone else just published a new price list for this code. Refresh and try again.",
+      };
+    }
+    throw err;
+  }
 
   revalidatePath("/pricing");
   revalidatePath("/products");

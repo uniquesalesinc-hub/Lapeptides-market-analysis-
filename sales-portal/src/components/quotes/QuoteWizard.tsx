@@ -251,7 +251,13 @@ export function QuoteWizard({
 
       {step !== "review" && cart.length > 0 && (
         <div
-          className="no-print fixed inset-x-0 bottom-16 z-30 border-t border-brand-border bg-brand-surface/95 px-4 py-3 backdrop-blur"
+          className="no-print fixed inset-x-0 z-30 border-t border-brand-border bg-brand-surface/95 px-4 py-3 backdrop-blur"
+          // BottomNav is also `fixed bottom-0` and adds `env(safe-area-inset-bottom)` on top of
+          // its own ~52px content height — a hardcoded `bottom-16` (64px) sits *inside* that
+          // nav's real footprint on notched phones (iPhone X and later), covering part of the
+          // Continue/Review Quote button. Push this bar up by the same safe-area inset so it
+          // always clears the nav regardless of device.
+          style={{ bottom: "calc(4rem + env(safe-area-inset-bottom))" }}
         >
           <div className="mx-auto flex max-w-2xl items-center justify-between">
             <div>

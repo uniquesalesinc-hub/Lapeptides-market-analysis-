@@ -301,6 +301,51 @@ instead of a formatted PDF letterhead, this importer is the integration point to
   numeric keypads, no horizontal scroll (verified at 375px width across every screen), card
   layouts for all rep/customer-facing data
 
+### Pre-merge security & correctness review
+
+Before merging, this PR went through a dedicated review pass (5 parallel finder angles, each
+verified against the actual code and, where practical, against a live database) covering
+calculation correctness, mobile UI, authentication, authorization/IDOR, and pricing-snapshot
+integrity. Fixes applied, each verified with a real reproduction (empirical rounding sweep,
+concurrent-transaction test, or a browser-driven end-to-end run):
+
+- **Currency rounding**: `round2()`'s `Number.EPSILON` nudge is too small to correct
+  binary-float drift at realistic dollar amounts (e.g. `48.95 × 10% = 4.8949999999999996`,
+  which rounded to `$4.89` instead of `$4.90`) — fixed and pinned with a permanent regression
+  test (`engine.test.ts`) sweeping thousands of subtotal/percentage combinations against
+  exact-decimal ground truth.
+- **Duplicate-line under-pricing**: the quote wizard's "Duplicate" button created a second,
+  independent cart line for the same SKU instead of merging quantities, so a per-SKU volume
+  tier was computed twice at the smaller split quantity instead of once at the true combined
+  quantity — could under-charge a customer on a real order. Now merges into the existing line.
+- **Payment race condition**: `recordPayment` read-then-wrote `amountPaid` outside any lock, so
+  two payments recorded at nearly the same moment could produce a lost update instead of
+  summing. Switched to an atomic DB `increment` inside an interactive transaction; verified
+  under genuine concurrency.
+- **Price-list publish race condition**: two concurrent "publish new pricing" actions for the
+  same price list code could leave two active `PriceList` rows, and pricing resolution would
+  then pick between them non-deterministically. Added a DB-level partial unique index (one
+  active row per code) plus graceful handling of the resulting constraint error.
+- **Net-terms invoices never went overdue**: `convertQuoteToInvoice` set `dueDate: null` for
+  any non-Prepaid term, and overdue detection requires a due date — Net 15/30 invoices could
+  never be flagged delinquent no matter how late. Now computes a real due date from the term.
+- **Login enumeration/timing + stale sessions**: account-status details (pending/deactivated)
+  are now only revealed after a correct password is verified, `bcrypt.compare` always runs
+  (even for unknown emails) to remove the timing side-channel, and every authenticated
+  request now re-verifies status/role against the database rather than trusting a
+  session JWT that can otherwise stay valid for up to 30 days after an admin deactivates the
+  account or changes a role.
+- **Open redirect**: the login page's `?next=` parameter is now restricted to same-origin
+  relative paths.
+- **Weak public quote/invoice token**: `publicToken` used Prisma's default `cuid()`, which
+  embeds a timestamp/counter/host fingerprint and is far weaker than a real credential —
+  switched to the same 256-bit `randomBytes` approach already used for password-reset tokens.
+- Smaller fixes: a mobile quantity input that snapped back to "1" mid-edit when cleared; a
+  fixed-position cart bar that could sit inside the bottom nav's real footprint on notched
+  phones; CSV pricing-upload column-count validation; an unhandled-exception path when a SKU
+  qualifies for a tier it has no price on file for; and an admin-reporting figure that bypassed
+  the invoice-overdue grace period logic used everywhere else.
+
 ## 14. Remaining Integrations Requiring Credentials
 
 These are architected and ready to wire up, but intentionally **not implemented** without

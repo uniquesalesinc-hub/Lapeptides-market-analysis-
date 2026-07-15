@@ -8,6 +8,7 @@ import { resolveLineItemPricing } from "@/lib/pricing/resolve";
 import { calculateQuoteTotals, authorizeDiscount, type AdjustmentInput } from "@/lib/pricing/engine";
 import { formatDocumentNumber, nextSequenceNumber } from "@/lib/numbering";
 import { sendEmail } from "@/lib/email";
+import { generatePublicToken } from "@/lib/security/token";
 
 export interface SaveQuoteResult {
   ok: boolean;
@@ -52,9 +53,26 @@ export async function saveQuoteDraft(rawInput: QuoteDraftInput): Promise<SaveQuo
   }
 
   // Resolve every line server-side — the client never gets to dictate a unit price.
-  const resolvedLines = await Promise.all(
-    input.lineItems.map((li) => resolveLineItemPricing(li.variantId, li.quantity, input.priceListCode))
-  );
+  // calculateLineItemPricing() throws rather than inventing a price when the selected tier
+  // qualifies but has no PriceListEntry for this variant (a real, reachable state: the
+  // client's cart preview is built from whichever tiers a variant already has prices for, so a
+  // newly-added SKU that's only priced for some tiers can look fine in the wizard right up
+  // until the server tries to resolve a tier it has no price for). Catch it here and surface a
+  // normal error instead of letting the whole action reject with an unhandled exception.
+  let resolvedLines;
+  try {
+    resolvedLines = await Promise.all(
+      input.lineItems.map((li) => resolveLineItemPricing(li.variantId, li.quantity, input.priceListCode))
+    );
+  } catch (err) {
+    return {
+      ok: false,
+      message:
+        err instanceof Error
+          ? `Could not price one or more lines: ${err.message}`
+          : "Could not price one or more lines. Contact an administrator.",
+    };
+  }
 
   const lineWarnings: SaveQuoteResult["lineWarnings"] = [];
   const validLineTotals: number[] = [];
@@ -118,6 +136,7 @@ export async function saveQuoteDraft(rawInput: QuoteDraftInput): Promise<SaveQuo
       const created = await tx.quote.create({
         data: {
           quoteNumber,
+          publicToken: generatePublicToken(),
           customerId: input.customerId,
           ownerId: user.id,
           priceListCode: input.priceListCode,

@@ -4,10 +4,19 @@ import { useState, useTransition } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
 
+/** Only ever follow a same-origin, relative path from `?next=` — never an absolute or
+ *  protocol-relative URL, which would let a crafted login link redirect a freshly-authenticated
+ *  user off-site (e.g. `/login?next=https://evil.example` or `//evil.example`). */
+function sanitizeNextPath(value: string | null): string {
+  if (!value) return "/dashboard";
+  if (!value.startsWith("/") || value.startsWith("//")) return "/dashboard";
+  return value;
+}
+
 export function LoginForm() {
   const router = useRouter();
   const params = useSearchParams();
-  const next = params.get("next") || "/dashboard";
+  const next = sanitizeNextPath(params.get("next"));
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
@@ -21,9 +30,12 @@ export function LoginForm() {
     startTransition(async () => {
       const result = await signIn("credentials", { email, password, redirect: false });
       if (!result || result.error) {
-        if (result?.error === "ACCOUNT_PENDING_ACTIVATION") {
+        // `result.error` is always the generic Auth.js error type ("CredentialsSignin") for
+        // every authorize() failure; the specific reason travels in `result.code`, set by the
+        // AccountPendingActivationError/AccountDeactivatedError subclasses in src/auth.ts.
+        if (result?.code === "ACCOUNT_PENDING_ACTIVATION") {
           setError("Your account has been created but is not yet activated. Contact your administrator.");
-        } else if (result?.error === "ACCOUNT_DEACTIVATED") {
+        } else if (result?.code === "ACCOUNT_DEACTIVATED") {
           setError("This account has been deactivated. Contact your administrator.");
         } else {
           setError("Invalid email or password.");

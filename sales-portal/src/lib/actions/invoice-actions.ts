@@ -7,6 +7,8 @@ import { requireUser } from "@/lib/session";
 import { formatDocumentNumber, nextSequenceNumber } from "@/lib/numbering";
 import { sendEmail } from "@/lib/email";
 import { round2 } from "@/lib/pricing/engine";
+import { generatePublicToken } from "@/lib/security/token";
+import { computeDueDate } from "@/lib/invoiceTerms";
 
 export interface InvoiceActionResult {
   ok: boolean;
@@ -44,12 +46,13 @@ export async function convertQuoteToInvoice(quoteId: string): Promise<InvoiceAct
     const invoice = await tx.invoice.create({
       data: {
         invoiceNumber,
+        publicToken: generatePublicToken(),
         quoteId: quote.id,
         customerId: quote.customerId,
         ownerId: quote.ownerId,
         priceListCode: quote.priceListCode,
         status: "DRAFT",
-        dueDate: quote.paymentTerms === "Prepaid" || !quote.paymentTerms ? new Date() : null,
+        dueDate: computeDueDate(quote.paymentTerms ?? settings.defaultPaymentTerms),
         paymentTerms: quote.paymentTerms ?? settings.defaultPaymentTerms,
         subtotal: quote.subtotal,
         discountTotal: quote.discountTotal,
@@ -162,44 +165,64 @@ export async function recordPayment(invoiceId: string, input: z.infer<typeof pay
   const parsed = paymentSchema.safeParse(input);
   if (!parsed.success) return { ok: false, message: parsed.error.issues[0]?.message ?? "Invalid payment." };
 
-  const invoice = await prisma.invoice.findUnique({ where: { id: invoiceId } });
-  if (!invoice) return { ok: false, message: "Invoice not found." };
-  if (user.role === "SALES_REP" && invoice.ownerId !== user.id) return { ok: false, message: "Not authorized." };
+  const existing = await prisma.invoice.findUnique({ where: { id: invoiceId }, select: { ownerId: true, customerId: true, invoiceNumber: true } });
+  if (!existing) return { ok: false, message: "Invoice not found." };
+  if (user.role === "SALES_REP" && existing.ownerId !== user.id) return { ok: false, message: "Not authorized." };
 
-  const newAmountPaid = round2(Number(invoice.amountPaid) + parsed.data.amount);
-  const grandTotal = Number(invoice.grandTotal);
-  if (newAmountPaid > grandTotal + 0.01) {
-    return { ok: false, message: `Payment of ${parsed.data.amount} would exceed the remaining balance of ${round2(grandTotal - Number(invoice.amountPaid))}.` };
+  // Reading amountPaid, computing the new total in JS, then writing it back is a lost-update
+  // race: two payments recorded within the same moment (e.g. two staff members, or a double
+  // click) can both read the pre-payment balance and each overwrite the other's update instead
+  // of summing. `{ increment }` pushes the addition down into a single atomic SQL statement —
+  // Postgres serializes concurrent updates to the same row via row-level locking, so the second
+  // writer's increment always applies on top of the first writer's already-committed value.
+  try {
+    await prisma.$transaction(async (tx) => {
+      const updated = await tx.invoice.update({
+        where: { id: invoiceId },
+        data: { amountPaid: { increment: parsed.data.amount } },
+      });
+
+      const newAmountPaid = round2(Number(updated.amountPaid));
+      const grandTotal = Number(updated.grandTotal);
+      if (newAmountPaid > grandTotal + 0.01) {
+        // Throwing rolls back the increment along with everything else in this transaction.
+        throw new Error(
+          `OVERPAY:Payment of ${parsed.data.amount} would exceed the remaining balance of ${round2(grandTotal - (newAmountPaid - parsed.data.amount))}.`
+        );
+      }
+      const newBalance = round2(grandTotal - newAmountPaid);
+      const newStatus = newBalance <= 0.01 ? "PAID" : "PARTIALLY_PAID";
+
+      await tx.invoice.update({
+        where: { id: invoiceId },
+        data: { balanceDue: newBalance, status: newStatus, paidAt: newStatus === "PAID" ? new Date() : updated.paidAt },
+      });
+
+      await tx.payment.create({
+        data: {
+          invoiceId,
+          amount: parsed.data.amount,
+          method: parsed.data.method,
+          referenceNote: parsed.data.referenceNote || null,
+          internalNote: parsed.data.internalNote || null,
+          recordedById: user.id,
+        },
+      });
+      await tx.activityLog.create({
+        data: { action: "PAYMENT_RECORDED", actorId: user.id, customerId: existing.customerId, invoiceId, description: `Payment of ${parsed.data.amount} recorded (${parsed.data.method})` },
+      });
+      if (newStatus === "PAID") {
+        await tx.activityLog.create({
+          data: { action: "INVOICE_MARKED_PAID", actorId: user.id, customerId: existing.customerId, invoiceId, description: `${existing.invoiceNumber} fully paid` },
+        });
+      }
+
+    });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Could not record payment.";
+    if (message.startsWith("OVERPAY:")) return { ok: false, message: message.slice("OVERPAY:".length) };
+    throw err;
   }
-  const newBalance = round2(grandTotal - newAmountPaid);
-  const newStatus = newBalance <= 0.01 ? "PAID" : "PARTIALLY_PAID";
-
-  await prisma.$transaction([
-    prisma.payment.create({
-      data: {
-        invoiceId,
-        amount: parsed.data.amount,
-        method: parsed.data.method,
-        referenceNote: parsed.data.referenceNote || null,
-        internalNote: parsed.data.internalNote || null,
-        recordedById: user.id,
-      },
-    }),
-    prisma.invoice.update({
-      where: { id: invoiceId },
-      data: { amountPaid: newAmountPaid, balanceDue: newBalance, status: newStatus, paidAt: newStatus === "PAID" ? new Date() : invoice.paidAt },
-    }),
-    prisma.activityLog.create({
-      data: { action: "PAYMENT_RECORDED", actorId: user.id, customerId: invoice.customerId, invoiceId, description: `Payment of ${parsed.data.amount} recorded (${parsed.data.method})` },
-    }),
-    ...(newStatus === "PAID"
-      ? [
-          prisma.activityLog.create({
-            data: { action: "INVOICE_MARKED_PAID", actorId: user.id, customerId: invoice.customerId, invoiceId, description: `${invoice.invoiceNumber} fully paid` },
-          }),
-        ]
-      : []),
-  ]);
 
   revalidatePath(`/invoices/${invoiceId}`);
   revalidatePath("/invoices");

@@ -230,6 +230,10 @@ enum MinimumBasis {
 /// One versioned publication of a price list, e.g. "Bulk Wholesale — May 2026". Historical
 /// versions are preserved forever; quotes/invoices snapshot the version active at creation time
 /// and are never retroactively changed when a new version is published.
+///
+/// DB-level invariant (not expressible as a plain Prisma @@unique): a partial unique index on
+/// (code) WHERE isActive — see migration 20260715171000_price_list_one_active_per_code —
+/// guarantees at most one active PriceList per code, even under concurrent publishes.
 model PriceList {
   id            String        @id @default(cuid())
   code          PriceListCode
@@ -341,7 +345,11 @@ model Quote {
   customerFacingNotes String? @db.Text
   termsAndConditions String? @db.Text
 
-  publicToken   String      @unique @default(cuid()) // customer-facing approval link token
+  // No @default here on purpose: this gates an unauthenticated public URL, so it must always
+  // be an explicit cryptographically-random value (see src/lib/security/token.ts), never
+  // Prisma's default cuid() — cuid embeds a timestamp/counter/host fingerprint and is
+  // guessable in a way a security credential must not be.
+  publicToken   String      @unique
 
   sentAt        DateTime?
   sentToEmail   String?
@@ -446,7 +454,9 @@ model Invoice {
   internalNotes String?       @db.Text
   customerFacingNotes String? @db.Text
 
-  publicToken   String        @unique @default(cuid())
+  // Same rationale as Quote.publicToken above — always set explicitly via
+  // src/lib/security/token.ts, never left to Prisma's default cuid().
+  publicToken   String        @unique
 
   sentAt        DateTime?
   sentToEmail   String?

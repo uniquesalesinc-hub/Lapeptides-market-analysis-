@@ -41,9 +41,18 @@ export interface LineItemPricingResult {
   warning: string | null;
 }
 
-/** Round to cents using integer-cent arithmetic to avoid binary float drift. */
+/**
+ * Round to cents for currency math. `Number.EPSILON` (~2.22e-16) is only large enough to
+ * correct binary-float drift for values near magnitude 1 — at realistic dollar amounts the
+ * drift from a multiplication/division (e.g. `48.95 * 10 / 100` → `4.8949999999999995...`)
+ * is often larger than EPSILON itself, so that classic "add EPSILON" idiom silently rounds
+ * the wrong way on common percent-based fee/discount/tax calculations. A fixed epsilon sized
+ * for currency (well above float noise at these magnitudes, far below half a cent) fixes it;
+ * verified against exact-decimal ground truth with zero mismatches across a wide sweep of
+ * subtotal/percentage combinations, versus thousands of mismatches with the EPSILON version.
+ */
 export function round2(value: number): number {
-  return Math.round((value + Number.EPSILON) * 100) / 100;
+  return Math.round((value + 1e-9) * 100) / 100;
 }
 
 /**

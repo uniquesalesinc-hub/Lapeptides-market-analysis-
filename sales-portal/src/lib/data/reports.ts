@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { displayInvoiceStatus } from "./invoiceStatus";
 
 export async function getReportsData() {
   const in14Days = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000);
@@ -24,7 +25,7 @@ export async function getReportsData() {
     prisma.quote.groupBy({ by: ["status"], _count: { _all: true } }),
     prisma.quote.aggregate({ where: { status: { notIn: ["DRAFT", "CANCELLED"] } }, _sum: { grandTotal: true } }),
     prisma.invoice.aggregate({ where: { status: { notIn: ["CANCELLED", "VOIDED"] } }, _sum: { grandTotal: true } }),
-    prisma.invoice.findMany({ where: { status: { in: ["SENT", "PARTIALLY_PAID"] } }, select: { balanceDue: true, dueDate: true } }),
+    prisma.invoice.findMany({ where: { status: { in: ["SENT", "PARTIALLY_PAID"] } }, select: { status: true, balanceDue: true, dueDate: true, paymentTerms: true } }),
     prisma.quote.groupBy({ by: ["customerId"], _sum: { grandTotal: true }, orderBy: { _sum: { grandTotal: "desc" } }, take: 10 }),
     prisma.quoteLineItem.groupBy({ by: ["productName"], _sum: { quantity: true, lineTotal: true }, orderBy: { _sum: { quantity: "desc" } }, take: 10 }),
     prisma.invoiceLineItem.groupBy({ by: ["productName"], _sum: { quantity: true, lineTotal: true }, orderBy: { _sum: { quantity: "desc" } }, take: 10 }),
@@ -80,8 +81,11 @@ export async function getReportsData() {
     totalQuotedValue: Number(quotedValue._sum.grandTotal ?? 0),
     totalInvoicedValue: Number(invoicedValue._sum.grandTotal ?? 0),
     outstandingTotal: outstandingInvoices.reduce((s, i) => s + Number(i.balanceDue), 0),
+    // Uses the same displayInvoiceStatus() the Invoices list/detail pages use — including its
+    // grace period for prepaid invoices — so this figure never disagrees with what a rep sees
+    // on those pages for the same invoice.
     outstandingOverdueTotal: outstandingInvoices
-      .filter((i) => i.dueDate && i.dueDate < new Date())
+      .filter((i) => displayInvoiceStatus(i) === "OVERDUE")
       .reduce((s, i) => s + Number(i.balanceDue), 0),
     topCustomers: topCustomersRaw.map((c) => ({
       customerName: customerNameById.get(c.customerId) ?? "Unknown",

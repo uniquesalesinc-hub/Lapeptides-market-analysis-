@@ -84,15 +84,31 @@ export function PublicApprovalForm({ token, approvalLanguage }: { token: string;
           {decision === "APPROVED" && (
             <div className="space-y-2 text-sm text-brand-slate-300">
               <label className="flex items-start gap-2">
-                <input type="checkbox" checked={billingConfirmed} onChange={(e) => setBillingConfirmed(e.target.checked)} />
+                <input
+                  type="checkbox"
+                  className="h-5 w-5 shrink-0"
+                  checked={billingConfirmed}
+                  onChange={(e) => setBillingConfirmed(e.target.checked)}
+                />
                 I confirm the billing information on this quote is correct.
               </label>
               <label className="flex items-start gap-2">
-                <input type="checkbox" checked={shippingConfirmed} onChange={(e) => setShippingConfirmed(e.target.checked)} />
+                <input
+                  type="checkbox"
+                  className="h-5 w-5 shrink-0"
+                  checked={shippingConfirmed}
+                  onChange={(e) => setShippingConfirmed(e.target.checked)}
+                />
                 I confirm the shipping information on this quote is correct.
               </label>
               <label className="flex items-start gap-2">
-                <input type="checkbox" checked={termsAccepted} onChange={(e) => setTermsAccepted(e.target.checked)} required />
+                <input
+                  type="checkbox"
+                  className="h-5 w-5 shrink-0"
+                  checked={termsAccepted}
+                  onChange={(e) => setTermsAccepted(e.target.checked)}
+                  required
+                />
                 {approvalLanguage || "I accept the quoted pricing and terms."}
               </label>
             </div>
