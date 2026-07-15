@@ -201,13 +201,13 @@ export const BLENDS: BulkCatalogItem[] = [
   { name: "BPC-TB", size: "20/20mg", category: "INJECTABLE_BLEND", bulkRetail: [68.0, 68.0, 68.0], bulkWholesale: [68.0, 68.0, 68.0, 68.0, 68.0] },
   { name: "KLOW", size: "50/10mg", category: "INJECTABLE_BLEND", bulkRetail: [42.0, 42.0, 42.0], bulkWholesale: [42.0, 40.0, 38.0, 38.0, 38.0] },
   { name: "KLOW", size: "80mg", category: "INJECTABLE_BLEND", bulkRetail: [42.0, 42.0, 42.0], bulkWholesale: [42.0, 42.0, 42.0, 42.0, 42.0] },
-  { name: "KLOW", size: "100/20mg", category: "INJECTABLE_BLEND", bulkRetail: [80.0, 80.0, 80.0], bulkWholesale: [78.0, 78.0, 74.0, 74.0, 72.0] },
+  { name: "KLOW", size: "100/20mg", category: "INJECTABLE_BLEND", bulkRetail: [80.0, 80.0, 80.0], bulkWholesale: [80.0, 78.0, 74.0, 74.0, 72.0] },
   { name: "GLOW", size: "50/10/10mg", category: "INJECTABLE_BLEND", bulkRetail: [34.0, 34.0, 34.0], bulkWholesale: [34.0, 32.0, 32.0, 30.0, 30.0] },
   { name: "GLOW", size: "100/20/20mg", category: "INJECTABLE_BLEND", bulkRetail: [72.0, 70.0, 68.0], bulkWholesale: [66.0, 64.0, 62.0, 60.0, 58.0] },
   { name: "Ipa/CJC", size: "5/5mg", category: "INJECTABLE_BLEND", bulkRetail: [26.0, 26.0, 26.0], bulkWholesale: [26.0, 24.0, 22.0, 22.0, 20.0] },
-  { name: "Ipa/CJC", size: "10/10mg", category: "INJECTABLE_BLEND", bulkRetail: [54.0, 54.0, 45.5], bulkWholesale: [41.5, 37.5, 33.5, 29.0, 25.0] },
+  { name: "Ipa/CJC", size: "10/10mg", category: "INJECTABLE_BLEND", bulkRetail: [54.0, 50.0, 45.5], bulkWholesale: [41.5, 37.5, 33.5, 29.0, 25.0] },
   { name: "Tesa/Ipa", size: "10/5mg", category: "INJECTABLE_BLEND", bulkRetail: [50.0, 50.0, 50.0], bulkWholesale: [50.0, 46.0, 42.0, 40.0, 38.0] },
-  { name: "Semax/Selank", size: "30/10mg", category: "INJECTABLE_BLEND", bulkRetail: [36.0, 36.0, 36.0], bulkWholesale: [36.0, 36.0, 36.0, 36.0, 36.0] },
+  { name: "Semax/Selank", size: "30/10mg", category: "INJECTABLE_BLEND", bulkRetail: [36.0, 36.0, 36.0], bulkWholesale: [36.0, 34.0, 34.0, 32.0, 32.0] },
   { name: "AOD/Tesa", size: "5/5mg", category: "INJECTABLE_BLEND", bulkRetail: [44.0, 44.0, 44.0], bulkWholesale: [44.0, 42.0, 40.0, 40.0, 40.0] },
 ];
 
