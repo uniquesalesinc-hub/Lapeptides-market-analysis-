@@ -8,14 +8,17 @@ import {
   BULK_RETAIL_TIERS,
   BULK_WHOLESALE_TIERS,
   SPRAY_CREAM_TIERS,
+  CAPSULE_TIERS,
   FULL_BULK_CATALOG,
   SPRAYS,
   CREAMS,
+  CAPSULES,
   PRICE_LIST_CODES,
   makeSku,
   type PriceListCode,
   type BulkCatalogItem,
   type SprayCreamCatalogItem,
+  type CapsuleCatalogItem,
 } from "../../../prisma/seed-data/pricing-source";
 import type { TierDefinition } from "./engine";
 
@@ -46,6 +49,15 @@ export function tiersFor(code: PriceListCode): TierDefinition[] {
         minQty: t.minQty,
         maxQty: t.maxQty,
       }));
+    case PRICE_LIST_CODES.WHOLESALE_CAPSULES:
+      // One priced band only (draft sheet): 1–49 bottles. 50+ = manual quote, by design.
+      return CAPSULE_TIERS.map((t) => ({
+        tier: t.tier,
+        label: `${t.label} (${t.minQty}–${t.maxQty} bottles)`,
+        minimumBasis: "BAND" as const,
+        minQty: t.minQty,
+        maxQty: t.maxQty,
+      }));
     default: {
       const exhaustive: never = code;
       throw new Error(`Unknown price list code: ${exhaustive}`);
@@ -60,6 +72,8 @@ export interface CatalogEntry {
   category: string;
   priceListCode: PriceListCode;
   pricesByTier: Map<number, number>;
+  /** MSRP metadata (capsules only today) — informational, never used in quote math. */
+  suggestedRetail?: number;
 }
 
 function bulkItemToEntries(item: BulkCatalogItem): CatalogEntry[] {
@@ -111,12 +125,25 @@ function sprayCreamToEntry(item: SprayCreamCatalogItem): CatalogEntry {
   };
 }
 
+function capsuleToEntry(item: CapsuleCatalogItem): CatalogEntry {
+  return {
+    sku: makeSku(item.name, "capsules"),
+    name: item.name,
+    size: "capsules",
+    category: item.category,
+    priceListCode: PRICE_LIST_CODES.WHOLESALE_CAPSULES,
+    pricesByTier: new Map([[1, item.wholesalePrice]]),
+    suggestedRetail: item.suggestedRetail,
+  };
+}
+
 /** Every (SKU, price list) combination the app can quote against, flattened for lookup/seeding. */
 export function buildFullCatalogEntries(): CatalogEntry[] {
   return [
     ...FULL_BULK_CATALOG.flatMap(bulkItemToEntries),
     ...SPRAYS.map(sprayCreamToEntry),
     ...CREAMS.map(sprayCreamToEntry),
+    ...CAPSULES.map(capsuleToEntry),
   ];
 }
 

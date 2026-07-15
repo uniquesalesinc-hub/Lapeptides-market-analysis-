@@ -23,13 +23,15 @@ export type ProductCategory =
   | "INJECTABLE_BIOREGULATOR"
   | "INJECTABLE_BLEND"
   | "NASAL_SPRAY"
-  | "TOPICAL_CREAM";
+  | "TOPICAL_CREAM"
+  | "CAPSULE";
 
 export const PRICE_LIST_CODES = {
   BULK_RETAIL: "BULK_RETAIL",
   BULK_WHOLESALE: "BULK_WHOLESALE",
   WHOLESALE_SPRAYS: "WHOLESALE_SPRAYS",
   WHOLESALE_CREAMS: "WHOLESALE_CREAMS",
+  WHOLESALE_CAPSULES: "WHOLESALE_CAPSULES",
 } as const;
 export type PriceListCode = (typeof PRICE_LIST_CODES)[keyof typeof PRICE_LIST_CODES];
 
@@ -55,6 +57,16 @@ export const SPRAY_CREAM_TIERS = [
   { tier: 2, label: "Tier 2", minQty: 100, maxQty: null as number | null },
   { tier: 3, label: "Tier 3", minQty: 200, maxQty: null as number | null },
 ];
+
+/**
+ * Capsules: the sheet ("Bulk_Wholesale_Capsules_Draft.pdf") prices ONE band only —
+ * "1–49 Bottles Per SKU" at the wholesale price. Orders of 50+ are NOT priced on the
+ * sheet; they must be quoted manually (the engine correctly refuses to invent a price).
+ * The sheet's second column, "RETAIL TIER" ($70), is the suggested resale price (MSRP),
+ * NOT a purchasable volume tier — confirmed with JJ 2026-07-15. Stored as
+ * `suggestedRetail` metadata, never used in quote math.
+ */
+export const CAPSULE_TIERS = [{ tier: 1, label: "Tier 1", minQty: 1, maxQty: 49 as number | null }];
 
 export interface BulkCatalogItem {
   name: string;
@@ -236,6 +248,29 @@ export const CREAMS: SprayCreamCatalogItem[] = [
   { name: "Repair Cream", category: "TOPICAL_CREAM", description: "BPC-157 + TB-500", prices: [45.0, 42.5, 40.0] },
   { name: "Smooth Cream", category: "TOPICAL_CREAM", description: "GHK-Cu + SNAP-8 + KPV", prices: [49.0, 46.5, 44.0] },
   { name: "Tan Cream", category: "TOPICAL_CREAM", description: "Melanotan-2 + GHK-Cu", prices: [45.0, 42.5, 40.0] },
+];
+
+export interface CapsuleCatalogItem {
+  name: string;
+  category: Extract<ProductCategory, "CAPSULE">;
+  /** Charged price per bottle for 1–49 bottles (the only band the draft sheet prices). */
+  wholesalePrice: number;
+  /** Suggested resale price (MSRP) from the sheet's "RETAIL TIER" column — metadata only. */
+  suggestedRetail: number;
+}
+
+/** Source: Bulk_Wholesale_Capsules_Draft.pdf (May 2026). All rows $65 wholesale / $70 MSRP. */
+export const CAPSULES: CapsuleCatalogItem[] = [
+  { name: "5 Amino 1MQ Capsules", category: "CAPSULE", wholesalePrice: 65.0, suggestedRetail: 70.0 },
+  { name: "BPC-157 Capsules", category: "CAPSULE", wholesalePrice: 65.0, suggestedRetail: 70.0 },
+  { name: "Dihexa Capsules", category: "CAPSULE", wholesalePrice: 65.0, suggestedRetail: 70.0 },
+  { name: "GHK-Cu Capsules", category: "CAPSULE", wholesalePrice: 65.0, suggestedRetail: 70.0 },
+  { name: "GLP-1 Capsules", category: "CAPSULE", wholesalePrice: 65.0, suggestedRetail: 70.0 },
+  { name: "GLP-2 Capsules", category: "CAPSULE", wholesalePrice: 65.0, suggestedRetail: 70.0 },
+  { name: "Gut Restore Capsules", category: "CAPSULE", wholesalePrice: 65.0, suggestedRetail: 70.0 },
+  { name: "Repair & Fix Capsules", category: "CAPSULE", wholesalePrice: 65.0, suggestedRetail: 70.0 },
+  { name: "SLU-PP-332 Capsules", category: "CAPSULE", wholesalePrice: 65.0, suggestedRetail: 70.0 },
+  { name: "TB-500 Capsules", category: "CAPSULE", wholesalePrice: 65.0, suggestedRetail: 70.0 },
 ];
 
 export const SPRAY_CREAM_TERMS = {

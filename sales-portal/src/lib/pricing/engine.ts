@@ -109,21 +109,33 @@ export function calculateLineItemPricing(
 
   if (!tier) {
     const nextPrice = nextEligible ? tierPrices.get(nextEligible.tier) : undefined;
+    // Distinguish the two ways a quantity can fail to qualify: below every minimum, or
+    // above every priced ceiling (e.g. 50+ capsules — the sheet only prices 1–49, so a
+    // bigger order needs a manual quote; we refuse to invent a price).
+    const highestCeiling = tierDefs.reduce<number | null>(
+      (max, t) => (t.maxQty == null ? max : max == null ? t.maxQty : Math.max(max, t.maxQty)),
+      null
+    );
+    const overCeiling =
+      highestCeiling != null && quantity > highestCeiling && tierDefs.every((t) => t.maxQty != null);
+    const warning = overCeiling
+      ? `Quantity ${quantity} exceeds the ${highestCeiling}-unit ceiling priced on this list. Larger orders require a custom quote — no price is on file for this volume.`
+      : `Quantity ${quantity} is below the ${minimumRequired}-unit minimum for this price list. Add ${Math.max(
+          0,
+          minimumRequired - quantity
+        )} more unit(s) to qualify for ${nextEligible?.label ?? "the entry tier"}.`;
     return {
       qualifies: false,
       appliedTier: null,
       unitPrice: null,
       lineTotal: null,
       minimumRequired,
-      shortfall: Math.max(0, minimumRequired - quantity),
+      shortfall: overCeiling ? null : Math.max(0, minimumRequired - quantity),
       nextEligibleTier:
         nextEligible && nextPrice != null
           ? { tier: nextEligible, unitPrice: nextPrice, unitsNeeded: nextEligible.minQty - quantity }
           : null,
-      warning: `Quantity ${quantity} is below the ${minimumRequired}-unit minimum for this price list. Add ${Math.max(
-        0,
-        minimumRequired - quantity
-      )} more unit(s) to qualify for ${nextEligible?.label ?? "the entry tier"}.`,
+      warning,
     };
   }
 

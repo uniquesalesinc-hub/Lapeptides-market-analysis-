@@ -199,6 +199,9 @@ model ProductVariant {
   product     Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
   sku         String   @unique
   size        String   // e.g. "10mg", "20/20mg", "cream"
+  /// Suggested resale price (MSRP) from the source sheet — informational metadata only,
+  /// never used in quote/invoice math. Today only the capsules sheet provides one.
+  suggestedRetailPrice Decimal? @db.Decimal(12, 2)
   isActive    Boolean  @default(true)
   sortOrder   Int      @default(0)
   createdAt   DateTime @default(now())
@@ -220,6 +223,7 @@ enum PriceListCode {
   BULK_WHOLESALE
   WHOLESALE_SPRAYS
   WHOLESALE_CREAMS
+  WHOLESALE_CAPSULES
 }
 
 enum MinimumBasis {

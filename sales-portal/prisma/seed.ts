@@ -105,12 +105,15 @@ async function main() {
     ],
     [PRICE_LIST_CODES.WHOLESALE_SPRAYS]: ["Wholesale_Sprays.pdf"],
     [PRICE_LIST_CODES.WHOLESALE_CREAMS]: ["Wholesale_Creams.pdf"],
+    [PRICE_LIST_CODES.WHOLESALE_CAPSULES]: ["Bulk_Wholesale_Capsules_Draft.pdf"],
   };
   const listNames: Record<string, string> = {
     [PRICE_LIST_CODES.BULK_RETAIL]: "Bulk Retail — May 2026",
     [PRICE_LIST_CODES.BULK_WHOLESALE]: "Bulk Wholesale — May 2026",
     [PRICE_LIST_CODES.WHOLESALE_SPRAYS]: "Wholesale Sprays — May 2026",
     [PRICE_LIST_CODES.WHOLESALE_CREAMS]: "Wholesale Creams — May 2026",
+    // Source sheet is titled "Draft" — kept visible in the name so nobody mistakes it for final.
+    [PRICE_LIST_CODES.WHOLESALE_CAPSULES]: "Wholesale Capsules — May 2026 (draft sheet)",
   };
 
   const priceListIds: Record<string, string> = {};
@@ -176,7 +179,13 @@ async function main() {
     if (!variantId) {
       const variant = await prisma.productVariant.upsert({
         where: { sku: entry.sku },
-        create: { productId, sku: entry.sku, size: entry.size, isActive: true },
+        create: {
+          productId,
+          sku: entry.sku,
+          size: entry.size,
+          isActive: true,
+          suggestedRetailPrice: entry.suggestedRetail ?? null,
+        },
         update: {},
       });
       variantId = variant.id;

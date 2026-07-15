@@ -289,6 +289,37 @@ describe("Full catalog integrity", () => {
   });
 });
 
+describe("Bulk_Wholesale_Capsules_Draft.pdf — one priced band; MSRP is metadata", () => {
+  const capsuleTiers = tiersFor(PRICE_LIST_CODES.WHOLESALE_CAPSULES);
+  const bpcCaps = priceMap("BPC157CAPSULES-CAPSULES", PRICE_LIST_CODES.WHOLESALE_CAPSULES);
+
+  it("30 bottles qualifies for the 1–49 band at $65.00", () => {
+    const r = calculateLineItemPricing(30, capsuleTiers, bpcCaps);
+    expect(r.qualifies).toBe(true);
+    expect(r.unitPrice).toBe(65);
+    expect(r.lineTotal).toBe(1950);
+  });
+
+  it("60 bottles exceeds the priced ceiling — no invented price, custom-quote warning", () => {
+    const r = calculateLineItemPricing(60, capsuleTiers, bpcCaps);
+    expect(r.qualifies).toBe(false);
+    expect(r.unitPrice).toBeNull();
+    expect(r.warning).toMatch(/exceeds the 49-unit ceiling/);
+    expect(r.warning).toMatch(/custom quote/);
+  });
+
+  it("all 10 capsule SKUs are priced at $65 with a $70 suggested retail (metadata only)", () => {
+    const capsuleEntries = buildFullCatalogEntries().filter(
+      (e) => e.priceListCode === PRICE_LIST_CODES.WHOLESALE_CAPSULES
+    );
+    expect(capsuleEntries).toHaveLength(10);
+    for (const e of capsuleEntries) {
+      expect(e.pricesByTier.get(1)).toBe(65);
+      expect(e.suggestedRetail).toBe(70);
+    }
+  });
+});
+
 function round(v: number) {
   return Math.round((v + Number.EPSILON) * 100) / 100;
 }

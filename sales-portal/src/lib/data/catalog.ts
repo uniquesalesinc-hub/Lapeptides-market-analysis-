@@ -6,6 +6,7 @@ export const PRICE_LIST_LABELS: Record<PriceListCode, string> = {
   BULK_WHOLESALE: "Bulk Wholesale",
   WHOLESALE_SPRAYS: "Wholesale Sprays",
   WHOLESALE_CREAMS: "Wholesale Creams",
+  WHOLESALE_CAPSULES: "Wholesale Capsules",
 };
 
 export const CATEGORY_LABELS: Record<ProductCategory, string> = {
