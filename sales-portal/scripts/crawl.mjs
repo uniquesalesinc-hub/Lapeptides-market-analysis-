@@ -18,7 +18,17 @@ const REP_ROUTES = [
   "/invoices",
   "/account",
 ];
-const ADMIN_ROUTES = [...REP_ROUTES, "/dashboard/leads", "/pricing", "/reps", "/reports", "/settings"];
+const ADMIN_ROUTES = [
+  ...REP_ROUTES,
+  "/dashboard/leads",
+  "/pricing",
+  "/reps",
+  "/reports",
+  "/reports/customers",
+  "/reports/products",
+  "/reports/team",
+  "/settings",
+];
 const USERS = [
   { label: "admin", email: "uniquesalesinc@gmail.com", routes: ADMIN_ROUTES },
   // rep1 (not spencer): the rep crawl must reach a customer detail page, and rep1 is the
@@ -67,16 +77,18 @@ async function crawlUser(browser, { label, email, routes }) {
 
   for (const route of routes) await visit(route);
 
-  // The leads inbox is admin-only: a rep hitting it must be redirected away (requireAdmin).
+  // Admin-only routes: a rep hitting them must be redirected away (requireAdmin).
   if (label === "rep") {
-    await page.goto(`${BASE}/dashboard/leads`, { waitUntil: "load", timeout: 30000 });
-    await page.waitForTimeout(500);
-    const landed = new URL(page.url()).pathname;
-    if (landed === "/dashboard/leads") {
-      failures.push({ label, route: "/dashboard/leads", errors: ["rep was NOT redirected off the admin leads inbox"] });
-      console.log(`FAIL [${label}] /dashboard/leads (no redirect for rep)`);
-    } else {
-      console.log(`ok   [${label}] /dashboard/leads redirected rep to ${landed}`);
+    for (const adminRoute of ["/dashboard/leads", "/reports"]) {
+      await page.goto(`${BASE}${adminRoute}`, { waitUntil: "load", timeout: 30000 });
+      await page.waitForTimeout(500);
+      const landed = new URL(page.url()).pathname;
+      if (landed === adminRoute) {
+        failures.push({ label, route: adminRoute, errors: [`rep was NOT redirected off admin route ${adminRoute}`] });
+        console.log(`FAIL [${label}] ${adminRoute} (no redirect for rep)`);
+      } else {
+        console.log(`ok   [${label}] ${adminRoute} redirected rep to ${landed}`);
+      }
     }
   }
 

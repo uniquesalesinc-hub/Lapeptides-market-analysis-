@@ -20,7 +20,8 @@ export interface ReorderRadarRow {
   overdueBy: number;
 }
 
-function median(sorted: number[]): number {
+/** Median of an ascending-sorted number array. Shared with the reports reorder-days math. */
+export function median(sorted: number[]): number {
   const mid = Math.floor(sorted.length / 2);
   if (sorted.length % 2 === 1) return sorted[mid] ?? 0;
   return ((sorted[mid - 1] ?? 0) + (sorted[mid] ?? 0)) / 2;
