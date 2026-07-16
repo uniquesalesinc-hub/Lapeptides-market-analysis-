@@ -1,9 +1,19 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { ADMIN_ONLY_PREFIXES } from "@/lib/permissions";
+import { CLIENT_SESSION_COOKIE } from "@/lib/clientCookie";
 
 const PUBLIC_PATHS = ["/login", "/forgot-password", "/reset-password"];
 const PUBLIC_PREFIXES = ["/q/", "/api/auth", "/icons", "/manifest.json", "/sw.js"];
+
+/**
+ * Store account routes require the CLIENT session cookie. Everything else under /store is
+ * public browse. The client cookie is a completely separate surface from the NextAuth
+ * session: it is only ever consulted for these store prefixes, so it can never open a
+ * (portal)/rep/admin route, and a NextAuth session is never consulted for /store, so a
+ * logged-in rep gets no client access either.
+ */
+const CLIENT_GATED_PREFIXES = ["/store/account", "/store/cart", "/store/checkout", "/store/orders"];
 
 /**
  * Prefix match on a real path segment boundary, not a raw string prefix — `pathname.startsWith(p)`
@@ -20,6 +30,23 @@ function matchesPrefix(pathname: string, prefix: string): boolean {
 
 export default auth((req) => {
   const { pathname } = req.nextUrl;
+
+  // Client storefront surface. Handled BEFORE any NextAuth logic so the two auth worlds
+  // never mix. The Edge runtime has neither node:crypto nor Prisma, so this is a cheap
+  // presence gate for UX (307 to the store login with a return path); the authoritative
+  // HMAC + expiry + ACTIVE-status verification happens in requireClient()/getClientSession()
+  // on every store page and action - a tampered, expired, or disabled-account cookie passes
+  // this presence check and is then rejected server-side. This mirrors the rep surface,
+  // where session.ts re-checks the database on every request.
+  if (matchesPrefix(pathname, "/store")) {
+    const needsClient = CLIENT_GATED_PREFIXES.some((p) => matchesPrefix(pathname, p));
+    if (needsClient && !req.cookies.get(CLIENT_SESSION_COOKIE)?.value) {
+      const loginUrl = new URL("/store/login", req.nextUrl.origin);
+      loginUrl.searchParams.set("from", pathname);
+      return NextResponse.redirect(loginUrl);
+    }
+    return NextResponse.next();
+  }
 
   const isPublic =
     PUBLIC_PATHS.includes(pathname) || PUBLIC_PREFIXES.some((p) => matchesPrefix(pathname, p));
