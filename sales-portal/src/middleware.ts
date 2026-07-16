@@ -4,7 +4,10 @@ import { ADMIN_ONLY_PREFIXES } from "@/lib/permissions";
 import { CLIENT_SESSION_COOKIE } from "@/lib/clientCookie";
 
 const PUBLIC_PATHS = ["/login", "/forgot-password", "/reset-password"];
-const PUBLIC_PREFIXES = ["/q/", "/api/auth", "/icons", "/manifest.json", "/sw.js"];
+// "/api/q/" belongs with "/q/": the public quote page's PDF download route is gated by the
+// same unguessable token as the page itself, and without this prefix the middleware 307s an
+// unauthenticated customer's PDF click to the staff /login screen.
+const PUBLIC_PREFIXES = ["/q/", "/api/q/", "/api/auth", "/icons", "/manifest.json", "/sw.js"];
 
 /**
  * Store account routes require the CLIENT session cookie. Everything else under /store is

@@ -15,7 +15,15 @@ const STATUSES = [
   "CANCELLED",
 ];
 
-export function QuoteListFilters({ defaultSearch, defaultStatus }: { defaultSearch?: string; defaultStatus?: string }) {
+export function QuoteListFilters({
+  defaultSearch,
+  defaultStatus,
+  defaultOrigin,
+}: {
+  defaultSearch?: string;
+  defaultStatus?: string;
+  defaultOrigin?: string;
+}) {
   const router = useRouter();
   const pathname = usePathname();
   const params = useSearchParams();
@@ -52,6 +60,18 @@ export function QuoteListFilters({ defaultSearch, defaultStatus }: { defaultSear
             }`}
           >
             All
+          </button>
+          {/* Origin chip: CLIENT-origin portal orders awaiting review. Sits apart from the
+              status chips because it filters a different axis (who built it, not where it is). */}
+          <button
+            type="button"
+            data-testid="filter-client-orders"
+            onClick={() => update("origin", defaultOrigin === "CLIENT" ? "" : "CLIENT")}
+            className={`min-h-touch whitespace-nowrap rounded-full border px-3 text-xs font-semibold ${
+              defaultOrigin === "CLIENT" ? "border-lap-teal bg-lap-teal-wash text-lap-teal" : "border-lap-border bg-lap-surface text-lap-slate"
+            }`}
+          >
+            Client orders
           </button>
           {STATUSES.map((s) => (
             <button

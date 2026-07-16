@@ -28,6 +28,11 @@ export function resolveInjectableLadder(defaultPriceListCode: string | null | un
   return defaultPriceListCode === "BULK_WHOLESALE" ? "BULK_WHOLESALE" : "BULK_RETAIL";
 }
 
+/** Display name for a customer's injectable ladder ("Bulk Retail" / "Bulk Wholesale"). */
+export function ladderDisplayName(ladder: InjectableLadder): string {
+  return LADDER_NAMES[ladder];
+}
+
 async function customerLadder(customerId: string): Promise<InjectableLadder> {
   const customer = await prisma.customer.findUnique({
     where: { id: customerId },

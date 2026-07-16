@@ -10,11 +10,15 @@ import type { QuoteStatus } from "@prisma/client";
 export default async function QuotesPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string; status?: string }>;
+  searchParams: Promise<{ q?: string; status?: string; origin?: string }>;
 }) {
   const user = await getEffectiveViewer();
   const sp = await searchParams;
-  const quotes = await listQuotes(user, { search: sp.q, status: sp.status as QuoteStatus | undefined });
+  const quotes = await listQuotes(user, {
+    search: sp.q,
+    status: sp.status as QuoteStatus | undefined,
+    origin: sp.origin === "CLIENT" ? "CLIENT" : undefined,
+  });
 
   return (
     <div className="space-y-4">
@@ -25,7 +29,7 @@ export default async function QuotesPage({
         </Link>
       </div>
 
-      <QuoteListFilters defaultSearch={sp.q} defaultStatus={sp.status} />
+      <QuoteListFilters defaultSearch={sp.q} defaultStatus={sp.status} defaultOrigin={sp.origin} />
 
       {quotes.length === 0 ? (
         <EmptyState title="No quotes yet" description="Create your first quote to get started." />
@@ -35,7 +39,15 @@ export default async function QuotesPage({
             <li key={q.id}>
               <Link href={`/quotes/${q.id}`} className="card flex items-center justify-between p-4">
                 <div>
-                  <p className="font-mono text-sm text-lap-ink">{q.quoteNumber}</p>
+                  <p className="flex items-center gap-2 font-mono text-sm text-lap-ink">
+                    {q.quoteNumber}
+                    {/* Only CLIENT orders are badged - REP is the unmarked default. */}
+                    {q.origin === "CLIENT" && (
+                      <span className="badge border-lap-teal/30 bg-lap-teal-wash font-sans text-lap-teal">
+                        Client
+                      </span>
+                    )}
+                  </p>
                   <p className="text-sm text-lap-slate">{q.customer.businessName}</p>
                   <p className="text-xs text-lap-slate">{formatDate(q.quoteDate)} · {q.owner.name}</p>
                 </div>

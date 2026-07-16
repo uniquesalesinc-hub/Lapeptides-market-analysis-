@@ -1,11 +1,13 @@
 import { prisma } from "@/lib/prisma";
-import type { Prisma, QuoteStatus } from "@prisma/client";
+import type { Prisma, QuoteOrigin, QuoteStatus } from "@prisma/client";
 
 export interface QuoteListFilters {
   search?: string;
   status?: QuoteStatus;
   repId?: string;
   customerId?: string;
+  /** CLIENT = self-serve portal orders awaiting review; REP = staff-built quotes. */
+  origin?: QuoteOrigin;
 }
 
 export async function listQuotes(viewer: { id: string; role: "ADMIN" | "SALES_REP" }, filters: QuoteListFilters = {}) {
@@ -13,6 +15,7 @@ export async function listQuotes(viewer: { id: string; role: "ADMIN" | "SALES_RE
     ...(viewer.role === "SALES_REP" ? { ownerId: viewer.id } : filters.repId ? { ownerId: filters.repId } : {}),
     ...(filters.status ? { status: filters.status } : {}),
     ...(filters.customerId ? { customerId: filters.customerId } : {}),
+    ...(filters.origin ? { origin: filters.origin } : {}),
     ...(filters.search
       ? {
           OR: [
@@ -25,6 +28,9 @@ export async function listQuotes(viewer: { id: string; role: "ADMIN" | "SALES_RE
 
   return prisma.quote.findMany({
     where,
+    // origin is globally omitted (src/lib/prisma.ts, pre-migration safety); the list needs it
+    // back to badge client orders, so it is re-included per-query here.
+    omit: { origin: false },
     include: { customer: { select: { businessName: true } }, owner: { select: { name: true } } },
     orderBy: { createdAt: "desc" },
     take: 100,
