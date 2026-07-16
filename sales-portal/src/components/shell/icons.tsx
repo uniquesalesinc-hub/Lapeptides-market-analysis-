@@ -138,3 +138,36 @@ export function CloseIcon(props: IconProps) {
     </svg>
   );
 }
+
+export function SearchIcon(props: IconProps) {
+  return (
+    <svg {...base(props)}>
+      <circle cx="11" cy="11" r="6.5" />
+      <path d="m16 16 4.5 4.5" />
+    </svg>
+  );
+}
+
+export function ChevronDownIcon(props: IconProps) {
+  return (
+    <svg {...base(props)}>
+      <path d="m6 9.5 6 6 6-6" />
+    </svg>
+  );
+}
+
+export function PlusIcon(props: IconProps) {
+  return (
+    <svg {...base(props)}>
+      <path d="M12 5v14M5 12h14" />
+    </svg>
+  );
+}
+
+export function MinusIcon(props: IconProps) {
+  return (
+    <svg {...base(props)}>
+      <path d="M5 12h14" />
+    </svg>
+  );
+}

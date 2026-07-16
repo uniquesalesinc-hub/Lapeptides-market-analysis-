@@ -124,6 +124,133 @@ export async function getWizardCatalog(ladderCode: PriceListCode): Promise<Catal
   return [...injectables, ...sprays, ...creams, ...capsules];
 }
 
+// ---------------------------------------------------------------------------
+// Order Mode rails: "Most ordered" / "Trending this quarter" / "Previously purchased"
+// ---------------------------------------------------------------------------
+
+export interface OrderRails {
+  /** Top variant ids by total ordered quantity, all time, best first. */
+  mostOrdered: string[];
+  /** Top variant ids by quantity ordered in the last 90 days, best first. */
+  trending: string[];
+}
+
+export interface PurchaseHistoryEntry {
+  variantId: string;
+  totalQuantity: number;
+  lastQuantity: number;
+  lastUnitPrice: number;
+  /** ISO date string of the most recent purchase (serializable to client components). */
+  lastDate: string;
+}
+
+/** Invoices in these states never happened commercially - exclude them from demand data. */
+const DEAD_INVOICE_STATUSES = ["CANCELLED", "VOIDED"] as const;
+
+/**
+ * Aggregate ordered quantity per variant from the two places an accepted order can live:
+ * invoice lines (every invoice not cancelled/voided) plus quote lines on APPROVED quotes that
+ * have no invoice yet. Converted quotes are counted once, through their invoice.
+ */
+async function orderedQuantityByVariant(since?: Date): Promise<Map<string, number>> {
+  const createdFilter = since ? { createdAt: { gte: since } } : {};
+  const [invoiceGroups, quoteGroups] = await Promise.all([
+    prisma.invoiceLineItem.groupBy({
+      by: ["productVariantId"],
+      where: {
+        productVariantId: { not: null },
+        invoice: { status: { notIn: [...DEAD_INVOICE_STATUSES] } },
+        ...createdFilter,
+      },
+      _sum: { quantity: true },
+    }),
+    prisma.quoteLineItem.groupBy({
+      by: ["productVariantId"],
+      where: {
+        productVariantId: { not: null },
+        quote: { status: "APPROVED", invoice: { is: null } },
+        ...createdFilter,
+      },
+      _sum: { quantity: true },
+    }),
+  ]);
+
+  const totals = new Map<string, number>();
+  for (const group of [...invoiceGroups, ...quoteGroups]) {
+    if (!group.productVariantId) continue;
+    totals.set(group.productVariantId, (totals.get(group.productVariantId) ?? 0) + (group._sum.quantity ?? 0));
+  }
+  return totals;
+}
+
+function topVariantIds(totals: Map<string, number>, take: number): string[] {
+  return [...totals.entries()]
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, take)
+    .map(([variantId]) => variantId);
+}
+
+export async function getOrderRails(take = 8): Promise<OrderRails> {
+  const since = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000);
+  const [allTime, recent] = await Promise.all([
+    orderedQuantityByVariant(),
+    orderedQuantityByVariant(since),
+  ]);
+  return { mostOrdered: topVariantIds(allTime, take), trending: topVariantIds(recent, take) };
+}
+
+/**
+ * Everything one customer has actually bought, keyed by variant, most recent first -
+ * powers the "Previously purchased" rail and the "2 @ $110 on Apr 29" line on product cards.
+ */
+export async function getPreviouslyPurchased(customerId: string): Promise<PurchaseHistoryEntry[]> {
+  const lineSelect = {
+    productVariantId: true,
+    quantity: true,
+    unitPrice: true,
+    createdAt: true,
+  } as const;
+  const [invoiceLines, quoteLines] = await Promise.all([
+    prisma.invoiceLineItem.findMany({
+      where: {
+        productVariantId: { not: null },
+        invoice: { customerId, status: { notIn: [...DEAD_INVOICE_STATUSES] } },
+      },
+      select: lineSelect,
+      orderBy: { createdAt: "desc" },
+      take: 300,
+    }),
+    prisma.quoteLineItem.findMany({
+      where: {
+        productVariantId: { not: null },
+        quote: { customerId, status: "APPROVED", invoice: { is: null } },
+      },
+      select: lineSelect,
+      orderBy: { createdAt: "desc" },
+      take: 300,
+    }),
+  ]);
+
+  const byVariant = new Map<string, PurchaseHistoryEntry>();
+  const all = [...invoiceLines, ...quoteLines].sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+  for (const line of all) {
+    if (!line.productVariantId) continue;
+    const existing = byVariant.get(line.productVariantId);
+    if (existing) {
+      existing.totalQuantity += line.quantity;
+    } else {
+      byVariant.set(line.productVariantId, {
+        variantId: line.productVariantId,
+        totalQuantity: line.quantity,
+        lastQuantity: line.quantity,
+        lastUnitPrice: Number(line.unitPrice),
+        lastDate: line.createdAt.toISOString(),
+      });
+    }
+  }
+  return [...byVariant.values()];
+}
+
 export async function getVariantWithPricing(variantId: string, priceListCode: PriceListCode) {
   const priceList = await getActivePriceList(priceListCode);
   if (!priceList) return null;

@@ -5,7 +5,7 @@ import { chromium } from "playwright";
 
 const BASE = process.env.CRAWL_BASE || "http://localhost:3000";
 const PASSWORD = "ChangeMe123!";
-const REP_ROUTES = ["/dashboard", "/quotes", "/quotes/new", "/customers", "/products", "/invoices", "/account"];
+const REP_ROUTES = ["/dashboard", "/order", "/quotes", "/quotes/new", "/customers", "/products", "/invoices", "/account"];
 const ADMIN_ROUTES = [...REP_ROUTES, "/pricing", "/reps", "/reports", "/settings"];
 const USERS = [
   { label: "admin", email: "uniquesalesinc@gmail.com", routes: ADMIN_ROUTES },

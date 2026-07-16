@@ -35,6 +35,26 @@ export async function listCustomers(
   });
 }
 
+/**
+ * Customer rows for the Order Mode drawer. Explicit select on purpose: the Prisma schema
+ * already declares the Phase-1 CRM columns (crmStatus etc.) but the shared database may not
+ * have them yet, and a default-select findMany would ask for every declared column and fail.
+ * This query only touches columns that exist in the live DB today.
+ */
+export async function listOrderModeCustomers(viewer: { id: string; role: "ADMIN" | "SALES_REP" }) {
+  return prisma.customer.findMany({
+    where: viewer.role === "SALES_REP" ? { assignedRepId: viewer.id } : {},
+    select: {
+      id: true,
+      businessName: true,
+      billingCity: true,
+      defaultPriceListCode: true,
+      _count: { select: { invoices: true } },
+    },
+    orderBy: { updatedAt: "desc" },
+  });
+}
+
 export async function getRecentCustomers(viewer: { id: string; role: "ADMIN" | "SALES_REP" }, take = 5) {
   return prisma.customer.findMany({
     where: viewer.role === "SALES_REP" ? { assignedRepId: viewer.id } : {},

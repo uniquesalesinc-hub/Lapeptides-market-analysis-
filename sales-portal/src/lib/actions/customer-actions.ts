@@ -98,6 +98,10 @@ export async function createCustomer(
       isProspect,
       lastContactDate: new Date(),
     },
+    // Explicit select: the schema declares Phase-1 CRM columns (crmStatus etc.) the shared
+    // DB may not have yet; the default RETURNING-all would fail on them. Only the fields the
+    // code below actually uses are read back.
+    select: { id: true, businessName: true, contactName: true, email: true, defaultPriceListCode: true },
   });
 
   await prisma.activityLog.create({
