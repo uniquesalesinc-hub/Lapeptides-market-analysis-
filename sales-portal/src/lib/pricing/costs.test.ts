@@ -13,8 +13,8 @@ describe("Hard-cost sheet integrity (admin-only COGS data)", () => {
     }
   });
 
-  it("covers 74 SKUs with 5 bands each, mirroring the wholesale bands", () => {
-    expect(COSTS.length).toBe(74); // 46 peptides + 16 bioregulators + 12 blends
+  it("covers 99 SKUs with 5 bands each, mirroring the wholesale bands", () => {
+    expect(COSTS.length).toBe(99); // 46 peptides + 25 GLP + 16 bioregulators + 12 blends
     expect(COST_BANDS.map((b) => b.minQty)).toEqual([1, 100, 300, 500, 1000]);
   });
 
@@ -24,6 +24,8 @@ describe("Hard-cost sheet integrity (admin-only COGS data)", () => {
     expect(row("FOXO4-DRI", "10mg").slice(2)).toEqual([50, 48, 46, 44, 42]);
     expect(row("Ipa/CJC", "10/10mg").slice(2)).toEqual([25, 23, 20, 20, 19]);
     expect(row("Pinealon", "20mg").slice(2)).toEqual([10, 9, 8, 8, 7]);
+    expect(row("Retatrutide", "40mg").slice(2)).toEqual([32, 30, 28, 27, 25]);
+    expect(row("SS-31", "50mg").slice(2)).toEqual([44, 40, 39, 37, 35]);
   });
 
   it("cost never meets or exceeds the wholesale sell price at the same band (margin sanity)", () => {

@@ -16,9 +16,8 @@
  *  - "MOTS-c"           → catalog "MOTS-C" (case only; SKUs match)
  *
  * NO COST DATA PROVIDED for (flagged to JJ; these SKUs show "no cost on file"):
- *  - The GLP section (Semaglutide, Tirzepatide, Retatrutide, Tesamorelin), Sermorelin,
- *    Kisspeptin-10, LL-37, ARA-290, SS-31, HGH Frag 176-191, NAD+ 500/1000mg,
- *    KLOW 80mg, and all sprays, creams, and capsules.
+ *  - NAD+ 500/1000mg, KLOW 80mg, and all sprays, creams, and capsules.
+ * (GLP-section costs arrived 7/15 evening and are included below.)
  */
 
 /** [name (catalog spelling), size, c1, c2, c3, c4, c5] */
@@ -80,6 +79,32 @@ export const COSTS: CostRow[] = [
   ["Selank", "10mg", 7, 7, 7, 7, 6],
   ["Semax Acetyl", "30mg", 17, 16, 15, 15, 14],
   ["Selank Acetyl", "10mg", 9, 9, 9, 9, 8],
+  // ── GLP (cost page provided 7/15 evening) ─────────────────────────────────
+  ["Semaglutide", "5mg", 7, 6, 6, 6, 6],
+  ["Semaglutide", "10mg", 11, 10, 9, 9, 8],
+  ["Semaglutide", "15mg", 15, 14, 13, 13, 12],
+  ["Semaglutide", "20mg", 19, 18, 17, 17, 16],
+  ["Tirzepatide", "10mg", 12, 11, 10, 9, 8],
+  ["Tirzepatide", "15mg", 16, 15, 14, 13, 12],
+  ["Tirzepatide", "20mg", 20, 19, 18, 17, 16],
+  ["Tirzepatide", "30mg", 27, 25, 23, 21, 20],
+  ["Tirzepatide", "40mg", 32, 30, 28, 27, 25],
+  ["Retatrutide", "10mg", 12, 11, 10, 9, 8],
+  ["Retatrutide", "20mg", 20, 19, 18, 17, 16],
+  ["Retatrutide", "30mg", 27, 25, 23, 21, 20],
+  ["Retatrutide", "40mg", 32, 30, 28, 27, 25],
+  ["Tesamorelin", "5mg", 10, 10, 9, 8, 8],
+  ["Tesamorelin", "10mg", 19, 18, 18, 17, 17],
+  ["Tesamorelin", "20mg", 36, 34, 34, 32, 32],
+  ["Sermorelin", "5mg", 9, 8, 7, 7, 7],
+  ["Sermorelin", "10mg", 16, 14, 13, 13, 13],
+  ["Kisspeptin-10", "10mg", 10, 9, 9, 8, 8],
+  ["LL-37", "5mg", 15, 14, 13, 13, 12],
+  ["ARA-290", "16mg", 15, 14, 13, 13, 12],
+  ["SS-31", "10mg", 12, 11, 10, 10, 9],
+  ["SS-31", "30mg", 28, 26, 26, 25, 24],
+  ["SS-31", "50mg", 44, 40, 39, 37, 35],
+  ["HGH Frag 176-191", "5mg", 15, 14, 13, 13, 12],
   // ── BIO REGULATORS (uniform 10/9/8/8/7) ──────────────────────────────────
   ...([
     "Pinealon", "Ovagen", "Chonluten", "Prostamax", "Cortagen", "Vesugen",
