@@ -5,8 +5,20 @@ import { chromium } from "playwright";
 
 const BASE = process.env.CRAWL_BASE || "http://localhost:3000";
 const PASSWORD = "ChangeMe123!";
-const REP_ROUTES = ["/dashboard", "/order", "/quotes", "/quotes/new", "/customers", "/products", "/invoices", "/account"];
-const ADMIN_ROUTES = [...REP_ROUTES, "/pricing", "/reps", "/reports", "/settings"];
+const REP_ROUTES = [
+  "/dashboard",
+  "/dashboard/sales",
+  "/dashboard/engagement",
+  "/dashboard/tasks",
+  "/order",
+  "/quotes",
+  "/quotes/new",
+  "/customers",
+  "/products",
+  "/invoices",
+  "/account",
+];
+const ADMIN_ROUTES = [...REP_ROUTES, "/dashboard/leads", "/pricing", "/reps", "/reports", "/settings"];
 const USERS = [
   { label: "admin", email: "uniquesalesinc@gmail.com", routes: ADMIN_ROUTES },
   // rep1 (not spencer): the rep crawl must reach a customer detail page, and rep1 is the
@@ -54,6 +66,19 @@ async function crawlUser(browser, { label, email, routes }) {
   }
 
   for (const route of routes) await visit(route);
+
+  // The leads inbox is admin-only: a rep hitting it must be redirected away (requireAdmin).
+  if (label === "rep") {
+    await page.goto(`${BASE}/dashboard/leads`, { waitUntil: "load", timeout: 30000 });
+    await page.waitForTimeout(500);
+    const landed = new URL(page.url()).pathname;
+    if (landed === "/dashboard/leads") {
+      failures.push({ label, route: "/dashboard/leads", errors: ["rep was NOT redirected off the admin leads inbox"] });
+      console.log(`FAIL [${label}] /dashboard/leads (no redirect for rep)`);
+    } else {
+      console.log(`ok   [${label}] /dashboard/leads redirected rep to ${landed}`);
+    }
+  }
 
   // Representative customer detail page (Customer 360): first customer link on /customers.
   await page.goto(`${BASE}/customers`, { waitUntil: "load", timeout: 30000 });

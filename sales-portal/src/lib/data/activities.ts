@@ -24,14 +24,17 @@ export async function logActivity(input: LogActivityInput) {
 
 export interface ListActivitiesFilters {
   customerId?: string;
+  /** Scope to one user's touchpoints (rep-own dashboard views). */
+  userId?: string;
   sinceDays?: number;
 }
 
-export async function listActivities({ customerId, sinceDays }: ListActivitiesFilters = {}) {
+export async function listActivities({ customerId, userId, sinceDays }: ListActivitiesFilters = {}) {
   const since = sinceDays ? new Date(Date.now() - sinceDays * 24 * 60 * 60 * 1000) : undefined;
   return prisma.activity.findMany({
     where: {
       ...(customerId ? { customerId } : {}),
+      ...(userId ? { userId } : {}),
       ...(since ? { occurredAt: { gte: since } } : {}),
     },
     include: {
@@ -60,20 +63,22 @@ function emptyCounts(): ActivityTypeCounts {
  */
 export async function activityCountsByType(
   rangeStart: Date,
-  rangeEnd: Date
+  rangeEnd: Date,
+  userId?: string
 ): Promise<ActivityCountsByTypeResult> {
   const rangeMs = rangeEnd.getTime() - rangeStart.getTime();
   const previousStart = new Date(rangeStart.getTime() - rangeMs);
+  const userScope = userId ? { userId } : {};
 
   const [currentGroups, previousGroups] = await Promise.all([
     prisma.activity.groupBy({
       by: ["type"],
-      where: { occurredAt: { gte: rangeStart, lt: rangeEnd } },
+      where: { ...userScope, occurredAt: { gte: rangeStart, lt: rangeEnd } },
       _count: { _all: true },
     }),
     prisma.activity.groupBy({
       by: ["type"],
-      where: { occurredAt: { gte: previousStart, lt: rangeStart } },
+      where: { ...userScope, occurredAt: { gte: previousStart, lt: rangeStart } },
       _count: { _all: true },
     }),
   ]);
