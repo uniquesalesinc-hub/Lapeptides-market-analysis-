@@ -158,3 +158,32 @@ storefront theme picker, login-as-user impersonation, WordPress/page builder.
   console/page errors for admin + rep on all routes; rep session gets 307 from
   admin-only routes; live deploy to lapeptides-portal-v2.vercel.app verified
   logged-in before reporting done.
+
+---
+
+## Addendum A (7/16, JJ + Spencer field call): Phase 1.5 - admin enhancements
+
+1. **Sub-MOQ ordering.** Bulk Retail Tier 1 floor drops 20 -> 5 for ALL products
+   (Spencer: "order less than 20... from five to 20 under bulk retail tier number
+   one"). Quantities 5-19 price at the T1 sheet price; below 5 stays unpriced.
+   Wholesale bands unchanged (band 1 already covers 1-99). This is a deliberate
+   business override of the printed sheets, same provenance class as the flat
+   spray/cream rule. Tier data lives in the shared DB, so the rule applies to
+   BOTH portals once the data migration runs.
+2. **Brand kit per customer.** Customer 360 gains a Brand tab: sections Logo /
+   Social media / Vial labels / Other; upload PNG/JPEG/PDF/SVG (<= 8 MB), stored
+   in Postgres (BrandAsset model with bytea), served via authenticated route;
+   uploaded by reps or admin; delete allowed (admin or uploader). Structured
+   brand details on the customer: primaryHex, secondaryHex, accentHex, fontNotes,
+   brandNotes - exact hex values to stop color drift in label/logo production.
+   Purpose: Danny's print staff pulls one folder per customer; label template has
+   4 fixed layers + editable layer 5 (peptide name + mg).
+3. **Admin view switching.** Sidebar becomes sectioned for admins: collapsible
+   "Admin view" (the admin nav), "Sales rep view" (list of reps; selecting one
+   enters viewing-as mode: dashboards/quotes/customers/order-mode data scoped to
+   that rep, persistent banner "Viewing as [rep] - Exit"), "Customer view" (list
+   of customers; opens their Customer 360 now, becomes their portal view when the
+   client portal ships). Mechanism: signed viewAs cookie honored ONLY for ADMIN
+   sessions; never a credential swap; all writes still audit as the admin.
+4. Client portal (Phase 2) additionally gains: reorder from history (already
+   specced) + brand info upload by the customer themselves.
