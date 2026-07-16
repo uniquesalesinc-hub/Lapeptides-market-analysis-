@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import Link from "next/link";
 import type { CatalogProduct } from "@/lib/data/catalog";
 import { CATEGORY_LABELS } from "@/lib/data/catalog";
 import { cartPooledQuantity, previewLinePricing } from "@/lib/pricing/clientPreview";
@@ -46,7 +47,14 @@ export function ProductCard({ product }: { product: CatalogProduct }) {
             <CategoryDot category={product.category} />
             {CATEGORY_LABELS[product.category]}
           </p>
-          <h3 className="mt-1 truncate font-heading text-base font-semibold text-lap-ink">{product.name}</h3>
+          <h3 className="mt-1 truncate font-heading text-base font-semibold text-lap-ink">
+            <Link
+              href={`/products/${product.id}`}
+              className="transition-colors duration-150 hover:text-lap-teal hover:underline"
+            >
+              {product.name}
+            </Link>
+          </h3>
         </div>
         <div className="shrink-0 text-right">
           {preview.qualifies ? (

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { formatMoney } from "@/lib/format";
 import type { CatalogProduct } from "@/lib/data/catalog";
 
@@ -14,7 +15,11 @@ export function ProductCard({ product }: { product: CatalogProduct }) {
     <div className="card p-4">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <p className="font-semibold text-white">{product.name}</p>
+          <p className="font-semibold text-white">
+            <Link href={`/products/${product.id}`} className="hover:underline">
+              {product.name}
+            </Link>
+          </p>
           <p className="font-mono text-xs text-brand-slate-400">{variant.sku}</p>
         </div>
         <p className="whitespace-nowrap text-right">

@@ -32,7 +32,7 @@ async function crawlUser(browser, { label, email, routes }) {
   await page.click('button[type="submit"]');
   await page.waitForURL("**/dashboard", { timeout: 30000 });
 
-  for (const route of routes) {
+  async function visit(route) {
     errors.length = 0;
     try {
       await page.goto(`${BASE}${route}`, { waitUntil: "load", timeout: 30000 });
@@ -50,6 +50,21 @@ async function crawlUser(browser, { label, email, routes }) {
       console.log(`ok   [${label}] ${route}`);
     }
   }
+
+  for (const route of routes) await visit(route);
+
+  // Representative product detail page: the first detail link found on /products.
+  await page.goto(`${BASE}/products`, { waitUntil: "load", timeout: 30000 });
+  const detailHref = await page.$$eval('a[href^="/products/"]', (anchors) =>
+    anchors.map((a) => a.getAttribute("href")).find((h) => h && h !== "/products")
+  );
+  if (detailHref) {
+    await visit(detailHref);
+  } else {
+    failures.push({ label, route: "/products/[id]", errors: ["no product detail link found on /products"] });
+    console.log(`FAIL [${label}] /products/[id] (no detail link found)`);
+  }
+
   await context.close();
 }
 

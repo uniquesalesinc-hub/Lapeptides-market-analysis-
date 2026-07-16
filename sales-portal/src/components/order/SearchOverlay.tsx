@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import Link from "next/link";
 import { CATEGORY_LABELS } from "@/lib/data/catalog";
 import { previewLinePricing } from "@/lib/pricing/clientPreview";
 import { cartPooledQuantity } from "@/lib/pricing/clientPreview";
@@ -96,14 +97,18 @@ export function SearchOverlay({ open, onClose }: { open: boolean; onClose: () =>
                     <li key={variant.id} className="border-b border-lap-border last:border-b-0">
                       <div className="flex min-h-touch items-center gap-3 px-4 py-2">
                         <CategoryDot category={product.category} />
-                        <div className="min-w-0 flex-1">
-                          <p className="truncate text-sm font-semibold text-lap-ink">
+                        <Link
+                          href={`/products/${product.id}`}
+                          onClick={onClose}
+                          className="min-w-0 flex-1"
+                        >
+                          <p className="truncate text-sm font-semibold text-lap-ink hover:text-lap-teal hover:underline">
                             {product.name} <span className="font-normal text-lap-slate">{variant.size}</span>
                           </p>
                           <p className="truncate font-mono text-[11px] text-lap-slate">
                             {variant.sku} · {CATEGORY_LABELS[product.category]}
                           </p>
-                        </div>
+                        </Link>
                         <span className="shrink-0 font-mono text-sm font-semibold text-lap-ink">
                           {price != null ? (
                             <>

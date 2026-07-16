@@ -1,30 +1,30 @@
+import { notFound } from "next/navigation";
 import { requireUser } from "@/lib/session";
 import { prisma } from "@/lib/prisma";
-import { getOrderRails, getPreviouslyPurchased, getWizardCatalog } from "@/lib/data/catalog";
+import { getProductDetail, getWizardCatalog } from "@/lib/data/catalog";
 import { listOrderModeCustomers } from "@/lib/data/customers";
 import { OrderModeProvider } from "@/components/order/OrderModeProvider";
-import { OrderModeScreen } from "@/components/order/OrderModeScreen";
+import { ProductDetail } from "@/components/catalog/ProductDetail";
 import type { CatalogsByLadder, OrderCustomer } from "@/components/order/orderMode";
 
-export const metadata = { title: "Order Mode | LA Peptides Sales Portal" };
+export const metadata = { title: "Product | LA Peptides Sales Portal" };
 
 /**
- * Order Mode: the rep's primary selling surface. Loads both injectable ladders up front so
- * switching customer/ladder never waits on the network, plus the rep-scoped customer list
- * and the demand rails. `?customerId=` preselects a customer (e.g. arriving from Customer 360).
+ * Product detail page. Mounts its OWN OrderModeProvider instance: the provider persists
+ * customer/ladder/cart to sessionStorage under one shared key, so the Order Mode session
+ * (selected customer, pooled cart) carries over here and back without moving the provider
+ * up the layout tree - /order stays untouched.
  */
-export default async function OrderModePage({
-  searchParams,
-}: {
-  searchParams?: { customerId?: string; selectCustomer?: string };
-}) {
+export default async function ProductDetailPage({ params }: { params: { id: string } }) {
   const user = await requireUser();
 
-  const [retail, wholesale, customerRows, rails, settings, currentUser] = await Promise.all([
+  const detail = await getProductDetail(params.id);
+  if (!detail) notFound();
+
+  const [retail, wholesale, customerRows, settings, currentUser] = await Promise.all([
     getWizardCatalog("BULK_RETAIL"),
     getWizardCatalog("BULK_WHOLESALE"),
     listOrderModeCustomers({ id: user.id, role: user.role }),
-    getOrderRails(),
     prisma.companySettings.upsert({ where: { id: "singleton" }, create: { id: "singleton" }, update: {} }),
     prisma.user.findUnique({ where: { id: user.id } }),
   ]);
@@ -41,15 +41,8 @@ export default async function OrderModePage({
     paymentTerms: c.paymentTerms,
   }));
 
-  // Same limit resolution as the legacy wizard (quotes/new): the rep's personal ceiling,
-  // falling back to the company default; admins are uncapped. Display-side only - the
-  // createQuote path re-derives this server-side on every save.
   const discountLimitPercent =
     user.role === "ADMIN" ? 100 : Number(currentUser?.discountLimitPercent ?? settings.repDiscountLimitPercent);
-
-  const requestedId = searchParams?.customerId;
-  const initialCustomerId = customers.some((c) => c.id === requestedId) ? requestedId : undefined;
-  const initialHistory = initialCustomerId ? await getPreviouslyPurchased(initialCustomerId) : undefined;
 
   return (
     <OrderModeProvider
@@ -58,10 +51,8 @@ export default async function OrderModePage({
       currentUserId={user.id}
       discountLimitPercent={discountLimitPercent}
       defaultExpirationDays={settings.defaultQuoteExpirationDays}
-      initialCustomerId={initialCustomerId}
-      initialHistory={initialHistory}
     >
-      <OrderModeScreen rails={rails} initialCustomerDrawerOpen={searchParams?.selectCustomer === "1"} />
+      <ProductDetail detail={detail} />
     </OrderModeProvider>
   );
 }

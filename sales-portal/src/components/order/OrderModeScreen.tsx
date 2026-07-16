@@ -20,9 +20,16 @@ import { useOrderMode } from "./OrderModeProvider";
  * category chips, the browse grid, and the cart - a sticky right rail on xl+ screens,
  * a bottom sheet opened from the header cart chip below that.
  */
-export function OrderModeScreen({ rails }: { rails: OrderRails }) {
+export function OrderModeScreen({
+  rails,
+  initialCustomerDrawerOpen = false,
+}: {
+  rails: OrderRails;
+  /** True when arriving via ?selectCustomer=1 (e.g. from a product detail page's hint). */
+  initialCustomerDrawerOpen?: boolean;
+}) {
   const { state, catalog, purchaseHistory } = useOrderMode();
-  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [drawerOpen, setDrawerOpen] = useState(initialCustomerDrawerOpen);
   const [searchOpen, setSearchOpen] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
   const [category, setCategory] = useState<ProductCategory | null>(null);

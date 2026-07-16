@@ -125,6 +125,95 @@ export async function getWizardCatalog(ladderCode: PriceListCode): Promise<Catal
 }
 
 // ---------------------------------------------------------------------------
+// Product detail page
+// ---------------------------------------------------------------------------
+
+/** Format products always price from their dedicated sheet, whatever the injectable ladder. */
+const FORMAT_SHEETS: Partial<Record<ProductCategory, PriceListCode>> = {
+  NASAL_SPRAY: "WHOLESALE_SPRAYS",
+  TOPICAL_CREAM: "WHOLESALE_CREAMS",
+  CAPSULE: "WHOLESALE_CAPSULES",
+};
+
+export interface ProductDetailData {
+  id: string;
+  name: string;
+  category: ProductCategory;
+  description: string | null;
+  imageUrl: string | null;
+  /**
+   * Priced variants keyed by injectable ladder. Format products (sprays/creams/capsules)
+   * carry their dedicated sheet's tiers under BOTH keys so the detail page renders the
+   * same truth regardless of the session's active ladder.
+   */
+  byLadder: Record<"BULK_RETAIL" | "BULK_WHOLESALE", CatalogVariant[]>;
+}
+
+/**
+ * One product with its active variants and full tier entries for both ladders - the
+ * server payload for /products/[id]. Returns null (page 404s) for unknown, inactive,
+ * or entirely unpriced products.
+ */
+export async function getProductDetail(productId: string): Promise<ProductDetailData | null> {
+  const product = await prisma.product.findUnique({
+    where: { id: productId },
+    include: {
+      variants: {
+        where: { isActive: true },
+        orderBy: { sortOrder: "asc" },
+        include: {
+          priceListEntries: {
+            where: { priceList: { isActive: true } },
+            include: { pricingTier: true, priceList: { select: { code: true } } },
+          },
+        },
+      },
+    },
+  });
+  if (!product || !product.isActive) return null;
+
+  const formatSheet = FORMAT_SHEETS[product.category];
+  const variantsFor = (code: PriceListCode): CatalogVariant[] =>
+    product.variants
+      .map((v) => {
+        const tierPrices = v.priceListEntries
+          .filter((e) => e.priceList.code === code)
+          .map((e) => ({
+            tierNumber: e.pricingTier.tierNumber,
+            label: e.pricingTier.label,
+            minQty: e.pricingTier.minQty,
+            maxQty: e.pricingTier.maxQty,
+            unitPrice: Number(e.unitPrice),
+          }))
+          .sort((a, b) => a.tierNumber - b.tierNumber);
+        return {
+          id: v.id,
+          sku: v.sku,
+          size: v.size,
+          isActive: v.isActive,
+          tierPrices,
+          entryPrice: tierPrices[0]?.unitPrice ?? null,
+        };
+      })
+      .filter((v) => v.tierPrices.length > 0);
+
+  const byLadder = {
+    BULK_RETAIL: variantsFor(formatSheet ?? "BULK_RETAIL"),
+    BULK_WHOLESALE: variantsFor(formatSheet ?? "BULK_WHOLESALE"),
+  };
+  if (byLadder.BULK_RETAIL.length === 0 && byLadder.BULK_WHOLESALE.length === 0) return null;
+
+  return {
+    id: product.id,
+    name: product.name,
+    category: product.category,
+    description: product.description,
+    imageUrl: product.imageUrl,
+    byLadder,
+  };
+}
+
+// ---------------------------------------------------------------------------
 // Order Mode rails: "Most ordered" / "Trending this quarter" / "Previously purchased"
 // ---------------------------------------------------------------------------
 
