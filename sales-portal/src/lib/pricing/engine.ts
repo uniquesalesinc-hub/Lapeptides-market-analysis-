@@ -5,8 +5,10 @@
  * against the numbers in the uploaded pricing sheets. It implements exactly the two tier
  * shapes found in the source material (see docs/PRICING_AUDIT.md):
  *
- *  - FLOOR_ONLY tiers (Bulk Retail, Sprays, Creams): "20+ / 50+ / 75+ bottles" — a quantity
+ *  - FLOOR_ONLY tiers (Bulk Retail, Sprays, Creams): "5+ / 50+ / 75+ bottles" — a quantity
  *    qualifies for the highest tier whose minimum it meets or exceeds. No stated ceiling.
+ *    (Bulk Retail Tier 1 floor is 5 per the 7/16/2026 JJ + Spencer sub-MOQ rule, overriding
+ *    the printed sheets' 20.)
  *  - BAND tiers (Bulk Wholesale): "100–299 bottles" — a quantity must fall within the stated
  *    band. Bands are contiguous and non-overlapping by construction.
  *
@@ -59,7 +61,7 @@ export function round2(value: number): number {
  * Select the tier a given quantity qualifies for under a set of tier definitions.
  * Returns `tier: null` (with the next reachable tier, if any) when the quantity doesn't
  * qualify for anything — this happens only under FLOOR_ONLY lists when quantity is below the
- * lowest tier's minimum (e.g. 15 bottles against a 20-bottle Bulk Retail minimum).
+ * lowest tier's minimum (e.g. 4 bottles against the 5-bottle Bulk Retail minimum).
  */
 export function selectPricingTier(
   quantity: number,

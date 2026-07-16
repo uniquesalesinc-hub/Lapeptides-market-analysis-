@@ -27,7 +27,7 @@ const bpc10Retail = priceMap("BPC157-10MG", PRICE_LIST_CODES.BULK_RETAIL);
 const bpc10Wholesale = priceMap("BPC157-10MG", PRICE_LIST_CODES.BULK_WHOLESALE);
 
 describe("BulkRetail_Tier1/2/3.pdf — BPC-157 10mg ($37.50 / $35.00 / $32.50)", () => {
-  it("exact Tier 1 minimum (20 units) applies Tier 1 at $37.50", () => {
+  it("the sheet's printed Tier 1 quantity (20 units) applies Tier 1 at $37.50", () => {
     const r = calculateLineItemPricing(20, bulkRetailTiers, bpc10Retail);
     expect(r.qualifies).toBe(true);
     expect(r.appliedTier?.tier).toBe(1);
@@ -35,13 +35,13 @@ describe("BulkRetail_Tier1/2/3.pdf — BPC-157 10mg ($37.50 / $35.00 / $32.50)",
     expect(r.lineTotal).toBe(750.0);
   });
 
-  it("one unit below the Tier 1 minimum (19 units) does not qualify", () => {
-    const r = calculateLineItemPricing(19, bulkRetailTiers, bpc10Retail);
+  it("one unit below the Tier 1 minimum (4 units, per the 7/16 sub-MOQ floor of 5) does not qualify", () => {
+    const r = calculateLineItemPricing(4, bulkRetailTiers, bpc10Retail);
     expect(r.qualifies).toBe(false);
     expect(r.unitPrice).toBeNull();
     expect(r.shortfall).toBe(1);
     expect(r.nextEligibleTier?.unitPrice).toBe(37.5);
-    expect(r.warning).toMatch(/below the 20-unit minimum/);
+    expect(r.warning).toMatch(/below the 5-unit minimum/);
   });
 
   it("exact Tier 2 boundary (50 units) applies Tier 2 at $35.00", () => {
@@ -141,6 +141,53 @@ describe("Additional SKU coverage — GLP, Bio Regulator, flat-priced Blend", ()
   });
 });
 
+describe("Sub-MOQ rule (JJ + Spencer field call 7/16/2026) - Bulk Retail Tier 1 floor is 5, not 20", () => {
+  it("qty 5 on Bulk Retail qualifies for Tier 1 at the unchanged T1 sheet price ($37.50)", () => {
+    const r = calculateLineItemPricing(5, bulkRetailTiers, bpc10Retail);
+    expect(r.qualifies).toBe(true);
+    expect(r.appliedTier?.tier).toBe(1);
+    expect(r.unitPrice).toBe(37.5); // the T1 sheet price itself does NOT change
+    expect(r.lineTotal).toBe(187.5);
+  });
+
+  it("qty 19 on Bulk Retail is Tier 1 at $37.50 (5-19 all price at T1)", () => {
+    const r = calculateLineItemPricing(19, bulkRetailTiers, bpc10Retail);
+    expect(r.qualifies).toBe(true);
+    expect(r.appliedTier?.tier).toBe(1);
+    expect(r.unitPrice).toBe(37.5);
+  });
+
+  it("qty 4 does NOT qualify — same warning path as below-20 behaved before", () => {
+    const r = calculateLineItemPricing(4, bulkRetailTiers, bpc10Retail);
+    expect(r.qualifies).toBe(false);
+    expect(r.unitPrice).toBeNull();
+    expect(r.shortfall).toBe(1);
+    expect(r.nextEligibleTier?.unitPrice).toBe(37.5);
+    expect(r.warning).toMatch(/below the 5-unit minimum/);
+  });
+
+  it("pooled 3+3=6 injectables on Bulk Retail: both lines qualify for Tier 1", () => {
+    const ipa5 = priceMap("IPAMORELIN-5MG", PRICE_LIST_CODES.BULK_RETAIL);
+    const line1 = calculateLineItemPricing(3, bulkRetailTiers, bpc10Retail, 6);
+    const line2 = calculateLineItemPricing(3, bulkRetailTiers, ipa5, 6);
+    expect(line1.qualifies).toBe(true);
+    expect(line1.appliedTier?.tier).toBe(1);
+    expect(line1.unitPrice).toBe(37.5);
+    expect(line1.lineTotal).toBe(round(3 * 37.5));
+    expect(line2.qualifies).toBe(true);
+    expect(line2.appliedTier?.tier).toBe(1);
+    expect(line2.unitPrice).toBe(22.5);
+    expect(line2.lineTotal).toBe(round(3 * 22.5));
+  });
+
+  it("Bulk Wholesale is untouched: qty 5 still prices in band 1 (1-99) at $30.00", () => {
+    const r = calculateLineItemPricing(5, bulkWholesaleTiers, bpc10Wholesale);
+    expect(r.qualifies).toBe(true);
+    expect(r.appliedTier?.tier).toBe(1);
+    expect(r.unitPrice).toBe(30.0);
+  });
+});
+
 describe("Multi-SKU / mixed quantities on one quote", () => {
   it("sums independently-tiered lines correctly", () => {
     const ghk = priceMap("GHKCU-50MG", PRICE_LIST_CODES.BULK_WHOLESALE);
@@ -156,11 +203,11 @@ describe("Multi-SKU / mixed quantities on one quote", () => {
 
 describe("Per-SKU minimum is independent per line (no invented total-order minimum)", () => {
   it("one line below minimum does not block a sibling line that qualifies", () => {
-    const belowMin = calculateLineItemPricing(10, bulkRetailTiers, bpc10Retail); // below 20 minimum
+    const belowMin = calculateLineItemPricing(3, bulkRetailTiers, bpc10Retail); // below the 5 minimum
     const aboveMin = calculateLineItemPricing(75, bulkRetailTiers, bpc10Retail); // qualifies
     expect(belowMin.qualifies).toBe(false);
     expect(aboveMin.qualifies).toBe(true);
-    // Combining their quantities (10 + 75 = 85) must NOT retroactively qualify line 1 — no
+    // Combining their quantities (3 + 75 = 78) must NOT retroactively qualify line 1 — no
     // total-order minimum exists in the source sheets (see PRICING_AUDIT.md §5).
     expect(belowMin.qualifies).toBe(false);
   });
@@ -344,9 +391,9 @@ describe("Mix-and-match pooling — the pool qualifies the tier, the line bills 
   });
 
   it("still warns when even the pooled quantity misses the retail minimum", () => {
-    const r = calculateLineItemPricing(10, bulkRetailTiers, bpc10Retail, 15);
+    const r = calculateLineItemPricing(2, bulkRetailTiers, bpc10Retail, 4);
     expect(r.qualifies).toBe(false);
-    expect(r.warning).toMatch(/15 is below the 20-unit minimum/);
+    expect(r.warning).toMatch(/4 is below the 5-unit minimum/);
   });
 
   it("omitting the pool preserves per-SKU behavior exactly (default parameter)", () => {

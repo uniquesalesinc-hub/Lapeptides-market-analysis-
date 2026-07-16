@@ -35,9 +35,16 @@ export const PRICE_LIST_CODES = {
 } as const;
 export type PriceListCode = (typeof PRICE_LIST_CODES)[keyof typeof PRICE_LIST_CODES];
 
-/** Bulk Retail: floor-only tiers, no stated upper bound — best (highest) qualifying tier wins. */
+/** Bulk Retail: floor-only tiers, no stated upper bound — best (highest) qualifying tier wins.
+ *
+ * Sub-MOQ rule (JJ + Spencer field call, 7/16/2026): Tier 1 minimum is 5, overriding the
+ * printed sheets' 20-bottle minimum, for ALL products. Quantities 5-19 price at the existing
+ * Tier 1 sheet price (the prices themselves are unchanged); below 5 stays unpriced. This is a
+ * deliberate business override of the printed sheets - same provenance class as the flat
+ * spray/cream rule (Danny, 7/15/2026). Bulk Wholesale bands are unaffected.
+ */
 export const BULK_RETAIL_TIERS = [
-  { tier: 1, label: "Tier 1", minQty: 20, maxQty: null as number | null },
+  { tier: 1, label: "Tier 1", minQty: 5, maxQty: null as number | null },
   { tier: 2, label: "Tier 2", minQty: 50, maxQty: null as number | null },
   { tier: 3, label: "Tier 3", minQty: 75, maxQty: null as number | null },
 ];

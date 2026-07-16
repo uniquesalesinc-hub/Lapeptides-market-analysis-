@@ -98,7 +98,7 @@ function formatFilterDay(date: Date): string {
 
 /**
  * States the active filter window in words so every big number sits next to its context,
- * e.g. "Jun 16 - Jul 16, 2026, Danny R., Bulk Retail (20-99 bottles)". No filters = "all time".
+ * e.g. "Jun 16 - Jul 16, 2026, Danny R., Bulk Retail (5-99 bottles)". No filters = "all time".
  */
 export function describeReportFilters(
   filters: ReportFilters,

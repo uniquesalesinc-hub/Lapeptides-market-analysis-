@@ -2,7 +2,8 @@ import { prisma } from "@/lib/prisma";
 import type { PriceListCode, ProductCategory } from "@prisma/client";
 
 export const PRICE_LIST_LABELS: Record<PriceListCode, string> = {
-  BULK_RETAIL: "Bulk Retail (20–99 bottles)",
+  // Sub-MOQ rule (JJ + Spencer field call 7/16/2026): retail floor is 5, overriding the printed 20.
+  BULK_RETAIL: "Bulk Retail (5–99 bottles)",
   BULK_WHOLESALE: "Bulk Wholesale (100+ bottles)",
   WHOLESALE_SPRAYS: "Wholesale Sprays",
   WHOLESALE_CREAMS: "Wholesale Creams",
