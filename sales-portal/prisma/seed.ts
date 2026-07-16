@@ -17,6 +17,8 @@ import {
   SOURCE_DISCLAIMER,
 } from "./seed-data/pricing-source";
 import { tiersFor, buildFullCatalogEntries } from "../src/lib/pricing/priceLists";
+import { COSTS, COST_BANDS } from "./seed-data/cost-source";
+import { makeSku } from "./seed-data/pricing-source";
 import { calculateLineItemPricing, calculateQuoteTotals } from "../src/lib/pricing/engine";
 import { formatDocumentNumber, nextSequenceNumber } from "../src/lib/numbering";
 import { generatePublicToken } from "../src/lib/security/token";
@@ -212,6 +214,28 @@ async function main() {
   }
 
   console.log(`Catalog seeded: ${productCache.size} products, ${variantCache.size} SKUs.`);
+
+  // 4b. Hard costs (ADMIN-ONLY data; see cost-source.ts header). A cost row that doesn't
+  // match a catalog SKU is a transcription error — fail loudly rather than skip.
+  let costRows = 0;
+  for (const [name, size, ...cs] of COSTS) {
+    const sku = makeSku(name, size);
+    const variantId = variantCache.get(sku);
+    if (!variantId) throw new Error(`cost-source row has no matching catalog SKU: ${name} ${size} (${sku})`);
+    for (const band of COST_BANDS) {
+      await prisma.variantCost.create({
+        data: {
+          variantId,
+          tierNumber: band.tier,
+          minQty: band.minQty,
+          maxQty: band.maxQty,
+          unitCost: cs[band.tier - 1]!,
+        },
+      });
+      costRows++;
+    }
+  }
+  console.log(`Hard costs seeded: ${COSTS.length} SKUs, ${costRows} cost rows (admin-only).`);
 
   // 5. Demo customers (fictional — not real customer data)
   const customerAcme = await prisma.customer.create({
