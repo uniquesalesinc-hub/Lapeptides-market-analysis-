@@ -5,13 +5,17 @@
 @layer base {
   html {
     -webkit-text-size-adjust: 100%;
-    color-scheme: dark;
+    color-scheme: light;
   }
 
   body {
-    @apply bg-brand-navy text-brand-slate-100 antialiased;
+    @apply bg-lap-page text-lap-ink antialiased;
     /* Prevent iOS Safari from bouncing the whole page horizontally on the quote wizard. */
     overflow-x: hidden;
+  }
+
+  ::selection {
+    @apply bg-lap-teal-bright/25 text-lap-teal-dark;
   }
 
   input,
@@ -31,8 +35,11 @@
 }
 
 @layer components {
+  /* Legacy v1 component classes below (dark navy). Unmigrated pages keep using them until
+     Task 10; .card carries its own light text color so legacy content stays readable now
+     that the body defaults to dark ink on a light canvas. */
   .card {
-    @apply rounded-card border border-brand-border bg-brand-surface shadow-card;
+    @apply rounded-card border border-brand-border bg-brand-surface text-brand-slate-100 shadow-card;
   }
 
   .btn-primary {

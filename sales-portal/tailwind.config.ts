@@ -8,6 +8,19 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
+        // LA Peptides v2 light design system (DESIGN.md). Tinted neutrals + teal accent.
+        lap: {
+          ink: "#0F1B1F",
+          slate: "#4A5862",
+          page: "#F5FAFB",
+          surface: "#FFFFFF",
+          border: "#D3DFE2",
+          teal: { DEFAULT: "#0C535E", dark: "#073841", bright: "#0DA5BC", wash: "#E8F4F6" },
+          amber: "#F2A03D",
+          green: "#2D8A5F",
+          red: "#C9492A",
+        },
+        // Legacy v1 navy tokens. Unmigrated pages still use these; removed in Task 10.
         brand: {
           navy: "#0b1220",
           surface: "#0e1829",
@@ -38,17 +51,14 @@ const config: Config = {
         },
       },
       fontFamily: {
-        sans: [
-          "-apple-system",
-          "BlinkMacSystemFont",
-          "Segoe UI",
-          "Inter",
-          "system-ui",
-          "sans-serif",
-        ],
+        sans: ["var(--font-inter)", "system-ui", "sans-serif"],
+        heading: ["var(--font-outfit)", "var(--font-inter)", "sans-serif"],
+        mono: ["var(--font-jbmono)", "ui-monospace", "monospace"],
       },
       boxShadow: {
         card: "0 1px 2px rgba(0,0,0,0.4), 0 1px 3px rgba(0,0,0,0.3)",
+        lap: "0 1px 2px rgb(12 83 94 / 0.06)",
+        lapDrawer: "0 8px 30px rgb(7 56 65 / 0.18)",
       },
       spacing: {
         touch: "44px",
