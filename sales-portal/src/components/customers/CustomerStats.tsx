@@ -4,6 +4,7 @@ export interface CustomerStatsData {
   totalRevenue: number;
   orderCount: number;
   quoteCount: number;
+  samplesSent: number;
   openDraftCount: number;
   lastOrderDate: Date | null;
 }
@@ -48,6 +49,11 @@ export function CustomerStats({ stats }: { stats: CustomerStatsData }) {
         />
         <StatRow label="Orders" context={lastOrder} value={String(stats.orderCount)} />
         <StatRow label="Quotes" context="all statuses, all time" value={String(stats.quoteCount)} />
+        <StatRow
+          label="Samples sent"
+          context="free units on sent quotes and orders"
+          value={String(stats.samplesSent)}
+        />
         <StatRow
           label="Open drafts"
           context="quotes not yet sent or accepted"

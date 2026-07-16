@@ -277,3 +277,72 @@ describe("CLEAR_CART", () => {
     expect(state.customer).toEqual(wholesaleCustomer);
   });
 });
+
+describe("sample lines (JJ 7/16: free tracked samples, excluded from tier pooling)", () => {
+  it("ADD_SAMPLE creates a $0.00 line, default qty 1", () => {
+    let state = stateWith({ ladder: "BULK_WHOLESALE" });
+    state = reduce(state, { type: "ADD_SAMPLE", variantId: "GHKCU-50MG", quantity: 1 });
+    const sample = state.cart.find((l) => l.isSample);
+    expect(sample).toBeDefined();
+    expect(sample!.quantity).toBe(1);
+    expect(sample!.pricing.qualifies).toBe(true);
+    expect(sample!.pricing.unitPrice).toBe(0);
+    expect(sample!.pricing.lineTotal).toBe(0);
+  });
+
+  it("samples are excluded from pooled tier qualification", () => {
+    // Paid BPC-157 60 + SAMPLE GHK-Cu 60 on wholesale: a paid pool of 120 would price
+    // BPC at Tier 2 ($22.00); with the sample excluded it must stay Tier 1 ($30.00).
+    let state = stateWith({ ladder: "BULK_WHOLESALE" });
+    state = reduce(state, { type: "ADD_LINE", variantId: "BPC157-10MG", quantity: 60 });
+    state = reduce(state, { type: "ADD_SAMPLE", variantId: "GHKCU-50MG", quantity: 60 });
+    expect(line(state, "BPC157-10MG").pricing.unitPrice).toBe(30.0);
+    const sample = state.cart.find((l) => l.isSample);
+    expect(sample!.pricing.unitPrice).toBe(0);
+  });
+
+  it("a paid line and a sample line of the same variant coexist unmerged", () => {
+    let state = stateWith({ ladder: "BULK_WHOLESALE" });
+    state = reduce(state, { type: "ADD_LINE", variantId: "BPC157-10MG", quantity: 60 });
+    state = reduce(state, { type: "ADD_SAMPLE", variantId: "BPC157-10MG", quantity: 2 });
+    const lines = state.cart.filter((l) => l.variantId === "BPC157-10MG");
+    expect(lines).toHaveLength(2);
+    const paid = lines.find((l) => !l.isSample)!;
+    const sample = lines.find((l) => l.isSample)!;
+    expect(paid.quantity).toBe(60);
+    expect(paid.pricing.unitPrice).toBe(30.0); // pool is 60, not 62
+    expect(sample.quantity).toBe(2);
+    expect(sample.pricing.unitPrice).toBe(0);
+  });
+
+  it("ADD_SAMPLE for the same variant merges into the existing sample line", () => {
+    let state = stateWith({ ladder: "BULK_WHOLESALE" });
+    state = reduce(state, { type: "ADD_SAMPLE", variantId: "GHKCU-50MG", quantity: 1 });
+    state = reduce(state, { type: "ADD_SAMPLE", variantId: "GHKCU-50MG", quantity: 2 });
+    const samples = state.cart.filter((l) => l.isSample);
+    expect(samples).toHaveLength(1);
+    expect(samples[0]!.quantity).toBe(3);
+  });
+
+  it("SET_QTY targets the sample line without touching the paid line, price stays $0", () => {
+    let state = stateWith({ ladder: "BULK_WHOLESALE" });
+    state = reduce(state, { type: "ADD_LINE", variantId: "BPC157-10MG", quantity: 60 });
+    state = reduce(state, { type: "ADD_SAMPLE", variantId: "BPC157-10MG", quantity: 1 });
+    state = reduce(state, { type: "SET_QTY", variantId: "BPC157-10MG", quantity: 5, isSample: true });
+    const lines = state.cart.filter((l) => l.variantId === "BPC157-10MG");
+    expect(lines.find((l) => l.isSample)!.quantity).toBe(5);
+    expect(lines.find((l) => l.isSample)!.pricing.unitPrice).toBe(0);
+    expect(lines.find((l) => !l.isSample)!.quantity).toBe(60);
+    expect(lines.find((l) => !l.isSample)!.pricing.unitPrice).toBe(30.0);
+  });
+
+  it("REMOVE_LINE with isSample removes only the sample line", () => {
+    let state = stateWith({ ladder: "BULK_WHOLESALE" });
+    state = reduce(state, { type: "ADD_LINE", variantId: "BPC157-10MG", quantity: 60 });
+    state = reduce(state, { type: "ADD_SAMPLE", variantId: "BPC157-10MG", quantity: 1 });
+    state = reduce(state, { type: "REMOVE_LINE", variantId: "BPC157-10MG", isSample: true });
+    const lines = state.cart.filter((l) => l.variantId === "BPC157-10MG");
+    expect(lines).toHaveLength(1);
+    expect(lines[0]!.isSample).toBeFalsy();
+  });
+});

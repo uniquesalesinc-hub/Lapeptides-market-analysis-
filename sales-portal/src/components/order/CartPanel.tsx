@@ -122,6 +122,7 @@ function CartBody() {
   }, [state.cart, adjustments, state.customer]);
 
   const pooledUnits = cartPooledQuantity(state.cart);
+  const sampleUnits = state.cart.reduce((n, l) => (l.isSample ? n + l.quantity : n), 0);
   const customer = state.customer;
   const canSubmit = customer != null && state.cart.length > 0 && saving == null;
 
@@ -139,7 +140,7 @@ function CartBody() {
           quoteId: draftIdRef.current,
           customerId: customer.id,
           priceListCode: state.ladder,
-          lineItems: state.cart.map((l) => ({ variantId: l.variantId, quantity: l.quantity })),
+          lineItems: state.cart.map((l) => ({ variantId: l.variantId, quantity: l.quantity, isSample: l.isSample || undefined })),
           adjustments,
           depositPercent: depositPercentFor(customer.paymentTerms),
           expirationDate: new Date(Date.now() + defaultExpirationDays * 24 * 60 * 60 * 1000)
@@ -200,6 +201,12 @@ function CartBody() {
           <span className="text-lap-slate">Subtotal</span>
           <span className="font-mono text-lap-ink">{formatMoney(totals.subtotal)}</span>
         </div>
+        {sampleUnits > 0 && (
+          <div className="flex items-center justify-between">
+            <span className="text-lap-slate">Samples</span>
+            <span className="font-mono text-lap-amber">{sampleUnits} {sampleUnits === 1 ? "unit" : "units"} free</span>
+          </div>
+        )}
         {totals.discountTotal !== 0 && (
           <div className="flex items-center justify-between">
             <span className="text-lap-slate">Discounts</span>

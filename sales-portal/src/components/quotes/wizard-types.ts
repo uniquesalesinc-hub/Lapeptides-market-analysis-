@@ -15,6 +15,8 @@ export interface CartLine {
   note?: string;
   /** Rep-entered line discount percent (0-100); over-limit values flag approval server-side. */
   discountPercent?: number | null;
+  /** Free tracked sample: $0.00, excluded from tier pooling (JJ 7/16). */
+  isSample?: boolean;
 }
 
 export interface WizardAdjustment {

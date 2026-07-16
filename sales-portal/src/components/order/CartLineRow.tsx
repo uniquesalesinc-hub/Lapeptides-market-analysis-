@@ -40,7 +40,11 @@ export function CartLineRow({ line, category }: { line: CartLine; category: Prod
           </p>
           <p className="mt-0.5 flex flex-wrap items-center gap-1.5">
             <span className="font-mono text-[11px] text-lap-slate">{line.sku}</span>
-            {qualifies ? (
+            {line.isSample ? (
+              <span className="rounded-full bg-lap-amber/15 px-2 py-0.5 text-[10px] font-semibold text-lap-amber">
+                Sample
+              </span>
+            ) : qualifies ? (
               <span className="rounded-full bg-lap-teal-wash px-2 py-0.5 font-mono text-[10px] font-semibold text-lap-teal">
                 {flat ? "Flat" : `T${line.pricing.appliedTier?.tier} pooled`}
               </span>
@@ -76,7 +80,7 @@ export function CartLineRow({ line, category }: { line: CartLine; category: Prod
           <button
             type="button"
             aria-label={`Decrease quantity of ${line.productName} ${line.strength}`}
-            onClick={() => setQty(line.variantId, line.quantity - 1)}
+            onClick={() => setQty(line.variantId, line.quantity - 1, line.isSample)}
             className="flex h-touch w-touch items-center justify-center rounded-l-[10px] text-lap-slate transition-colors duration-150 hover:bg-lap-page hover:text-lap-ink"
           >
             <MinusIcon className="h-4 w-4" />
@@ -84,7 +88,7 @@ export function CartLineRow({ line, category }: { line: CartLine; category: Prod
           <QtyInput
             value={line.quantity}
             min={0}
-            onCommit={(next) => setQty(line.variantId, next)}
+            onCommit={(next) => setQty(line.variantId, next, line.isSample)}
             aria-label={`Quantity of ${line.productName} ${line.strength}`}
             data-testid={`qty-${line.sku}`}
             className="w-14 border-x border-lap-border bg-lap-surface text-center font-mono text-sm text-lap-ink focus:outline-none focus:ring-2 focus:ring-inset focus:ring-lap-teal-bright/40"
@@ -92,7 +96,7 @@ export function CartLineRow({ line, category }: { line: CartLine; category: Prod
           <button
             type="button"
             aria-label={`Increase quantity of ${line.productName} ${line.strength}`}
-            onClick={() => setQty(line.variantId, line.quantity + 1)}
+            onClick={() => setQty(line.variantId, line.quantity + 1, line.isSample)}
             className="flex h-touch w-touch items-center justify-center rounded-r-[10px] text-lap-slate transition-colors duration-150 hover:bg-lap-page hover:text-lap-ink"
           >
             <PlusIcon className="h-4 w-4" />
@@ -111,6 +115,7 @@ export function CartLineRow({ line, category }: { line: CartLine; category: Prod
         >
           Note
         </button>
+        {!line.isSample && (
         <button
           type="button"
           onClick={() => setDiscountOpen((v) => !v)}
@@ -123,10 +128,11 @@ export function CartLineRow({ line, category }: { line: CartLine; category: Prod
         >
           Discount
         </button>
+        )}
         <button
           type="button"
           aria-label={`Remove ${line.productName} ${line.strength} from cart`}
-          onClick={() => removeLine(line.variantId)}
+          onClick={() => removeLine(line.variantId, line.isSample)}
           className="ml-auto flex h-touch w-touch items-center justify-center rounded-[10px] text-lap-slate transition-colors duration-150 hover:bg-lap-page hover:text-lap-red"
         >
           <CloseIcon className="h-4 w-4" />
@@ -137,7 +143,7 @@ export function CartLineRow({ line, category }: { line: CartLine; category: Prod
         <input
           type="text"
           value={line.note ?? ""}
-          onChange={(e) => setLineNote(line.variantId, e.target.value)}
+          onChange={(e) => setLineNote(line.variantId, e.target.value, line.isSample)}
           placeholder="Line note (internal)"
           aria-label={`Note for ${line.productName} ${line.strength}`}
           className="min-h-touch w-full rounded-[10px] border border-lap-border bg-lap-surface px-3 text-sm text-lap-ink placeholder:text-lap-slate/70 focus:border-lap-teal focus:outline-none focus:ring-2 focus:ring-lap-teal-bright/40"

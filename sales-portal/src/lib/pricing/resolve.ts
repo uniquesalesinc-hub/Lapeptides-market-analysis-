@@ -90,3 +90,48 @@ export async function resolveLineItemPricing(
     effectiveDate: priceList.effectiveDate,
   };
 }
+
+/**
+ * A free tracked sample (JJ 7/16): always $0.00, always qualifies, never priced from a
+ * list, never counted toward the pooled quantity (the caller excludes it). The snapshot
+ * fields point at the variant's own effective list purely for record-keeping; the
+ * pricingTierLabel is set to "Sample" by the caller and is the tracking marker.
+ */
+export async function resolveSampleLine(
+  variantId: string,
+  quantity: number
+): Promise<(ResolvedLine & { isSampleLine: true }) | null> {
+  const variant = await prisma.productVariant.findUnique({
+    where: { id: variantId },
+    include: { product: true },
+  });
+  if (!variant) return null;
+
+  const effectiveCode = CATEGORY_LIST_OVERRIDES[variant.product.category] ?? "BULK_RETAIL";
+  const priceList = await prisma.priceList.findFirst({
+    where: { code: effectiveCode, isActive: true },
+    select: { id: true, name: true, effectiveDate: true },
+  });
+  if (!priceList) return null;
+
+  return {
+    qualifies: true,
+    appliedTier: null,
+    unitPrice: 0,
+    lineTotal: 0,
+    minimumRequired: 0,
+    shortfall: null,
+    nextEligibleTier: null,
+    warning: null,
+    variantId,
+    productName: variant.product.name,
+    sku: variant.sku,
+    strength: variant.size,
+    quantity,
+    effectivePriceListCode: effectiveCode,
+    priceListId: priceList.id,
+    priceListName: priceList.name,
+    effectiveDate: priceList.effectiveDate,
+    isSampleLine: true,
+  };
+}

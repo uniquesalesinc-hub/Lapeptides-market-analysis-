@@ -240,6 +240,8 @@ export interface ProductLeaderboardRow {
   size: string;
   qtySold: number;
   revenue: number;
+  /** Free tracked sample units (pricingTierLabel = "Sample"), never in qtySold/revenue. */
+  samples: number;
   distinctCustomers: number;
 }
 
@@ -256,6 +258,7 @@ export async function productLeaderboard(
       strength: true,
       quantity: true,
       lineTotal: true,
+      pricingTierLabel: true,
       quote: { select: { customerId: true } },
     },
   });
@@ -265,11 +268,16 @@ export async function productLeaderboard(
     const key = line.productVariantId ?? line.sku;
     let row = byVariant.get(key);
     if (!row) {
-      row = { key, product: line.productName, size: line.strength, qtySold: 0, revenue: 0, distinctCustomers: 0, customers: new Set() };
+      row = { key, product: line.productName, size: line.strength, qtySold: 0, revenue: 0, samples: 0, distinctCustomers: 0, customers: new Set() };
       byVariant.set(key, row);
     }
-    row.qtySold += line.quantity;
-    row.revenue += Number(line.lineTotal);
+    if (line.pricingTierLabel === "Sample") {
+      // Free tracked samples (JJ 7/16): counted separately, never as paid volume.
+      row.samples += line.quantity;
+    } else {
+      row.qtySold += line.quantity;
+      row.revenue += Number(line.lineTotal);
+    }
     row.customers.add(line.quote.customerId);
   }
 
@@ -289,13 +297,15 @@ export interface TeamLeaderboardRow {
   revenue: number;
   /** confirmed / non-draft for this rep, 0-100; null when the rep has no non-draft quotes. */
   quoteConversion: number | null;
+  /** Free tracked sample units sent on non-draft quotes (JJ 7/16). */
+  samplesSent: number;
   discountRequests: number;
   discountApprovals: number;
 }
 
 export async function teamLeaderboard(filters: ReportFilters): Promise<TeamLeaderboardRow[]> {
   const where = quoteWhere(filters);
-  const [confirmedGroups, nonDraftGroups, discountAdjustments, users] = await Promise.all([
+  const [confirmedGroups, nonDraftGroups, discountAdjustments, sampleLines, users] = await Promise.all([
     prisma.quote.groupBy({
       by: ["ownerId"],
       where: { ...where, status: { in: ORDER_QUOTE_STATUSES } },
@@ -318,6 +328,11 @@ export async function teamLeaderboard(filters: ReportFilters): Promise<TeamLeade
       },
       select: { approvedById: true, quote: { select: { ownerId: true } } },
     }),
+    // Samples sent (JJ 7/16): sample-marked line units on non-draft quotes, per rep.
+    prisma.quoteLineItem.findMany({
+      where: { pricingTierLabel: "Sample", quote: { is: { ...where, status: { not: "DRAFT" } } } },
+      select: { quantity: true, quote: { select: { ownerId: true } } },
+    }),
     prisma.user.findMany({ select: { id: true, name: true, role: true } }),
   ]);
 
@@ -332,6 +347,7 @@ export async function teamLeaderboard(filters: ReportFilters): Promise<TeamLeade
         confirmedCount: 0,
         revenue: 0,
         quoteConversion: null,
+        samplesSent: 0,
         discountRequests: 0,
         discountApprovals: 0,
       };
@@ -352,6 +368,11 @@ export async function teamLeaderboard(filters: ReportFilters): Promise<TeamLeade
   for (const g of nonDraftGroups) {
     const row = rowFor(g.ownerId);
     row.quoteConversion = g._count._all > 0 ? (row.confirmedCount / g._count._all) * 100 : null;
+  }
+  for (const line of sampleLines) {
+    const ownerId = line.quote?.ownerId;
+    if (!ownerId) continue;
+    rowFor(ownerId).samplesSent += line.quantity;
   }
   for (const adj of discountAdjustments) {
     const ownerId = adj.quote?.ownerId;

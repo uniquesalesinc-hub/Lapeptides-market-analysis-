@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/session";
 import { quoteDraftSchema, type QuoteDraftInput } from "@/lib/validation/quote";
-import { resolveLineItemPricing } from "@/lib/pricing/resolve";
+import { resolveLineItemPricing, resolveSampleLine } from "@/lib/pricing/resolve";
 import { calculateQuoteTotals, authorizeDiscount, type AdjustmentInput } from "@/lib/pricing/engine";
 import { formatDocumentNumber, nextSequenceNumber } from "@/lib/numbering";
 import { sendEmail } from "@/lib/email";
@@ -62,12 +62,18 @@ export async function saveQuoteDraft(rawInput: QuoteDraftInput): Promise<SaveQuo
   // normal error instead of letting the whole action reject with an unhandled exception.
   let resolvedLines;
   try {
-    // Mix-and-match pooling (confirmed business rule): every unit on the quote counts
-    // toward tier qualification for every line, across categories.
-    const pooledQuantity = input.lineItems.reduce((sum, li) => sum + li.quantity, 0);
+    // Mix-and-match pooling (confirmed business rule): every PAID unit on the quote counts
+    // toward tier qualification for every line, across categories. Sample lines are free
+    // product (JJ 7/16) and never help a paid line reach a deeper tier.
+    const pooledQuantity = input.lineItems.reduce(
+      (sum, li) => (li.isSample ? sum : sum + li.quantity),
+      0
+    );
     resolvedLines = await Promise.all(
       input.lineItems.map((li) =>
-        resolveLineItemPricing(li.variantId, li.quantity, input.priceListCode, pooledQuantity)
+        li.isSample
+          ? resolveSampleLine(li.variantId, li.quantity)
+          : resolveLineItemPricing(li.variantId, li.quantity, input.priceListCode, pooledQuantity)
       )
     );
   } catch (err) {
@@ -90,9 +96,10 @@ export async function saveQuoteDraft(rawInput: QuoteDraftInput): Promise<SaveQuo
     if (!line) {
       return { ok: false, message: "One or more products could not be priced — they may be inactive." };
     }
+    const isSampleLine = "isSampleLine" in line && line.isSampleLine === true;
     if (!line.qualifies) {
       lineWarnings.push({ variantId: line.variantId, sku: line.sku, warning: line.warning ?? "Below minimum." });
-    } else {
+    } else if (!isSampleLine) {
       validLineTotals.push(line.lineTotal!);
     }
     lineCreateData.push({
@@ -103,7 +110,10 @@ export async function saveQuoteDraft(rawInput: QuoteDraftInput): Promise<SaveQuo
       quantity: requested.quantity,
       unitPrice: line.unitPrice ?? 0,
       lineTotal: line.lineTotal ?? 0,
-      pricingTierLabel: line.appliedTier?.label ?? "Below minimum - not priced",
+      // "Sample" is the tracking marker for free samples (no schema column needed).
+      pricingTierLabel: isSampleLine
+        ? "Sample"
+        : line.appliedTier?.label ?? "Below minimum - not priced",
       priceListCode: line.effectivePriceListCode,
       priceListName: line.priceListName,
       effectiveDate: line.effectiveDate,

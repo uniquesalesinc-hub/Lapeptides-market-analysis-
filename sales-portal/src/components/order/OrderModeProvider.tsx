@@ -47,9 +47,10 @@ interface OrderModeContextValue {
   setCustomer: (customer: OrderCustomer | null) => void;
   setLadder: (ladder: QuoteLadderCode) => void;
   addLine: (variantId: string, quantity: number) => void;
-  setQty: (variantId: string, quantity: number) => void;
-  removeLine: (variantId: string) => void;
-  setLineNote: (variantId: string, note: string) => void;
+  addSample: (variantId: string, quantity?: number) => void;
+  setQty: (variantId: string, quantity: number, isSample?: boolean) => void;
+  removeLine: (variantId: string, isSample?: boolean) => void;
+  setLineNote: (variantId: string, note: string, isSample?: boolean) => void;
   setLineDiscount: (variantId: string, discountPercent: number | null) => void;
   clearCart: () => void;
   /** Registers a newly created customer (from the drawer inline form) and selects it. */
@@ -173,14 +174,17 @@ export function OrderModeProvider({
   const addLine = useCallback((variantId: string, quantity: number) => {
     dispatch({ type: "ADD_LINE", variantId, quantity });
   }, []);
-  const setQty = useCallback((variantId: string, quantity: number) => {
-    dispatch({ type: "SET_QTY", variantId, quantity });
+  const addSample = useCallback((variantId: string, quantity?: number) => {
+    dispatch({ type: "ADD_SAMPLE", variantId, quantity });
   }, []);
-  const removeLine = useCallback((variantId: string) => {
-    dispatch({ type: "REMOVE_LINE", variantId });
+  const setQty = useCallback((variantId: string, quantity: number, isSample?: boolean) => {
+    dispatch({ type: "SET_QTY", variantId, quantity, isSample });
   }, []);
-  const setLineNote = useCallback((variantId: string, note: string) => {
-    dispatch({ type: "SET_LINE_NOTE", variantId, note });
+  const removeLine = useCallback((variantId: string, isSample?: boolean) => {
+    dispatch({ type: "REMOVE_LINE", variantId, isSample });
+  }, []);
+  const setLineNote = useCallback((variantId: string, note: string, isSample?: boolean) => {
+    dispatch({ type: "SET_LINE_NOTE", variantId, note, isSample });
   }, []);
   const setLineDiscount = useCallback((variantId: string, discountPercent: number | null) => {
     dispatch({ type: "SET_LINE_DISCOUNT", variantId, discountPercent });
@@ -211,6 +215,7 @@ export function OrderModeProvider({
       setCustomer,
       setLadder,
       addLine,
+      addSample,
       setQty,
       removeLine,
       setLineNote,
@@ -218,7 +223,7 @@ export function OrderModeProvider({
       clearCart,
       adoptNewCustomer,
     }),
-    [state, catalogs, customers, currentUserId, discountLimitPercent, defaultExpirationDays, purchaseHistory, setCustomer, setLadder, addLine, setQty, removeLine, setLineNote, setLineDiscount, clearCart, adoptNewCustomer]
+    [state, catalogs, customers, currentUserId, discountLimitPercent, defaultExpirationDays, purchaseHistory, setCustomer, setLadder, addLine, addSample, setQty, removeLine, setLineNote, setLineDiscount, clearCart, adoptNewCustomer]
   );
 
   return <OrderModeContext.Provider value={value}>{children}</OrderModeContext.Provider>;

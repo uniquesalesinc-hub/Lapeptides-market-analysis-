@@ -26,9 +26,27 @@ export function previewLinePricing(
   return calculateLineItemPricing(quantity, tierDefs, priceMap, qualifyingQuantity);
 }
 
-/** Sum of every unit in the cart — the mix-and-match qualification pool. */
-export function cartPooledQuantity(lines: Array<{ quantity: number }>): number {
-  return lines.reduce((sum, l) => sum + l.quantity, 0);
+/**
+ * Sum of every PAID unit in the cart — the mix-and-match qualification pool.
+ * Sample lines are free product (JJ 7/16) and must never help a paid line
+ * qualify for a deeper tier.
+ */
+export function cartPooledQuantity(lines: Array<{ quantity: number; isSample?: boolean }>): number {
+  return lines.reduce((sum, l) => (l.isSample ? sum : sum + l.quantity), 0);
+}
+
+/** Fixed $0.00 pricing for a sample line — always qualifies, never priced. */
+export function samplePricing(): LineItemPricingResult {
+  return {
+    qualifies: true,
+    appliedTier: null,
+    unitPrice: 0,
+    lineTotal: 0,
+    minimumRequired: 0,
+    shortfall: null,
+    nextEligibleTier: null,
+    warning: null,
+  };
 }
 
 /**
@@ -38,12 +56,12 @@ export function cartPooledQuantity(lines: Array<{ quantity: number }>): number {
  * a hard 1–49 per-SKU band; the pool must not trip that ceiling) — mirroring the server rule
  * in resolveLineItemPricing.
  */
-export function repriceCart<L extends { variantId: string; quantity: number; pricing: LineItemPricingResult }>(
-  catalog: CatalogProduct[],
-  lines: L[]
-): L[] {
+export function repriceCart<
+  L extends { variantId: string; quantity: number; pricing: LineItemPricingResult; isSample?: boolean }
+>(catalog: CatalogProduct[], lines: L[]): L[] {
   const pooled = cartPooledQuantity(lines);
   return lines.map((line) => {
+    if (line.isSample) return { ...line, pricing: samplePricing() };
     const product = catalog.find((p) => p.variants.some((v) => v.id === line.variantId));
     const variant = product?.variants.find((v) => v.id === line.variantId);
     if (!variant) return line;

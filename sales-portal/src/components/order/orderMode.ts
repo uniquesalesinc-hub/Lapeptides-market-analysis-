@@ -8,7 +8,7 @@
  * createQuote re-resolves authoritative pricing server-side before anything persists.
  */
 import type { CatalogProduct } from "@/lib/data/catalog";
-import { previewLinePricing, repriceCart } from "@/lib/pricing/clientPreview";
+import { previewLinePricing, repriceCart, samplePricing } from "@/lib/pricing/clientPreview";
 import type { CartLine, QuoteLadderCode } from "@/components/quotes/wizard-types";
 
 export interface OrderCustomer {
@@ -41,9 +41,10 @@ export type OrderModeAction =
   | { type: "SET_CUSTOMER"; customer: OrderCustomer | null }
   | { type: "SET_LADDER"; ladder: QuoteLadderCode }
   | { type: "ADD_LINE"; variantId: string; quantity: number }
-  | { type: "SET_QTY"; variantId: string; quantity: number }
-  | { type: "REMOVE_LINE"; variantId: string }
-  | { type: "SET_LINE_NOTE"; variantId: string; note: string }
+  | { type: "ADD_SAMPLE"; variantId: string; quantity?: number }
+  | { type: "SET_QTY"; variantId: string; quantity: number; isSample?: boolean }
+  | { type: "REMOVE_LINE"; variantId: string; isSample?: boolean }
+  | { type: "SET_LINE_NOTE"; variantId: string; note: string; isSample?: boolean }
   | { type: "SET_LINE_DISCOUNT"; variantId: string; discountPercent: number | null }
   | { type: "CLEAR_CART" }
   | {
@@ -57,6 +58,11 @@ export type OrderModeAction =
 /** The customer's ladder if one is selected, with overridden = departure from that default. */
 function overriddenAgainst(customer: OrderCustomer | null, ladder: QuoteLadderCode): boolean {
   return customer != null && ladder !== customer.defaultPriceListCode;
+}
+
+/** Paid and sample lines of the same variant are distinct: the merge key is variantId+isSample. */
+function isLine(l: CartLine, variantId: string, isSample: boolean | undefined): boolean {
+  return l.variantId === variantId && !!l.isSample === !!isSample;
 }
 
 export function createOrderModeReducer(catalogs: CatalogsByLadder) {
@@ -88,11 +94,12 @@ export function createOrderModeReducer(catalogs: CatalogsByLadder) {
         const variant = product?.variants.find((v) => v.id === action.variantId);
         if (!product || !variant) return state;
 
-        // One line per variant, always: volume tiers must see the true combined quantity.
-        const existing = state.cart.find((l) => l.variantId === action.variantId);
+        // One PAID line per variant, always: volume tiers must see the true combined quantity.
+        // (A sample line of the same variant stays separate - merge key is variantId+isSample.)
+        const existing = state.cart.find((l) => isLine(l, action.variantId, false));
         const next: CartLine[] = existing
           ? state.cart.map((l) =>
-              l.variantId === action.variantId ? { ...l, quantity: l.quantity + action.quantity } : l
+              isLine(l, action.variantId, false) ? { ...l, quantity: l.quantity + action.quantity } : l
             )
           : [
               ...state.cart,
@@ -107,12 +114,41 @@ export function createOrderModeReducer(catalogs: CatalogsByLadder) {
             ];
         return { ...state, cart: repriceCart(catalog, next) };
       }
+      case "ADD_SAMPLE": {
+        // Free tracked sample (JJ 7/16): $0.00, never pools, coexists with a paid line.
+        const quantity = action.quantity ?? 1;
+        if (quantity <= 0) return state;
+        const catalog = catalogs[state.ladder];
+        const product = catalog.find((p) => p.variants.some((v) => v.id === action.variantId));
+        const variant = product?.variants.find((v) => v.id === action.variantId);
+        if (!product || !variant) return state;
+
+        const existing = state.cart.find((l) => isLine(l, action.variantId, true));
+        const next: CartLine[] = existing
+          ? state.cart.map((l) =>
+              isLine(l, action.variantId, true) ? { ...l, quantity: l.quantity + quantity } : l
+            )
+          : [
+              ...state.cart,
+              {
+                variantId: variant.id,
+                sku: variant.sku,
+                productName: product.name,
+                strength: variant.size,
+                quantity,
+                pricing: samplePricing(),
+                isSample: true,
+              },
+            ];
+        // Samples never move the pool, but reprice keeps every line's preview honest.
+        return { ...state, cart: repriceCart(catalog, next) };
+      }
       case "SET_QTY": {
         const next =
           action.quantity <= 0
-            ? state.cart.filter((l) => l.variantId !== action.variantId)
+            ? state.cart.filter((l) => !isLine(l, action.variantId, action.isSample))
             : state.cart.map((l) =>
-                l.variantId === action.variantId ? { ...l, quantity: action.quantity } : l
+                isLine(l, action.variantId, action.isSample) ? { ...l, quantity: action.quantity } : l
               );
         return { ...state, cart: repriceCart(catalogs[state.ladder], next) };
       }
@@ -120,7 +156,10 @@ export function createOrderModeReducer(catalogs: CatalogsByLadder) {
         // Removing a line shrinks the pool - the survivors may drop a tier, so reprice.
         return {
           ...state,
-          cart: repriceCart(catalogs[state.ladder], state.cart.filter((l) => l.variantId !== action.variantId)),
+          cart: repriceCart(
+            catalogs[state.ladder],
+            state.cart.filter((l) => !isLine(l, action.variantId, action.isSample))
+          ),
         };
       }
       case "SET_LINE_NOTE": {
@@ -128,7 +167,7 @@ export function createOrderModeReducer(catalogs: CatalogsByLadder) {
         return {
           ...state,
           cart: state.cart.map((l) =>
-            l.variantId === action.variantId ? { ...l, note: action.note } : l
+            isLine(l, action.variantId, action.isSample) ? { ...l, note: action.note } : l
           ),
         };
       }
@@ -141,7 +180,8 @@ export function createOrderModeReducer(catalogs: CatalogsByLadder) {
         return {
           ...state,
           cart: state.cart.map((l) =>
-            l.variantId === action.variantId ? { ...l, discountPercent: pct } : l
+            // Discounts only ever apply to paid lines - a sample is already $0.00.
+            isLine(l, action.variantId, false) ? { ...l, discountPercent: pct } : l
           ),
         };
       }

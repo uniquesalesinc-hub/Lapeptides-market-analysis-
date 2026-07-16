@@ -110,6 +110,13 @@ export default async function ReportsProductsPage({
               render: (r) => formatMoney(r.revenue),
             },
             {
+              key: "samples",
+              header: "Samples",
+              align: "right",
+              mono: true,
+              render: (r) => (r.samples > 0 ? r.samples : ""),
+            },
+            {
               key: "customers",
               header: <SortHeader label="Customers" sortKey="customers" activeSort={sort} sp={sp} />,
               align: "right",

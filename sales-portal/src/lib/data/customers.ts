@@ -101,6 +101,7 @@ export type Customer360Result =
         totalRevenue: number;
         orderCount: number;
         quoteCount: number;
+        samplesSent: number;
         openDraftCount: number;
         lastOrderDate: Date | null;
       };
@@ -169,7 +170,7 @@ export async function getCustomer360(
   if (viewer.role === "SALES_REP" && customer.assignedRepId !== viewer.id) return { status: "denied" };
 
   const orderWhere: Prisma.QuoteWhereInput = { customerId: id, status: { in: ORDER_QUOTE_STATUSES } };
-  const [revenueAgg, orderCount, quoteCount, openDraftCount, orderRows, quoteRows, invoiceRows, activityRows, taskRows] =
+  const [revenueAgg, orderCount, quoteCount, openDraftCount, samplesAgg, orderRows, quoteRows, invoiceRows, activityRows, taskRows] =
     await Promise.all([
       prisma.invoice.aggregate({
         where: { customerId: id, status: { not: "CANCELLED" } },
@@ -178,6 +179,11 @@ export async function getCustomer360(
       prisma.quote.count({ where: orderWhere }),
       prisma.quote.count({ where: { customerId: id } }),
       prisma.quote.count({ where: { customerId: id, status: "DRAFT" } }),
+      // Samples sent: sample-marked line units on quotes that left draft (JJ 7/16).
+      prisma.quoteLineItem.aggregate({
+        where: { pricingTierLabel: "Sample", quote: { customerId: id, status: { not: "DRAFT" } } },
+        _sum: { quantity: true },
+      }),
       prisma.quote.findMany({
         where: orderWhere,
         orderBy: { quoteDate: "desc" },
@@ -226,6 +232,7 @@ export async function getCustomer360(
       orderCount,
       quoteCount,
       openDraftCount,
+      samplesSent: samplesAgg._sum.quantity ?? 0,
       lastOrderDate: orderRows[0]?.quoteDate ?? null,
     },
     recent: {

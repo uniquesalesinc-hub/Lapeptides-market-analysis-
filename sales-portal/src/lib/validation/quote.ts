@@ -21,6 +21,8 @@ export const adjustmentInputSchema = z.object({
 export const quoteLineInputSchema = z.object({
   variantId: z.string().min(1),
   quantity: z.number().int().positive(),
+  /** Free tracked sample (JJ 7/16): $0.00 line, excluded from tier pooling. */
+  isSample: z.boolean().optional(),
 });
 
 export const quoteDraftSchema = z.object({

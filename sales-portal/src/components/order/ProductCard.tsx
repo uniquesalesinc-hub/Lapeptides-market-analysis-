@@ -17,7 +17,7 @@ import { useOrderMode } from "./OrderModeProvider";
  * never a side stripe), MOQ, last-order line for the selected customer, stepper + Add.
  */
 export function ProductCard({ product }: { product: CatalogProduct }) {
-  const { state, addLine, purchaseHistory } = useOrderMode();
+  const { state, addLine, addSample, purchaseHistory } = useOrderMode();
   const [variantId, setVariantId] = useState(product.variants[0]?.id);
   const variant = product.variants.find((v) => v.id === variantId) ?? product.variants[0];
   const moq = variant ? Math.min(...variant.tierPrices.map((t) => t.minQty)) : 1;
@@ -32,7 +32,7 @@ export function ProductCard({ product }: { product: CatalogProduct }) {
   const qualifying = product.category === "CAPSULE" ? quantity : pooledBase + quantity;
   const preview = previewLinePricing(variant, quantity, qualifying);
   const history = purchaseHistory.get(variant.id);
-  const inCart = state.cart.find((l) => l.variantId === variant.id);
+  const inCart = state.cart.find((l) => l.variantId === variant.id && !l.isSample);
 
   function selectVariant(id: string) {
     setVariantId(id);
@@ -183,6 +183,15 @@ export function ProductCard({ product }: { product: CatalogProduct }) {
           className="min-h-touch flex-1 rounded-[10px] bg-lap-teal px-4 text-sm font-semibold text-white transition-colors duration-150 hover:bg-lap-teal-dark"
         >
           Add
+        </button>
+        <button
+          type="button"
+          data-testid={`sample-${variant.sku}`}
+          onClick={() => addSample(variant.id, 1)}
+          title="Add one free tracked sample"
+          className="min-h-touch rounded-[10px] border border-lap-border px-3 text-xs font-semibold text-lap-slate transition-colors duration-150 hover:border-lap-amber hover:text-lap-amber"
+        >
+          Sample
         </button>
       </div>
     </div>

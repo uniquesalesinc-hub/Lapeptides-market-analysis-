@@ -68,6 +68,7 @@ export default async function ReportsTeamPage({
                   `${r.quoteConversion.toFixed(1)}%`
                 ),
             },
+            { key: "samples", header: "Samples sent", align: "right", mono: true, render: (r) => (r.samplesSent > 0 ? r.samplesSent : "") },
             { key: "requests", header: "Discount requests", align: "right", mono: true, render: (r) => r.discountRequests },
             { key: "approvals", header: "Approved", align: "right", mono: true, render: (r) => r.discountApprovals },
           ]}
