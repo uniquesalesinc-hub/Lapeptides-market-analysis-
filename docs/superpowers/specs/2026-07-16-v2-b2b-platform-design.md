@@ -164,13 +164,19 @@ cookie-scoped admin view-as instead), WordPress/page builder.
 
 ## Addendum A (7/16, JJ + Spencer field call): Phase 1.5 - admin enhancements
 
-1. **Sub-MOQ ordering.** Bulk Retail Tier 1 floor drops 20 -> 5 for ALL products
-   (Spencer: "order less than 20... from five to 20 under bulk retail tier number
-   one"). Quantities 5-19 price at the T1 sheet price; below 5 stays unpriced.
-   Wholesale bands unchanged (band 1 already covers 1-99). This is a deliberate
-   business override of the printed sheets, same provenance class as the flat
-   spray/cream rule. Tier data lives in the shared DB, so the rule applies to
-   BOTH portals once the data migration runs.
+1. **Retail band + order minimum (SUPERSEDES the earlier floor-to-5 rule, JJ
+   7/16 evening).** Quantities 1-19 price at the lapeptides.net single-unit
+   retail price per SKU (transcribed verbatim in prisma/seed-data/
+   retail-source.ts), as band tier 0 on BOTH ladders and the format lists, so
+   reps can show the single price and walk buyers up the ladder. Printed bulk
+   tiers apply from their printed minimums (Bulk Retail T1 at 20; Bulk
+   Wholesale band 1 becomes 20-99; spray/cream flat price from 20; capsule
+   wholesale band 20-49 with the 49 ceiling kept). SKUs without a site retail
+   price (RETAIL_GAPS, 56 SKUs) have no 1-19 band: their minimum stays the
+   printed floor. IGF-1 LR3 excluded pending JJ's ruling on the $59.99-site
+   vs $95-sheet conflict. Orders below 20 total units (samples excluded) can
+   be drafted but not sent or converted. Tier data lives in the shared DB, so
+   the band applies to BOTH portals once scripts/apply-retail-band.mjs runs.
 2. **Brand kit per customer.** Customer 360 gains a Brand tab: sections Logo /
    Social media / Vial labels / Other; upload PNG/JPEG/PDF/SVG (<= 8 MB), stored
    in Postgres (BrandAsset model with bytea), served via authenticated route;

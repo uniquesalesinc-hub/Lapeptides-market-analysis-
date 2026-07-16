@@ -2,9 +2,10 @@ import { prisma } from "@/lib/prisma";
 import type { PriceListCode, ProductCategory } from "@prisma/client";
 
 export const PRICE_LIST_LABELS: Record<PriceListCode, string> = {
-  // Sub-MOQ rule (JJ + Spencer field call 7/16/2026): retail floor is 5, overriding the printed 20.
-  BULK_RETAIL: "Bulk Retail (5–99 bottles)",
-  BULK_WHOLESALE: "Bulk Wholesale (100+ bottles)",
+  // Retail-band model (JJ 7/16/2026): 1-19 units price at lapeptides.net retail on both
+  // ladders; the printed tiers apply from 20. Labels describe the LADDER, not the band.
+  BULK_RETAIL: "Bulk Retail (tiers from 20)",
+  BULK_WHOLESALE: "Bulk Wholesale (bands from 20)",
   WHOLESALE_SPRAYS: "Wholesale Sprays",
   WHOLESALE_CREAMS: "Wholesale Creams",
   WHOLESALE_CAPSULES: "Wholesale Capsules",

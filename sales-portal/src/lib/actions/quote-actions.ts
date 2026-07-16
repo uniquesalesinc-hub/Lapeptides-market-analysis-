@@ -250,6 +250,19 @@ export async function finalizeAndSendQuote(quoteId: string, recipientEmail?: str
   }
   if (quote.lineItems.length === 0) return { ok: false, message: "Add at least one product before sending." };
 
+  // Order minimum (JJ 7/16/2026): quotes can be drafted at any size, but nothing under
+  // 20 total units (samples excluded) may be sent or converted to an order.
+  const billableUnits = quote.lineItems.reduce(
+    (sum, li) => (li.pricingTierLabel === "Sample" ? sum : sum + li.quantity),
+    0
+  );
+  if (billableUnits < 20) {
+    return {
+      ok: false,
+      message: `Order minimum is 20 units (this quote has ${billableUnits}, samples excluded). Add ${20 - billableUnits} more unit(s) before sending.`,
+    };
+  }
+
   const invalidLines = quote.lineItems.filter((li) => !li.minimumMet);
   if (invalidLines.length > 0) {
     return {
@@ -322,6 +335,19 @@ export async function acceptQuoteAsOrder(quoteId: string): Promise<SaveQuoteResu
     return { ok: false, message: "You do not have access to this quote." };
   }
   if (quote.lineItems.length === 0) return { ok: false, message: "Add at least one product before creating an order." };
+
+  // Order minimum (JJ 7/16/2026): quotes can be drafted at any size, but nothing under
+  // 20 total units (samples excluded) may be sent or converted to an order.
+  const billableUnits = quote.lineItems.reduce(
+    (sum, li) => (li.pricingTierLabel === "Sample" ? sum : sum + li.quantity),
+    0
+  );
+  if (billableUnits < 20) {
+    return {
+      ok: false,
+      message: `Order minimum is 20 units (this quote has ${billableUnits}, samples excluded). Add ${20 - billableUnits} more unit(s) before creating the order.`,
+    };
+  }
 
   const invalidLines = quote.lineItems.filter((li) => !li.minimumMet);
   if (invalidLines.length > 0) {

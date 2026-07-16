@@ -194,15 +194,20 @@ describe("Injectable pooling across cart mutations (mirrors engine.test.ts mix-a
     expect(line(state, "BPC157-10MG").pricing.unitPrice).toBe(22.0); // 120 -> Tier 2
   });
 
-  it("capsule lines are exempt from pooling: flat $65 regardless of the injectable pool", () => {
+  it("capsule lines are exempt from pooling: they price on their own quantity only", () => {
     let state = stateWith({ ladder: "BULK_WHOLESALE" });
     state = reduce(state, { type: "ADD_LINE", variantId: "BPC157-10MG", quantity: 150 });
+    // 10 capsules in a 160-unit cart: on their OWN quantity that is the retail band
+    // ($89.99, JJ 7/16 model) - the injectable pool must not drag them to wholesale.
     state = reduce(state, { type: "ADD_LINE", variantId: "BPC157CAPSULES-CAPSULES", quantity: 10 });
+    expect(line(state, "BPC157CAPSULES-CAPSULES").pricing.unitPrice).toBe(89.99);
 
+    // 30 capsules qualify for their 20-49 wholesale band at $65 on their own count.
+    state = reduce(state, { type: "SET_QTY", variantId: "BPC157CAPSULES-CAPSULES", quantity: 30 });
     const capsule = line(state, "BPC157CAPSULES-CAPSULES");
     expect(capsule.pricing.unitPrice).toBe(65.0);
-    expect(capsule.pricing.lineTotal).toBe(650.0);
-    // The injectable still earns the pooled tier (150 + 10 = 160 -> Tier 2 band 100-299).
+    expect(capsule.pricing.lineTotal).toBe(1950.0);
+    // The injectable still earns the pooled tier (150 + capsules -> Tier 2 band 100-299).
     expect(line(state, "BPC157-10MG").pricing.unitPrice).toBe(22.0);
   });
 

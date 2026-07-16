@@ -18,7 +18,10 @@ export function previewLinePricing(
   const tierDefs: TierDefinition[] = variant.tierPrices.map((t) => ({
     tier: t.tierNumber,
     label: t.label,
-    minimumBasis: t.maxQty != null || t.minQty === Math.min(...variant.tierPrices.map((x) => x.minQty)) ? inferBasis(variant) : "FLOOR_ONLY",
+    // Per-tier basis: a stated ceiling makes it a band (retail band 1-19, wholesale
+    // bands, capsule 20-49); no ceiling means a floor. Mixed lists (retail band over
+    // floor tiers) price correctly this way - a list-wide inference cannot.
+    minimumBasis: t.maxQty != null ? ("BAND" as const) : ("FLOOR_ONLY" as const),
     minQty: t.minQty,
     maxQty: t.maxQty,
   }));
@@ -70,9 +73,3 @@ export function repriceCart<
   });
 }
 
-function inferBasis(variant: CatalogVariant): "BAND" | "FLOOR_ONLY" {
-  // Bulk Wholesale tiers all carry an explicit maxQty except the final (open) tier; Bulk
-  // Retail / Sprays / Creams tiers never carry a maxQty at all. A single non-null maxQty
-  // among the tiers is a reliable signal this variant's price list uses banded tiers.
-  return variant.tierPrices.some((t) => t.maxQty != null) ? "BAND" : "FLOOR_ONLY";
-}

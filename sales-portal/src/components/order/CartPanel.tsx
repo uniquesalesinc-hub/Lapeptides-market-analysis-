@@ -124,7 +124,11 @@ function CartBody() {
   const pooledUnits = cartPooledQuantity(state.cart);
   const sampleUnits = state.cart.reduce((n, l) => (l.isSample ? n + l.quantity : n), 0);
   const customer = state.customer;
+  const billableUnits = state.cart.reduce((n, l) => (l.isSample ? n : n + l.quantity), 0);
+  const underOrderMinimum = billableUnits > 0 && billableUnits < 20;
   const canSubmit = customer != null && state.cart.length > 0 && saving == null;
+  // Order minimum (JJ 7/16): drafts are fine at any size, but orders need 20+ units.
+  const canSubmitOrder = canSubmit && billableUnits >= 20;
 
   const submit = useCallback(
     async (mode: "quote" | "order") => {
@@ -251,6 +255,13 @@ function CartBody() {
       )}
 
       <div className="space-y-2">
+      {underOrderMinimum && (
+        <p className="rounded-lg bg-lap-amber/10 px-2.5 py-1.5 text-[11px] font-medium text-lap-amber">
+          Order minimum is 20 units (samples excluded). This cart has {billableUnits}. A draft
+          quote can still be saved.
+        </p>
+      )}
+
         <button
           type="button"
           data-testid="create-quote"

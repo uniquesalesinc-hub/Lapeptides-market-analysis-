@@ -37,21 +37,23 @@ export type PriceListCode = (typeof PRICE_LIST_CODES)[keyof typeof PRICE_LIST_CO
 
 /** Bulk Retail: floor-only tiers, no stated upper bound — best (highest) qualifying tier wins.
  *
- * Sub-MOQ rule (JJ + Spencer field call, 7/16/2026): Tier 1 minimum is 5, overriding the
- * printed sheets' 20-bottle minimum, for ALL products. Quantities 5-19 price at the existing
- * Tier 1 sheet price (the prices themselves are unchanged); below 5 stays unpriced. This is a
- * deliberate business override of the printed sheets - same provenance class as the flat
- * spray/cream rule (Danny, 7/15/2026). Bulk Wholesale bands are unaffected.
+ * Retail-band model (JJ, 7/16/2026, supersedes the same-day floor-to-5 rule): quantities
+ * 1-19 price at the lapeptides.net single-unit retail price per SKU (see retail-source.ts,
+ * wired as band tier 0 in priceLists.ts). The printed bulk tiers apply from their printed
+ * minimums - Tier 1 is back at 20. Orders under 20 total units can be drafted but not
+ * sent/converted (enforced in quote-actions, samples excluded from the count).
  */
 export const BULK_RETAIL_TIERS = [
-  { tier: 1, label: "Tier 1", minQty: 5, maxQty: null as number | null },
+  { tier: 1, label: "Tier 1", minQty: 20, maxQty: null as number | null },
   { tier: 2, label: "Tier 2", minQty: 50, maxQty: null as number | null },
   { tier: 3, label: "Tier 3", minQty: 75, maxQty: null as number | null },
 ];
 
 /** Bulk Wholesale: explicit bands exactly as printed on each sheet. */
 export const BULK_WHOLESALE_TIERS = [
-  { tier: 1, label: "Tier 1", minQty: 1, maxQty: 99 },
+  // Band 1 printed "<100"; its floor moved 1 -> 20 on 7/16/2026 because the retail band
+  // (tier 0, 1-19 units at lapeptides.net prices) now occupies quantities below 20.
+  { tier: 1, label: "Tier 1", minQty: 20, maxQty: 99 },
   { tier: 2, label: "Tier 2", minQty: 100, maxQty: 299 },
   { tier: 3, label: "Tier 3", minQty: 300, maxQty: 499 },
   { tier: 4, label: "Tier 4", minQty: 500, maxQty: 999 },

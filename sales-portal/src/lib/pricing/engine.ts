@@ -5,12 +5,15 @@
  * against the numbers in the uploaded pricing sheets. It implements exactly the two tier
  * shapes found in the source material (see docs/PRICING_AUDIT.md):
  *
- *  - FLOOR_ONLY tiers (Bulk Retail, Sprays, Creams): "5+ / 50+ / 75+ bottles" — a quantity
+ *  - FLOOR_ONLY tiers (Bulk Retail, Sprays, Creams): "20+ / 50+ / 75+ bottles" — a quantity
  *    qualifies for the highest tier whose minimum it meets or exceeds. No stated ceiling.
- *    (Bulk Retail Tier 1 floor is 5 per the 7/16/2026 JJ + Spencer sub-MOQ rule, overriding
- *    the printed sheets' 20.)
- *  - BAND tiers (Bulk Wholesale): "100–299 bottles" — a quantity must fall within the stated
- *    band. Bands are contiguous and non-overlapping by construction.
+ *  - BAND tiers (Bulk Wholesale bands, the tier-0 retail band 1-19, the capsule 20-49
+ *    band): a quantity must fall within the stated band. Mixed lists work: bands match
+ *    exactly, floors accumulate (see selectPricingTier).
+ *
+ * Retail band (JJ, 7/16/2026): tier 0 on every list prices 1-19 units at the SKU's
+ * lapeptides.net retail price. SKUs without one have no tier-0 entry and fall through
+ * to the no-price-on-file path below (never a made-up price).
  *
  * It never substitutes a different tier than the one a quantity actually qualifies for, never
  * invents a total-order minimum, and never silently discounts below the source price.
@@ -151,7 +154,34 @@ export function calculateLineItemPricing(
 
   const unitPrice = tierPrices.get(tier.tier);
   if (unitPrice == null) {
-    throw new Error(`No price on file for tier ${tier.tier} ("${tier.label}") — refusing to invent one.`);
+    // The selected tier has no price for this SKU. This is an expected state for the
+    // retail band (tier 0): 50+ catalog SKUs have no lapeptides.net single-unit price
+    // (RETAIL_GAPS), so 1-19 of them is simply not sellable - never invent a price.
+    // Surface it as a non-qualifying line with the next PRICED tier as guidance.
+    const nextPriced = tierDefs
+      .filter((t) => t.minQty > qualifyingQuantity && tierPrices.get(t.tier) != null)
+      .sort((a, b) => a.minQty - b.minQty)[0];
+    return {
+      qualifies: false,
+      appliedTier: null,
+      unitPrice: null,
+      lineTotal: null,
+      minimumRequired: nextPriced?.minQty ?? minimumRequired,
+      shortfall: nextPriced ? Math.max(0, nextPriced.minQty - qualifyingQuantity) : null,
+      nextEligibleTier: nextPriced
+        ? {
+            tier: nextPriced,
+            unitPrice: tierPrices.get(nextPriced.tier)!,
+            unitsNeeded: nextPriced.minQty - qualifyingQuantity,
+          }
+        : null,
+      warning: nextPriced
+        ? `No price on file for ${tier.label} on this product. Add ${Math.max(
+            0,
+            nextPriced.minQty - qualifyingQuantity
+          )} more unit(s) to reach ${nextPriced.label}.`
+        : `No price on file for ${tier.label} on this product, and no priced tier is reachable at this quantity.`,
+    };
   }
 
   const betterTier = tierDefs
