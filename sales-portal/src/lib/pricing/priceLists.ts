@@ -7,8 +7,6 @@
 import {
   BULK_RETAIL_TIERS,
   BULK_WHOLESALE_TIERS,
-  SPRAY_CREAM_TIERS,
-  CAPSULE_TIERS,
   FULL_BULK_CATALOG,
   SPRAYS,
   CREAMS,
@@ -42,22 +40,20 @@ export function tiersFor(code: PriceListCode): TierDefinition[] {
       }));
     case PRICE_LIST_CODES.WHOLESALE_SPRAYS:
     case PRICE_LIST_CODES.WHOLESALE_CREAMS:
-      return SPRAY_CREAM_TIERS.map((t) => ({
-        tier: t.tier,
-        label: `${t.label} (${t.minQty}+ units)`,
-        minimumBasis: "FLOOR_ONLY" as const,
-        minQty: t.minQty,
-        maxQty: t.maxQty,
-      }));
     case PRICE_LIST_CODES.WHOLESALE_CAPSULES:
-      // One priced band only (draft sheet): 1–49 bottles. 50+ = manual quote, by design.
-      return CAPSULE_TIERS.map((t) => ({
-        tier: t.tier,
-        label: `${t.label} (${t.minQty}–${t.maxQty} bottles)`,
-        minimumBasis: "BAND" as const,
-        minQty: t.minQty,
-        maxQty: t.maxQty,
-      }));
+      // Business rule (Danny, 7/15/2026 review call): sprays, creams, and capsules sell at ONE
+      // flat price regardless of quantity, identical on either ladder, no minimum. Volume
+      // discounts on these are negotiated by a rep as a custom quote, never auto-applied.
+      // The printed sheets' 50+/100+/200+ columns are intentionally retired from the app.
+      return [
+        {
+          tier: 1,
+          label: "Flat price (any quantity)",
+          minimumBasis: "FLOOR_ONLY" as const,
+          minQty: 1,
+          maxQty: null,
+        },
+      ];
     default: {
       const exhaustive: never = code;
       throw new Error(`Unknown price list code: ${exhaustive}`);
@@ -117,11 +113,10 @@ function sprayCreamToEntry(item: SprayCreamCatalogItem): CatalogEntry {
     size: item.category === "NASAL_SPRAY" ? "spray" : "cream",
     category: item.category,
     priceListCode: code,
-    pricesByTier: new Map([
-      [1, item.prices[0]],
-      [2, item.prices[1]],
-      [3, item.prices[2]],
-    ]),
+    // Flat-price rule (Danny, 7/15/2026): the app sells sprays/creams at the sheet's Tier 1
+    // price at any quantity. prices[1]/prices[2] stay in the source transcription but are
+    // intentionally not loaded into the app.
+    pricesByTier: new Map([[1, item.prices[0]]]),
   };
 }
 

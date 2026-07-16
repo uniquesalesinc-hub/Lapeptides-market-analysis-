@@ -97,29 +97,29 @@ describe("BulkWholesale_Tier1-5.pdf — BPC-157 10mg band boundaries", () => {
   });
 });
 
-describe("Wholesale_Sprays.pdf — BPC-157 Spray", () => {
+describe("Sprays — flat price at any quantity (business rule, 7/15/2026 review call)", () => {
   const prices = priceMap("BPC157SPRAY-SPRAY", PRICE_LIST_CODES.WHOLESALE_SPRAYS);
 
-  it("below the 50-unit minimum does not qualify", () => {
-    const r = calculateLineItemPricing(49, sprayTiers, prices);
-    expect(r.qualifies).toBe(false);
-    expect(r.shortfall).toBe(1);
+  it("one spray prices at the sheet Tier-1 rate — no minimum, no volume steps", () => {
+    for (const qty of [1, 49, 50, 100, 200, 999]) {
+      const r = calculateLineItemPricing(qty, sprayTiers, prices);
+      expect(r.qualifies).toBe(true);
+      expect(r.unitPrice).toBe(35.0);
+    }
   });
 
-  it("matches the sheet at 50 / 100 / 200 units exactly", () => {
-    expect(calculateLineItemPricing(50, sprayTiers, prices).unitPrice).toBe(35.0);
-    expect(calculateLineItemPricing(100, sprayTiers, prices).unitPrice).toBe(32.5);
-    expect(calculateLineItemPricing(200, sprayTiers, prices).unitPrice).toBe(30.0);
+  it("no next-cheaper-tier hint exists (single flat tier)", () => {
+    expect(calculateLineItemPricing(10, sprayTiers, prices).nextEligibleTier).toBeNull();
   });
 });
 
-describe("Wholesale_Creams.pdf — Repair Cream", () => {
+describe("Creams — flat price at any quantity (business rule, 7/15/2026 review call)", () => {
   const prices = priceMap("REPAIRCREAM-CREAM", PRICE_LIST_CODES.WHOLESALE_CREAMS);
 
-  it("matches the sheet at 50 / 100 / 200 units exactly", () => {
-    expect(calculateLineItemPricing(50, creamTiers, prices).unitPrice).toBe(45.0);
-    expect(calculateLineItemPricing(100, creamTiers, prices).unitPrice).toBe(42.5);
-    expect(calculateLineItemPricing(200, creamTiers, prices).unitPrice).toBe(40.0);
+  it("Repair Cream is $45.00 flat at any quantity", () => {
+    for (const qty of [1, 50, 200]) {
+      expect(calculateLineItemPricing(qty, creamTiers, prices).unitPrice).toBe(45.0);
+    }
   });
 });
 
@@ -300,10 +300,16 @@ describe("Bulk_Wholesale_Capsules_Draft.pdf — one priced band; MSRP is metadat
     expect(r.lineTotal).toBe(1950);
   });
 
-  it("60 bottles exceeds the priced ceiling — no invented price, custom-quote warning", () => {
+  it("60 bottles still prices at \$65 flat (ceiling retired per 7/15 business rule)", () => {
     const r = calculateLineItemPricing(60, capsuleTiers, bpcCaps);
+    expect(r.qualifies).toBe(true);
+    expect(r.unitPrice).toBe(65);
+  });
+
+  it("engine over-ceiling branch (kept for future banded lists): synthetic 1–49 band", () => {
+    const banded = [{ tier: 1, label: "Band", minimumBasis: "BAND" as const, minQty: 1, maxQty: 49 }];
+    const r = calculateLineItemPricing(60, banded, new Map([[1, 65]]));
     expect(r.qualifies).toBe(false);
-    expect(r.unitPrice).toBeNull();
     expect(r.warning).toMatch(/exceeds the 49-unit ceiling/);
     expect(r.warning).toMatch(/custom quote/);
   });
@@ -329,20 +335,18 @@ describe("Mix-and-match pooling — the pool qualifies the tier, the line bills 
     expect(r.lineTotal).toBe(round(60 * 22)); // billed on this line's 60 units, not the pool
   });
 
-  it("a 30-unit spray line qualifies through a 110-unit cross-format pool (floor 50)", () => {
-    const sprayPrices = priceMap("BPC157SPRAY-SPRAY", PRICE_LIST_CODES.WHOLESALE_SPRAYS);
-    const r = calculateLineItemPricing(30, sprayTiers, sprayPrices, 110);
+  it("a 5-unit retail line reaches Tier 3 through a 90-unit cross-format pool", () => {
+    const r = calculateLineItemPricing(5, bulkRetailTiers, bpc10Retail, 90);
     expect(r.qualifies).toBe(true);
-    expect(r.appliedTier?.tier).toBe(2); // 100+ tier reached via the pool
+    expect(r.appliedTier?.tier).toBe(3); // 75+ floor reached via the pool
     expect(r.unitPrice).toBe(32.5);
-    expect(r.lineTotal).toBe(round(30 * 32.5));
+    expect(r.lineTotal).toBe(round(5 * 32.5));
   });
 
-  it("still warns when even the pooled quantity misses the minimum", () => {
-    const sprayPrices = priceMap("BPC157SPRAY-SPRAY", PRICE_LIST_CODES.WHOLESALE_SPRAYS);
-    const r = calculateLineItemPricing(10, sprayTiers, sprayPrices, 30);
+  it("still warns when even the pooled quantity misses the retail minimum", () => {
+    const r = calculateLineItemPricing(10, bulkRetailTiers, bpc10Retail, 15);
     expect(r.qualifies).toBe(false);
-    expect(r.warning).toMatch(/30 is below the 50-unit minimum/);
+    expect(r.warning).toMatch(/15 is below the 20-unit minimum/);
   });
 
   it("omitting the pool preserves per-SKU behavior exactly (default parameter)", () => {

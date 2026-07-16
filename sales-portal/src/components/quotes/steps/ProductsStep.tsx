@@ -3,7 +3,8 @@
 import { useEffect, useMemo, useState } from "react";
 import type { PriceListCode } from "@prisma/client";
 import type { CatalogProduct } from "@/lib/data/catalog";
-import { PRICE_LIST_LABELS } from "@/lib/data/catalog";
+import { PRICE_LIST_LABELS, CATEGORY_LABELS } from "@/lib/data/catalog";
+import type { ProductCategory } from "@prisma/client";
 import { previewLinePricing, repriceCart, cartPooledQuantity } from "@/lib/pricing/clientPreview";
 import { formatMoney } from "@/lib/format";
 import { QuantityInput } from "../QuantityInput";
@@ -46,16 +47,19 @@ export function ProductsStep({
   onContinue: () => void;
 }) {
   const [query, setQuery] = useState("");
+  const [category, setCategory] = useState<ProductCategory | null>(null);
   const [recent, setRecent] = useState<string[]>([]);
 
   useEffect(() => setRecent(readRecent()), []);
 
   const filtered = useMemo(
     () =>
-      catalog.filter((p) =>
-        query ? `${p.name} ${p.variants.map((v) => v.sku).join(" ")}`.toLowerCase().includes(query.toLowerCase()) : true
-      ),
-    [catalog, query]
+      catalog
+        .filter((p) => (category ? p.category === category : true))
+        .filter((p) =>
+          query ? `${p.name} ${p.variants.map((v) => v.sku).join(" ")}`.toLowerCase().includes(query.toLowerCase()) : true
+        ),
+    [catalog, query, category]
   );
 
   const recentProducts = useMemo(
@@ -153,6 +157,16 @@ export function ProductsStep({
         onChange={(e) => setQuery(e.target.value)}
       />
 
+      {/* Category buttons — "GLP, boom, they all pop up" (review call 7/15) */}
+      <div className="table-scroll">
+        <div className="flex gap-2">
+          <CategoryChip label="All" active={category === null} onClick={() => setCategory(null)} />
+          {(Object.keys(CATEGORY_LABELS) as ProductCategory[]).map((c) => (
+            <CategoryChip key={c} label={CATEGORY_LABELS[c]} active={category === c} onClick={() => setCategory(c)} />
+          ))}
+        </div>
+      </div>
+
       {recentProducts.length > 0 && !query && (
         <div>
           <p className="label-text">Recently used</p>
@@ -237,6 +251,22 @@ export function ProductsStep({
   );
 }
 
+function CategoryChip({ label, active, onClick }: { label: string; active: boolean; onClick: () => void }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`min-h-touch whitespace-nowrap rounded-full border px-4 text-sm font-semibold transition-colors ${
+        active
+          ? "border-brand-teal bg-brand-teal text-white"
+          : "border-brand-border bg-brand-surface text-brand-slate-200"
+      }`}
+    >
+      {label}
+    </button>
+  );
+}
+
 function ProductAddCard({
   product,
   onAdd,
@@ -274,6 +304,32 @@ function ProductAddCard({
           )}
         </p>
       </div>
+
+      {/* Tier ladder mirrored from the pricing sheets; the highlighted cell is what this
+          quantity (plus the rest of the cart, mix-and-match) qualifies for. */}
+      {variant.tierPrices.length > 0 && (
+        <div className="mt-3 overflow-x-auto">
+          <div className="flex min-w-max gap-1">
+            {variant.tierPrices.map((t) => {
+              const isApplied = preview.qualifies && preview.appliedTier?.tier === t.tierNumber;
+              const range = t.maxQty != null ? `${t.minQty}–${t.maxQty}` : `${t.minQty}+`;
+              return (
+                <div
+                  key={t.tierNumber}
+                  className={`rounded-lg border px-2.5 py-1.5 text-center ${
+                    isApplied ? "border-brand-teal bg-brand-teal/10" : "border-brand-border"
+                  }`}
+                >
+                  <div className="text-[10px] uppercase tracking-wide text-brand-slate-400">{range}</div>
+                  <div className={`text-sm font-semibold ${isApplied ? "text-brand-teal" : "text-white"}`}>
+                    {formatMoney(t.unitPrice)}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       <div className="mt-3 flex items-end gap-2">
         {product.variants.length > 1 && (

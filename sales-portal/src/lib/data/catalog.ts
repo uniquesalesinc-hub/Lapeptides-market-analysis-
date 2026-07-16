@@ -2,8 +2,8 @@ import { prisma } from "@/lib/prisma";
 import type { PriceListCode, ProductCategory } from "@prisma/client";
 
 export const PRICE_LIST_LABELS: Record<PriceListCode, string> = {
-  BULK_RETAIL: "Bulk Retail",
-  BULK_WHOLESALE: "Bulk Wholesale",
+  BULK_RETAIL: "Bulk Retail (20–99 bottles)",
+  BULK_WHOLESALE: "Bulk Wholesale (100+ bottles)",
   WHOLESALE_SPRAYS: "Wholesale Sprays",
   WHOLESALE_CREAMS: "Wholesale Creams",
   WHOLESALE_CAPSULES: "Wholesale Capsules",
