@@ -98,10 +98,12 @@ decisions already made so nothing is relearned later.
   requested/approved). Fulfills director requirement #9 visibly.
 
 ### 6. Data model additions (one additive migration)
-- `Customer`: `defaultPriceListCode` (BULK_RETAIL | BULK_WHOLESALE, default
-  BULK_RETAIL), `paymentTerms` (PIA | NET15 | NET30 | NET60, default PIA),
-  `leadStatus` (LEAD | ACTIVE | DORMANT, default ACTIVE), billing/shipping
-  address fields (nullable strings).
+- `Customer`: `defaultPriceListCode` and `paymentTerms` ALREADY EXIST in the
+  live schema as TEXT (values 'BULK_RETAIL'/'BULK_WHOLESALE' and 'Prepaid'/
+  'Net 15'/'Net 30'/'Net 60' parsed by `lib/invoiceTerms.computeDueDate`);
+  v2 reuses both as-is (amended 7/16 after migration review - no retyping of
+  live columns). New: `crmStatus` (LEAD | ACTIVE | DORMANT, default ACTIVE),
+  billing/shipping address fields (nullable strings).
 - `Activity`: id, type (CALL | EMAIL | VISIT | MEETING | NOTE), customerId,
   userId, occurredAt, note.
 - `Task`: id, title, note?, customerId?, assigneeId, creatorId, dueDate,
