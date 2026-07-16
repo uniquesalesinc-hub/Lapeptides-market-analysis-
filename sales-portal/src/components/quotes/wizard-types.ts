@@ -11,6 +11,10 @@ export interface CartLine {
   strength: string;
   quantity: number;
   pricing: LineItemPricingResult;
+  /** Order Mode extras (optional so the legacy wizard's carts stay valid unchanged). */
+  note?: string;
+  /** Rep-entered line discount percent (0-100); over-limit values flag approval server-side. */
+  discountPercent?: number | null;
 }
 
 export interface WizardAdjustment {

@@ -66,6 +66,17 @@ const config: Config = {
       borderRadius: {
         card: "12px",
       },
+      keyframes: {
+        // Cart-count bump on add-to-cart (DESIGN.md motion: 150-250ms, ease-out, no layout props).
+        "cart-bump": {
+          "0%": { transform: "scale(1)" },
+          "40%": { transform: "scale(1.25)" },
+          "100%": { transform: "scale(1)" },
+        },
+      },
+      animation: {
+        "cart-bump": "cart-bump 200ms cubic-bezier(0.25, 1, 0.5, 1)",
+      },
     },
   },
   plugins: [],

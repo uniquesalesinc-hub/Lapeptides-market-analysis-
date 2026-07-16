@@ -17,6 +17,8 @@ export interface OrderCustomer {
   city: string | null;
   orderCount: number;
   defaultPriceListCode: QuoteLadderCode;
+  /** e.g. "Prepaid" / "Net 30" - drives the cart's terms + due-date line. */
+  paymentTerms: string;
 }
 
 export type CatalogsByLadder = Record<QuoteLadderCode, CatalogProduct[]>;
@@ -41,6 +43,8 @@ export type OrderModeAction =
   | { type: "ADD_LINE"; variantId: string; quantity: number }
   | { type: "SET_QTY"; variantId: string; quantity: number }
   | { type: "REMOVE_LINE"; variantId: string }
+  | { type: "SET_LINE_NOTE"; variantId: string; note: string }
+  | { type: "SET_LINE_DISCOUNT"; variantId: string; discountPercent: number | null }
   | { type: "CLEAR_CART" }
   | {
       type: "RESTORE";
@@ -117,6 +121,28 @@ export function createOrderModeReducer(catalogs: CatalogsByLadder) {
         return {
           ...state,
           cart: repriceCart(catalogs[state.ladder], state.cart.filter((l) => l.variantId !== action.variantId)),
+        };
+      }
+      case "SET_LINE_NOTE": {
+        // Notes never move prices - no reprice needed.
+        return {
+          ...state,
+          cart: state.cart.map((l) =>
+            l.variantId === action.variantId ? { ...l, note: action.note } : l
+          ),
+        };
+      }
+      case "SET_LINE_DISCOUNT": {
+        // Discounts ride on top of resolved tier prices; the tier itself never moves.
+        const pct =
+          action.discountPercent == null
+            ? null
+            : Math.min(100, Math.max(0, action.discountPercent));
+        return {
+          ...state,
+          cart: state.cart.map((l) =>
+            l.variantId === action.variantId ? { ...l, discountPercent: pct } : l
+          ),
         };
       }
       case "CLEAR_CART": {

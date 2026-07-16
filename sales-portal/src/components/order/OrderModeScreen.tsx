@@ -12,17 +12,19 @@ import { SearchOverlay } from "./SearchOverlay";
 import { CategoryChips } from "./CategoryChips";
 import { ProductRail } from "./ProductRail";
 import { ProductCard } from "./ProductCard";
+import { CartPanel } from "./CartPanel";
 import { useOrderMode } from "./OrderModeProvider";
 
 /**
  * The Order Mode selling surface: customer + ladder context header, discovery rails,
- * category chips, and the browse grid. The cart PANEL lands in the next task - for now
- * the header carries a live unit-count chip fed by the same provider state.
+ * category chips, the browse grid, and the cart - a sticky right rail on xl+ screens,
+ * a bottom sheet opened from the header cart chip below that.
  */
 export function OrderModeScreen({ rails }: { rails: OrderRails }) {
   const { state, catalog, purchaseHistory } = useOrderMode();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [cartOpen, setCartOpen] = useState(false);
   const [category, setCategory] = useState<ProductCategory | null>(null);
 
   // "/" opens search from anywhere on the page (unless already typing somewhere).
@@ -74,65 +76,72 @@ export function OrderModeScreen({ rails }: { rails: OrderRails }) {
   );
 
   return (
-    <div className="space-y-6">
-      {/* Context header row */}
-      <div className="flex flex-wrap items-center gap-2">
-        <h1 className="sr-only">Order Mode</h1>
-        <CustomerChip onOpen={() => setDrawerOpen(true)} />
-        <PriceListChip />
-        <div className="ml-auto flex items-center gap-2">
-          <button
-            type="button"
-            onClick={() => setSearchOpen(true)}
-            className="flex min-h-touch items-center gap-2 rounded-[10px] border border-lap-border bg-lap-surface px-3.5 text-sm text-lap-slate shadow-lap transition-colors duration-200 hover:border-lap-teal hover:text-lap-ink"
-          >
-            <SearchIcon className="h-[18px] w-[18px]" aria-hidden="true" />
-            <span className="hidden sm:inline">Search</span>
-            <kbd className="hidden rounded border border-lap-border px-1.5 py-0.5 font-mono text-[10px] text-lap-slate sm:inline">
-              /
-            </kbd>
-          </button>
-          {/* Cart badge placeholder - the full cart panel is the next build step */}
-          <span
-            data-testid="cart-count-chip"
-            aria-label={`Cart: ${pooledUnits} units in ${state.cart.length} lines`}
-            className={`flex min-h-touch items-center gap-2 rounded-[10px] border px-3.5 text-sm font-semibold shadow-lap ${
-              pooledUnits > 0
-                ? "border-lap-teal bg-lap-teal-wash text-lap-teal"
-                : "border-lap-border bg-lap-surface text-lap-slate"
-            }`}
-          >
-            <OrderIcon className="h-[18px] w-[18px]" aria-hidden="true" />
-            <span className="font-mono" data-testid="cart-count-value">
-              {pooledUnits}
-            </span>
-            <span className="hidden text-xs font-normal sm:inline">{pooledUnits === 1 ? "unit" : "units"}</span>
-          </span>
+    <div className="xl:grid xl:grid-cols-[minmax(0,1fr)_360px] xl:items-start xl:gap-6">
+      <div className="space-y-6">
+        {/* Context header row */}
+        <div className="flex flex-wrap items-center gap-2">
+          <h1 className="sr-only">Order Mode</h1>
+          <CustomerChip onOpen={() => setDrawerOpen(true)} />
+          <PriceListChip />
+          <div className="ml-auto flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setSearchOpen(true)}
+              className="flex min-h-touch items-center gap-2 rounded-[10px] border border-lap-border bg-lap-surface px-3.5 text-sm text-lap-slate shadow-lap transition-colors duration-200 hover:border-lap-teal hover:text-lap-ink"
+            >
+              <SearchIcon className="h-[18px] w-[18px]" aria-hidden="true" />
+              <span className="hidden sm:inline">Search</span>
+              <kbd className="hidden rounded border border-lap-border px-1.5 py-0.5 font-mono text-[10px] text-lap-slate sm:inline">
+                /
+              </kbd>
+            </button>
+            {/* Cart chip: live count; opens the bottom-sheet cart below xl (the rail is
+                already visible on xl+). Count remounts on change to replay the bump. */}
+            <button
+              type="button"
+              onClick={() => setCartOpen(true)}
+              data-testid="cart-count-chip"
+              aria-label={`Cart: ${pooledUnits} units in ${state.cart.length} lines`}
+              className={`flex min-h-touch items-center gap-2 rounded-[10px] border px-3.5 text-sm font-semibold shadow-lap transition-colors duration-200 xl:cursor-default ${
+                pooledUnits > 0
+                  ? "border-lap-teal bg-lap-teal-wash text-lap-teal"
+                  : "border-lap-border bg-lap-surface text-lap-slate"
+              }`}
+            >
+              <OrderIcon className="h-[18px] w-[18px]" aria-hidden="true" />
+              <span key={pooledUnits} className="animate-cart-bump font-mono" data-testid="cart-count-value">
+                {pooledUnits}
+              </span>
+              <span className="hidden text-xs font-normal sm:inline">{pooledUnits === 1 ? "unit" : "units"}</span>
+            </button>
+          </div>
         </div>
+
+        {/* Discovery rails */}
+        <ProductRail title="Previously purchased" products={previouslyPurchased} />
+        <ProductRail title="Most ordered" products={productsForVariantIds(rails.mostOrdered)} />
+        <ProductRail title="Trending this quarter" products={productsForVariantIds(rails.trending)} />
+
+        {/* Browse */}
+        <section aria-label="Browse catalog" className="space-y-3">
+          <CategoryChips active={category} onChange={setCategory} />
+          {gridProducts.length === 0 ? (
+            <p className="py-8 text-center text-sm text-lap-slate">No products in this category.</p>
+          ) : (
+            <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-2 2xl:grid-cols-3">
+              {gridProducts.map((product) => (
+                <ProductCard key={product.id} product={product} />
+              ))}
+            </div>
+          )}
+        </section>
+
+        <p className="pt-2 text-[11px] uppercase tracking-wide text-lap-slate">
+          For research purposes only - not for human consumption.
+        </p>
       </div>
 
-      {/* Discovery rails */}
-      <ProductRail title="Previously purchased" products={previouslyPurchased} />
-      <ProductRail title="Most ordered" products={productsForVariantIds(rails.mostOrdered)} />
-      <ProductRail title="Trending this quarter" products={productsForVariantIds(rails.trending)} />
-
-      {/* Browse */}
-      <section aria-label="Browse catalog" className="space-y-3">
-        <CategoryChips active={category} onChange={setCategory} />
-        {gridProducts.length === 0 ? (
-          <p className="py-8 text-center text-sm text-lap-slate">No products in this category.</p>
-        ) : (
-          <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
-            {gridProducts.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
-          </div>
-        )}
-      </section>
-
-      <p className="pt-2 text-[11px] uppercase tracking-wide text-lap-slate">
-        For research purposes only - not for human consumption.
-      </p>
+      <CartPanel sheetOpen={cartOpen} onSheetClose={() => setCartOpen(false)} />
 
       <CustomerDrawer open={drawerOpen} onClose={() => setDrawerOpen(false)} />
       <SearchOverlay open={searchOpen} onClose={() => setSearchOpen(false)} />

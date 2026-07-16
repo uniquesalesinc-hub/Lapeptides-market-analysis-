@@ -49,6 +49,7 @@ export async function listOrderModeCustomers(viewer: { id: string; role: "ADMIN"
       businessName: true,
       billingCity: true,
       defaultPriceListCode: true,
+      paymentTerms: true,
       _count: { select: { invoices: true } },
     },
     orderBy: { updatedAt: "desc" },

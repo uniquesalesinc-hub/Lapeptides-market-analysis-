@@ -9,6 +9,7 @@ import { calculateQuoteTotals, authorizeDiscount, type AdjustmentInput } from "@
 import { formatDocumentNumber, nextSequenceNumber } from "@/lib/numbering";
 import { sendEmail } from "@/lib/email";
 import { generatePublicToken } from "@/lib/security/token";
+import { submitQuoteApproval } from "@/lib/actions/public-quote-actions";
 
 export interface SaveQuoteResult {
   ok: boolean;
@@ -291,6 +292,62 @@ export async function finalizeAndSendQuote(quoteId: string, recipientEmail?: str
   revalidatePath("/quotes");
 
   return { ok: true, quoteId, quoteNumber: quote.quoteNumber, message: emailSent ? "Quote sent." : "Quote marked sent, but email delivery is not configured — share the link manually." };
+}
+
+/**
+ * Order Mode "Create order": an order is a quote accepted on the spot (the existing model -
+ * APPROVED quotes with no invoice are what the demand rails and reports count as orders).
+ * Applies the SAME gates as finalizeAndSendQuote (minimums met, no unapproved over-limit
+ * discounts for reps), then chains the existing public acceptance step so the status flip,
+ * ApprovalRecord, and activity log stay on the one code path that already does acceptance.
+ */
+export async function acceptQuoteAsOrder(quoteId: string): Promise<SaveQuoteResult> {
+  const user = await requireUser();
+  const quote = await prisma.quote.findUnique({
+    where: { id: quoteId },
+    include: { lineItems: true, adjustments: true },
+  });
+  if (!quote) return { ok: false, message: "Quote not found." };
+  if (user.role === "SALES_REP" && quote.ownerId !== user.id) {
+    return { ok: false, message: "You do not have access to this quote." };
+  }
+  if (quote.lineItems.length === 0) return { ok: false, message: "Add at least one product before creating an order." };
+
+  const invalidLines = quote.lineItems.filter((li) => !li.minimumMet);
+  if (invalidLines.length > 0) {
+    return {
+      ok: false,
+      message: "One or more line items do not meet the minimum quantity for this price list. Fix them before creating an order.",
+      lineWarnings: invalidLines.map((li) => ({ variantId: li.productVariantId ?? "", sku: li.sku, warning: `Requires ${li.minimumRequired}+ units.` })),
+    };
+  }
+
+  const unapproved = quote.adjustments.filter((a) => a.requiresApproval && !a.approvedById);
+  if (unapproved.length > 0 && user.role !== "ADMIN") {
+    return {
+      ok: false,
+      quoteId,
+      quoteNumber: quote.quoteNumber,
+      message: "Saved as a draft quote. Its discounts exceed your limit and need administrator approval before it can become an order.",
+      blockingApprovals: unapproved.map((a) => ({ label: a.label, reason: "Exceeds representative discount limit." })),
+    };
+  }
+
+  const accepted = await submitQuoteApproval({
+    token: quote.publicToken,
+    decision: "APPROVED",
+    respondentName: user.name ?? "Sales representative",
+    respondentTitle: "Recorded by sales representative",
+    comments: "Order taken in person via Order Mode.",
+    billingConfirmed: false,
+    shippingConfirmed: false,
+    termsAccepted: true,
+  });
+  if (!accepted.ok) return { ok: false, message: accepted.message ?? "Could not accept this quote." };
+
+  revalidatePath("/quotes");
+  revalidatePath(`/quotes/${quoteId}`);
+  return { ok: true, quoteId, quoteNumber: quote.quoteNumber };
 }
 
 export async function duplicateQuote(quoteId: string): Promise<SaveQuoteResult> {

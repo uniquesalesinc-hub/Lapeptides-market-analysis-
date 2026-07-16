@@ -34,6 +34,7 @@ export interface CustomerActionResult {
     contactName: string;
     email: string | null;
     defaultPriceListCode: string;
+    paymentTerms: string;
   };
 }
 
@@ -101,7 +102,7 @@ export async function createCustomer(
     // Explicit select: the schema declares Phase-1 CRM columns (crmStatus etc.) the shared
     // DB may not have yet; the default RETURNING-all would fail on them. Only the fields the
     // code below actually uses are read back.
-    select: { id: true, businessName: true, contactName: true, email: true, defaultPriceListCode: true },
+    select: { id: true, businessName: true, contactName: true, email: true, defaultPriceListCode: true, paymentTerms: true },
   });
 
   await prisma.activityLog.create({
@@ -123,6 +124,7 @@ export async function createCustomer(
       contactName: customer.contactName,
       email: customer.email,
       defaultPriceListCode: customer.defaultPriceListCode,
+      paymentTerms: customer.paymentTerms,
     },
   };
 }

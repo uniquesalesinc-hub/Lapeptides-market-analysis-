@@ -69,6 +69,7 @@ const wholesaleCustomer: OrderCustomer = {
   city: "Scottsdale",
   orderCount: 4,
   defaultPriceListCode: "BULK_WHOLESALE",
+  paymentTerms: "Net 30",
 };
 
 const retailCustomer: OrderCustomer = {
@@ -77,6 +78,7 @@ const retailCustomer: OrderCustomer = {
   city: "Mesa",
   orderCount: 1,
   defaultPriceListCode: "BULK_RETAIL",
+  paymentTerms: "Prepaid",
 };
 
 function stateWith(partial: Partial<OrderModeState>): OrderModeState {
@@ -230,6 +232,39 @@ describe("RESTORE (sessionStorage rehydration)", () => {
     });
     expect(restored.customer).toEqual(wholesaleCustomer);
     expect(line(restored, "BPC157-10MG").pricing.unitPrice).toBe(22.0);
+  });
+});
+
+describe("SET_LINE_NOTE / SET_LINE_DISCOUNT (cart panel line extras)", () => {
+  it("stores a note on the targeted line without touching its pricing", () => {
+    let state = stateWith({ ladder: "BULK_WHOLESALE" });
+    state = reduce(state, { type: "ADD_LINE", variantId: "BPC157-10MG", quantity: 120 });
+    state = reduce(state, { type: "SET_LINE_NOTE", variantId: "BPC157-10MG", note: "Ship cold" });
+    expect(line(state, "BPC157-10MG").note).toBe("Ship cold");
+    expect(line(state, "BPC157-10MG").pricing.unitPrice).toBe(22.0);
+  });
+
+  it("stores a clamped discount percent and clears it with null", () => {
+    let state = stateWith({ ladder: "BULK_WHOLESALE" });
+    state = reduce(state, { type: "ADD_LINE", variantId: "BPC157-10MG", quantity: 120 });
+    state = reduce(state, { type: "SET_LINE_DISCOUNT", variantId: "BPC157-10MG", discountPercent: 150 });
+    expect(line(state, "BPC157-10MG").discountPercent).toBe(100);
+    state = reduce(state, { type: "SET_LINE_DISCOUNT", variantId: "BPC157-10MG", discountPercent: 7.5 });
+    expect(line(state, "BPC157-10MG").discountPercent).toBe(7.5);
+    state = reduce(state, { type: "SET_LINE_DISCOUNT", variantId: "BPC157-10MG", discountPercent: null });
+    expect(line(state, "BPC157-10MG").discountPercent).toBeNull();
+  });
+
+  it("notes and discounts survive repricing mutations (pooling reprices, extras persist)", () => {
+    let state = stateWith({ ladder: "BULK_WHOLESALE" });
+    state = reduce(state, { type: "ADD_LINE", variantId: "BPC157-10MG", quantity: 60 });
+    state = reduce(state, { type: "SET_LINE_NOTE", variantId: "BPC157-10MG", note: "Sample labels" });
+    state = reduce(state, { type: "SET_LINE_DISCOUNT", variantId: "BPC157-10MG", discountPercent: 5 });
+    // Pool crosses the tier boundary - the line reprices but keeps its extras.
+    state = reduce(state, { type: "ADD_LINE", variantId: "GHKCU-50MG", quantity: 60 });
+    expect(line(state, "BPC157-10MG").pricing.unitPrice).toBe(22.0);
+    expect(line(state, "BPC157-10MG").note).toBe("Sample labels");
+    expect(line(state, "BPC157-10MG").discountPercent).toBe(5);
   });
 });
 

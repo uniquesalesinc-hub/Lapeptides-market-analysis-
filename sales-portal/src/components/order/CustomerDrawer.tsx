@@ -195,6 +195,7 @@ function NewCustomerForm({ onCancel, onDone }: { onCancel: () => void; onDone: (
       city: cityRef.current || null,
       orderCount: 0,
       defaultPriceListCode: code === "BULK_WHOLESALE" ? "BULK_WHOLESALE" : "BULK_RETAIL",
+      paymentTerms: result.customer.paymentTerms || "Prepaid",
     });
     onDone();
   }, [result, adoptNewCustomer, onDone]);

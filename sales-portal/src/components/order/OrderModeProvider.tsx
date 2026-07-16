@@ -38,6 +38,10 @@ interface OrderModeContextValue {
   customers: OrderCustomer[];
   /** Signed-in user id, used as the default rep on drawer-created customers. */
   currentUserId: string;
+  /** The signed-in user's no-approval discount ceiling (admins get 100). Display only - the server re-checks. */
+  discountLimitPercent: number;
+  /** Company default quote lifetime, mirrored from the legacy wizard's payload. */
+  defaultExpirationDays: number;
   /** Previously-purchased map for the selected customer, keyed by variantId. */
   purchaseHistory: Map<string, PurchaseHistoryEntry>;
   setCustomer: (customer: OrderCustomer | null) => void;
@@ -45,6 +49,9 @@ interface OrderModeContextValue {
   addLine: (variantId: string, quantity: number) => void;
   setQty: (variantId: string, quantity: number) => void;
   removeLine: (variantId: string) => void;
+  setLineNote: (variantId: string, note: string) => void;
+  setLineDiscount: (variantId: string, discountPercent: number | null) => void;
+  clearCart: () => void;
   /** Registers a brand-new customer (from the drawer inline form) and selects it. */
   adoptNewCustomer: (customer: OrderCustomer) => void;
 }
@@ -65,6 +72,8 @@ export function OrderModeProvider({
   catalogs,
   customers: serverCustomers,
   currentUserId,
+  discountLimitPercent,
+  defaultExpirationDays,
   initialCustomerId,
   initialHistory,
   children,
@@ -72,6 +81,8 @@ export function OrderModeProvider({
   catalogs: CatalogsByLadder;
   customers: OrderCustomer[];
   currentUserId: string;
+  discountLimitPercent: number;
+  defaultExpirationDays: number;
   initialCustomerId?: string;
   initialHistory?: PurchaseHistoryEntry[];
   children: React.ReactNode;
@@ -168,6 +179,15 @@ export function OrderModeProvider({
   const removeLine = useCallback((variantId: string) => {
     dispatch({ type: "REMOVE_LINE", variantId });
   }, []);
+  const setLineNote = useCallback((variantId: string, note: string) => {
+    dispatch({ type: "SET_LINE_NOTE", variantId, note });
+  }, []);
+  const setLineDiscount = useCallback((variantId: string, discountPercent: number | null) => {
+    dispatch({ type: "SET_LINE_DISCOUNT", variantId, discountPercent });
+  }, []);
+  const clearCart = useCallback(() => {
+    dispatch({ type: "CLEAR_CART" });
+  }, []);
   const adoptNewCustomer = useCallback((customer: OrderCustomer) => {
     setCustomers((prev) => (prev.some((c) => c.id === customer.id) ? prev : [customer, ...prev]));
     dispatch({ type: "SET_CUSTOMER", customer });
@@ -185,15 +205,20 @@ export function OrderModeProvider({
       catalogs,
       customers,
       currentUserId,
+      discountLimitPercent,
+      defaultExpirationDays,
       purchaseHistory,
       setCustomer,
       setLadder,
       addLine,
       setQty,
       removeLine,
+      setLineNote,
+      setLineDiscount,
+      clearCart,
       adoptNewCustomer,
     }),
-    [state, catalogs, customers, currentUserId, purchaseHistory, setCustomer, setLadder, addLine, setQty, removeLine, adoptNewCustomer]
+    [state, catalogs, customers, currentUserId, discountLimitPercent, defaultExpirationDays, purchaseHistory, setCustomer, setLadder, addLine, setQty, removeLine, setLineNote, setLineDiscount, clearCart, adoptNewCustomer]
   );
 
   return <OrderModeContext.Provider value={value}>{children}</OrderModeContext.Provider>;
