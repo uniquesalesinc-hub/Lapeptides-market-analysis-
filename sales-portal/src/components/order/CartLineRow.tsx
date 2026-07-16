@@ -5,6 +5,7 @@ import type { ProductCategory } from "@prisma/client";
 import type { CartLine } from "@/components/quotes/wizard-types";
 import { formatMoney } from "@/lib/format";
 import { MinusIcon, PlusIcon, CloseIcon } from "@/components/shell/icons";
+import { QtyInput } from "./QtyInput";
 import { useOrderMode } from "./OrderModeProvider";
 
 const FLAT_CATEGORIES: ReadonlySet<ProductCategory> = new Set([
@@ -80,18 +81,13 @@ export function CartLineRow({ line, category }: { line: CartLine; category: Prod
           >
             <MinusIcon className="h-4 w-4" />
           </button>
-          <input
-            type="number"
+          <QtyInput
+            value={line.quantity}
             min={0}
-            inputMode="numeric"
+            onCommit={(next) => setQty(line.variantId, next)}
             aria-label={`Quantity of ${line.productName} ${line.strength}`}
             data-testid={`qty-${line.sku}`}
-            value={line.quantity}
-            onChange={(e) => {
-              const parsed = Number.parseInt(e.target.value, 10);
-              if (!Number.isNaN(parsed)) setQty(line.variantId, Math.max(0, parsed));
-            }}
-            className="w-14 border-x border-lap-border bg-lap-surface text-center font-mono text-sm text-lap-ink focus:outline-none focus:ring-2 focus:ring-inset focus:ring-lap-teal-bright/40 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+            className="w-14 border-x border-lap-border bg-lap-surface text-center font-mono text-sm text-lap-ink focus:outline-none focus:ring-2 focus:ring-inset focus:ring-lap-teal-bright/40"
           />
           <button
             type="button"

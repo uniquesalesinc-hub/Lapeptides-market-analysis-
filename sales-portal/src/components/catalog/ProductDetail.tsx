@@ -8,6 +8,7 @@ import { cartPooledQuantity, previewLinePricing } from "@/lib/pricing/clientPrev
 import { formatDate, formatMoney } from "@/lib/format";
 import { MinusIcon, OrderIcon, PlusIcon } from "@/components/shell/icons";
 import { CategoryDot } from "@/components/order/CategoryChips";
+import { QtyInput } from "@/components/order/QtyInput";
 import { ProductRail } from "@/components/order/ProductRail";
 import { useOrderMode } from "@/components/order/OrderModeProvider";
 
@@ -151,12 +152,16 @@ export function ProductDetail({ detail }: { detail: ProductDetailData }) {
             const active = preview.qualifies && preview.appliedTier?.tier === t.tierNumber;
             const range = t.maxQty != null ? `${t.minQty}-${t.maxQty}` : `${t.minQty}+`;
             return (
-              <div
+              <button
                 key={t.tierNumber}
+                type="button"
                 data-testid={`tier-band-${t.tierNumber}`}
                 data-active={active || undefined}
-                className={`rounded-md border border-lap-border px-3 py-2.5 ${
-                  active ? "bg-lap-teal-wash shadow-[inset_0_-2px_0_0_#0DA5BC]" : ""
+                onClick={() => setQuantity(Math.max(1, t.minQty))}
+                title={`Set quantity to ${Math.max(1, t.minQty)}`}
+                aria-label={`Set quantity to ${Math.max(1, t.minQty)} (${range} units, ${formatMoney(t.unitPrice)} per unit)`}
+                className={`rounded-md border border-lap-border px-3 py-2.5 text-left transition-colors duration-150 ${
+                  active ? "bg-lap-teal-wash shadow-[inset_0_-2px_0_0_#0DA5BC]" : "hover:border-lap-teal hover:bg-lap-page"
                 }`}
               >
                 <div className="text-[10px] uppercase text-lap-slate">{t.label}</div>
@@ -164,7 +169,7 @@ export function ProductDetail({ detail }: { detail: ProductDetailData }) {
                 <div className={`mt-1 text-sm font-semibold ${active ? "text-lap-teal" : "text-lap-ink"}`}>
                   {formatMoney(t.unitPrice)}
                 </div>
-              </div>
+              </button>
             );
           })}
         </div>
@@ -194,17 +199,12 @@ export function ProductDetail({ detail }: { detail: ProductDetailData }) {
             >
               <MinusIcon className="h-4 w-4" />
             </button>
-            <input
-              type="number"
-              min={1}
-              inputMode="numeric"
-              aria-label={`Quantity of ${detail.name} ${variant.size}`}
+            <QtyInput
               value={quantity}
-              onChange={(e) => {
-                const parsed = Number.parseInt(e.target.value, 10);
-                setQuantity(Number.isNaN(parsed) ? 1 : Math.max(1, parsed));
-              }}
-              className="w-16 border-x border-lap-border bg-lap-surface text-center font-mono text-sm text-lap-ink focus:outline-none focus:ring-2 focus:ring-inset focus:ring-lap-teal-bright/40 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+              min={1}
+              onCommit={setQuantity}
+              aria-label={`Quantity of ${detail.name} ${variant.size}`}
+              className="w-16 border-x border-lap-border bg-lap-surface text-center font-mono text-sm text-lap-ink focus:outline-none focus:ring-2 focus:ring-inset focus:ring-lap-teal-bright/40"
             />
             <button
               type="button"

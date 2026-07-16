@@ -8,6 +8,7 @@ import { cartPooledQuantity, previewLinePricing } from "@/lib/pricing/clientPrev
 import { formatMoney, formatDate } from "@/lib/format";
 import { MinusIcon, PlusIcon } from "@/components/shell/icons";
 import { CategoryDot } from "./CategoryChips";
+import { QtyInput } from "./QtyInput";
 import { useOrderMode } from "./OrderModeProvider";
 
 /**
@@ -107,19 +108,23 @@ export function ProductCard({ product }: { product: CatalogProduct }) {
             const active = preview.qualifies && preview.appliedTier?.tier === t.tierNumber;
             const range = t.maxQty != null ? `${t.minQty}-${t.maxQty}` : `${t.minQty}+`;
             return (
-              <div
+              <button
                 key={t.tierNumber}
-                className={`rounded-md border px-2.5 py-1.5 text-center ${
+                type="button"
+                onClick={() => setQuantity(Math.max(1, t.minQty))}
+                title={`Set quantity to ${Math.max(1, t.minQty)}`}
+                aria-label={`Set quantity to ${Math.max(1, t.minQty)} (${range} band, ${formatMoney(t.unitPrice)} per unit)`}
+                className={`rounded-md border px-2.5 py-1.5 text-center transition-colors duration-150 ${
                   active
                     ? "border-lap-border bg-lap-teal-wash shadow-[inset_0_-2px_0_0_#0DA5BC]"
-                    : "border-lap-border"
+                    : "border-lap-border hover:border-lap-teal hover:bg-lap-page"
                 }`}
               >
                 <div className="text-[10px] text-lap-slate">{range}</div>
                 <div className={`text-xs font-semibold ${active ? "text-lap-teal" : "text-lap-ink"}`}>
                   {formatMoney(t.unitPrice)}
                 </div>
-              </div>
+              </button>
             );
           })}
         </div>
@@ -155,17 +160,12 @@ export function ProductCard({ product }: { product: CatalogProduct }) {
           >
             <MinusIcon className="h-4 w-4" />
           </button>
-          <input
-            type="number"
-            min={1}
-            inputMode="numeric"
-            aria-label={`Quantity of ${product.name} ${variant.size}`}
+          <QtyInput
             value={quantity}
-            onChange={(e) => {
-              const parsed = Number.parseInt(e.target.value, 10);
-              setQuantity(Number.isNaN(parsed) ? 1 : Math.max(1, parsed));
-            }}
-            className="w-14 border-x border-lap-border bg-lap-surface text-center font-mono text-sm text-lap-ink focus:outline-none focus:ring-2 focus:ring-inset focus:ring-lap-teal-bright/40 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+            min={1}
+            onCommit={setQuantity}
+            aria-label={`Quantity of ${product.name} ${variant.size}`}
+            className="w-14 border-x border-lap-border bg-lap-surface text-center font-mono text-sm text-lap-ink focus:outline-none focus:ring-2 focus:ring-inset focus:ring-lap-teal-bright/40"
           />
           <button
             type="button"
