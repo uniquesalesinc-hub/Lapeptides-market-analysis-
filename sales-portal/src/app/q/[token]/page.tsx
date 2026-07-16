@@ -95,6 +95,10 @@ export default async function PublicQuotePage({ params }: { params: Promise<{ to
           This quote is no longer awaiting a response.
         </div>
       )}
+
+      <p className="mt-6 text-center text-[11px] uppercase tracking-wide text-lap-slate">
+        For research purposes only - not for human consumption.
+      </p>
     </main>
   );
 }
