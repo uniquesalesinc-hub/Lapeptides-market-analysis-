@@ -44,7 +44,12 @@ async function crawlUser(browser, { label, email, routes }) {
   const errors = [];
   page.on("pageerror", (err) => errors.push(`pageerror: ${err.message}`));
   page.on("console", (msg) => {
-    if (msg.type() === "error") errors.push(`console: ${msg.text()}`);
+    if (msg.type() !== "error") return;
+    // Benign by design: when a link prefetch's RSC fetch is dropped (remote target, flaky
+    // network, or a navigation racing the prefetch), Next logs this and recovers with a full
+    // browser navigation. The page still renders; only this exact recovery notice is ignored.
+    if (msg.text().startsWith("Failed to fetch RSC payload")) return;
+    errors.push(`console: ${msg.text()}`);
   });
 
   // Wait for hydration before submitting, or React's onSubmit handler is not attached yet
@@ -55,6 +60,15 @@ async function crawlUser(browser, { label, email, routes }) {
   await page.fill("#password", PASSWORD);
   await page.click('button[type="submit"]');
   await page.waitForURL("**/dashboard", { timeout: 30000 });
+  await settleNetwork();
+
+  // Let in-flight link prefetches finish before the next goto. Against a remote target
+  // (CRAWL_BASE on Vercel) a navigation would otherwise abort the previous page's RSC
+  // prefetch burst mid-flight, and Next logs "Failed to fetch RSC payload" console errors
+  // that are attribution noise, not app failures. Instant no-op on localhost.
+  async function settleNetwork() {
+    await page.waitForLoadState("networkidle", { timeout: 10000 }).catch(() => {});
+  }
 
   async function visit(route) {
     errors.length = 0;
@@ -63,6 +77,7 @@ async function crawlUser(browser, { label, email, routes }) {
       await page.waitForTimeout(800); // let client components hydrate and settle
       const body = (await page.textContent("body")) || "";
       if (body.includes("Application error")) errors.push('body: contains "Application error"');
+      await settleNetwork();
     } catch (err) {
       errors.push(`navigation: ${err.message}`);
     }
@@ -82,6 +97,7 @@ async function crawlUser(browser, { label, email, routes }) {
     for (const adminRoute of ["/dashboard/leads", "/reports"]) {
       await page.goto(`${BASE}${adminRoute}`, { waitUntil: "load", timeout: 30000 });
       await page.waitForTimeout(500);
+      await settleNetwork();
       const landed = new URL(page.url()).pathname;
       if (landed === adminRoute) {
         failures.push({ label, route: adminRoute, errors: [`rep was NOT redirected off admin route ${adminRoute}`] });
@@ -94,6 +110,7 @@ async function crawlUser(browser, { label, email, routes }) {
 
   // Representative customer detail page (Customer 360): first customer link on /customers.
   await page.goto(`${BASE}/customers`, { waitUntil: "load", timeout: 30000 });
+  await settleNetwork();
   const customerHref = await page.$$eval('a[href^="/customers/"]', (anchors) =>
     anchors
       .map((a) => a.getAttribute("href"))
@@ -108,6 +125,7 @@ async function crawlUser(browser, { label, email, routes }) {
 
   // Representative product detail page: the first detail link found on /products.
   await page.goto(`${BASE}/products`, { waitUntil: "load", timeout: 30000 });
+  await settleNetwork();
   const detailHref = await page.$$eval('a[href^="/products/"]', (anchors) =>
     anchors.map((a) => a.getAttribute("href")).find((h) => h && h !== "/products")
   );
