@@ -1,4 +1,4 @@
-import { requireUser } from "@/lib/session";
+import { getEffectiveViewer } from "@/lib/viewAs";
 import { getRepSalesBreakdown, getSalesComparison } from "@/lib/data/dashboard";
 import { PageHeader } from "@/components/shell/PageHeader";
 import { DashboardTabs } from "@/components/dashboard/DashboardTabs";
@@ -39,7 +39,7 @@ function ComparisonRow({
 
 /** Sales tab: this month vs last for the viewer's scope; admins also get a per-rep table. */
 export default async function DashboardSalesPage() {
-  const user = await requireUser();
+  const user = await getEffectiveViewer();
   const isAdmin = user.role === "ADMIN";
 
   const [comparison, repRows] = await Promise.all([

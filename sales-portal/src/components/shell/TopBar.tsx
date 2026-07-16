@@ -17,7 +17,16 @@ function segmentLabel(segment: string): string {
   return segment.charAt(0).toUpperCase() + segment.slice(1);
 }
 
-export function TopBar({ userName, role }: { userName?: string | null; role: PortalRole }) {
+export function TopBar({
+  userName,
+  role,
+  viewingAsName,
+}: {
+  userName?: string | null;
+  role: PortalRole;
+  /** Set while an admin views the portal as this rep; changes the role chip only. */
+  viewingAsName?: string | null;
+}) {
   const pathname = usePathname();
   const segments = pathname.split("/").filter(Boolean);
 
@@ -51,9 +60,15 @@ export function TopBar({ userName, role }: { userName?: string | null; role: Por
       <div className="flex shrink-0 items-center gap-3">
         <span className="hidden items-center gap-2 text-sm text-lap-slate sm:flex">
           {userName}
-          <span className="inline-flex items-center rounded-full bg-lap-teal-wash px-2.5 py-0.5 text-xs font-semibold text-lap-teal">
-            {role === "ADMIN" ? "Admin" : "Sales Rep"}
-          </span>
+          {viewingAsName ? (
+            <span className="inline-flex items-center rounded-full bg-lap-amber/20 px-2.5 py-0.5 text-xs font-semibold text-lap-ink">
+              Admin, viewing as {viewingAsName}
+            </span>
+          ) : (
+            <span className="inline-flex items-center rounded-full bg-lap-teal-wash px-2.5 py-0.5 text-xs font-semibold text-lap-teal">
+              {role === "ADMIN" ? "Admin" : "Sales Rep"}
+            </span>
+          )}
         </span>
         <SignOutButton />
       </div>

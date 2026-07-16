@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { requireUser } from "@/lib/session";
+import { getEffectiveViewer } from "@/lib/viewAs";
 import { listInvoices } from "@/lib/data/invoices";
 import { displayInvoiceStatus } from "@/lib/data/invoiceStatus";
 import { StatusBadge } from "@/components/ui/StatusBadge";
@@ -13,7 +13,7 @@ export default async function InvoicesPage({
 }: {
   searchParams: Promise<{ q?: string; status?: string; unpaid?: string }>;
 }) {
-  const user = await requireUser();
+  const user = await getEffectiveViewer();
   const sp = await searchParams;
   const invoices = await listInvoices(user, {
     search: sp.q,

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { requireUser } from "@/lib/session";
+import { getEffectiveViewer } from "@/lib/viewAs";
 import { listCustomers } from "@/lib/data/customers";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { formatDate } from "@/lib/format";
@@ -10,7 +10,7 @@ export default async function CustomersPage({
 }: {
   searchParams: Promise<{ q?: string }>;
 }) {
-  const user = await requireUser();
+  const user = await getEffectiveViewer();
   const sp = await searchParams;
   const customers = await listCustomers(user, { search: sp.q });
 

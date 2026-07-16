@@ -1,4 +1,4 @@
-import { requireUser } from "@/lib/session";
+import { getEffectiveViewer } from "@/lib/viewAs";
 import { listTasks, taskCounts } from "@/lib/data/tasks";
 import { listOrderModeCustomers } from "@/lib/data/customers";
 import { listSalesReps } from "@/lib/data/users";
@@ -10,7 +10,7 @@ export const metadata = { title: "Tasks | LA Peptides Sales Portal" };
 
 /** Tasks tab: counts in context, then open tasks grouped overdue-first with quick-add. */
 export default async function DashboardTasksPage() {
-  const user = await requireUser();
+  const user = await getEffectiveViewer();
   const isAdmin = user.role === "ADMIN";
   const viewer = { id: user.id, role: user.role } as const;
   const assigneeScope = isAdmin ? undefined : user.id;

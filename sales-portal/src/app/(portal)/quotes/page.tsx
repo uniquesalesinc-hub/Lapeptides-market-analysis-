@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { requireUser } from "@/lib/session";
+import { getEffectiveViewer } from "@/lib/viewAs";
 import { listQuotes } from "@/lib/data/quotes";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -12,7 +12,7 @@ export default async function QuotesPage({
 }: {
   searchParams: Promise<{ q?: string; status?: string }>;
 }) {
-  const user = await requireUser();
+  const user = await getEffectiveViewer();
   const sp = await searchParams;
   const quotes = await listQuotes(user, { search: sp.q, status: sp.status as QuoteStatus | undefined });
 

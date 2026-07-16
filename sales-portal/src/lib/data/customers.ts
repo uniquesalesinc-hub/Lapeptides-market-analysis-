@@ -64,6 +64,19 @@ export async function getRecentCustomers(viewer: { id: string; role: "ADMIN" | "
   });
 }
 
+/**
+ * id + name only, admin-wide, most recently active first: feeds the admin sidebar
+ * "Customer view" section (capped small; the section has its own client-side filter).
+ */
+export async function listCustomerNamesByRecentActivity(take = 30) {
+  const rows = await prisma.customer.findMany({
+    orderBy: { updatedAt: "desc" },
+    take,
+    select: { id: true, businessName: true },
+  });
+  return rows.map((c) => ({ id: c.id, name: c.businessName }));
+}
+
 export async function getCustomerById(id: string) {
   return prisma.customer.findUnique({
     where: { id },

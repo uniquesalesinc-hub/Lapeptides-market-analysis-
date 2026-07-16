@@ -1,4 +1,4 @@
-import { requireUser } from "@/lib/session";
+import { getEffectiveViewer } from "@/lib/viewAs";
 import { getDashboardHome } from "@/lib/data/dashboard";
 import { listActivities } from "@/lib/data/activities";
 import { getReorderRadar } from "@/lib/data/reorderRadar";
@@ -15,7 +15,7 @@ export const metadata = { title: "Dashboard | LA Peptides Sales Portal" };
  * three recent columns, and the reorder radar.
  */
 export default async function DashboardHomePage() {
-  const user = await requireUser();
+  const user = await getEffectiveViewer();
   const viewer = { id: user.id, role: user.role } as const;
   const isAdmin = user.role === "ADMIN";
 

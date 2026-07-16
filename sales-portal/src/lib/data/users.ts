@@ -8,6 +8,15 @@ export async function listSalesReps() {
   });
 }
 
+/** id + name only, active reps: feeds the admin sidebar "Sales rep view" section. */
+export async function listActiveSalesRepNames() {
+  return prisma.user.findMany({
+    where: { role: "SALES_REP", status: "ACTIVE" },
+    orderBy: { name: "asc" },
+    select: { id: true, name: true },
+  });
+}
+
 export async function listAllUsers() {
   return prisma.user.findMany({
     orderBy: [{ role: "asc" }, { name: "asc" }],

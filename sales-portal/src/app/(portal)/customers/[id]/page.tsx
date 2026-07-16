@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
-import { requireUser } from "@/lib/session";
+import { getEffectiveViewer } from "@/lib/viewAs";
 import { getCustomer360 } from "@/lib/data/customers";
 import { getBrandKit } from "@/lib/data/brand";
 import { listSalesReps } from "@/lib/data/users";
@@ -18,7 +18,7 @@ export const metadata = { title: "Customer | LA Peptides Sales Portal" };
  * reach their own accounts; the admin controls card never renders for non-admins.
  */
 export default async function CustomerDetailPage({ params }: { params: { id: string } }) {
-  const user = await requireUser();
+  const user = await getEffectiveViewer();
   const result = await getCustomer360(params.id, { id: user.id, role: user.role });
   if (result.status === "not_found") notFound();
   if (result.status === "denied") redirect("/customers");

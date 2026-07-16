@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { requireUser } from "@/lib/session";
+import { getEffectiveViewer } from "@/lib/viewAs";
 import { activityCountsByType, listActivities } from "@/lib/data/activities";
 import { listTasks } from "@/lib/data/tasks";
 import { PageHeader } from "@/components/shell/PageHeader";
@@ -20,7 +20,7 @@ const ACTIVITY_LABELS: Record<string, string> = {
 
 /** Engagement tab: activity counts vs previous month, timeline, and the next 7 days of tasks. */
 export default async function DashboardEngagementPage() {
-  const user = await requireUser();
+  const user = await getEffectiveViewer();
   const isAdmin = user.role === "ADMIN";
   const userScope = isAdmin ? undefined : user.id;
 

@@ -1,4 +1,4 @@
-import { requireUser } from "@/lib/session";
+import { getEffectiveViewer } from "@/lib/viewAs";
 import { prisma } from "@/lib/prisma";
 import { getOrderRails, getPreviouslyPurchased, getWizardCatalog } from "@/lib/data/catalog";
 import { listOrderModeCustomers } from "@/lib/data/customers";
@@ -18,7 +18,7 @@ export default async function OrderModePage({
 }: {
   searchParams?: { customerId?: string; selectCustomer?: string };
 }) {
-  const user = await requireUser();
+  const user = await getEffectiveViewer();
 
   const [retail, wholesale, customerRows, rails, settings, currentUser] = await Promise.all([
     getWizardCatalog("BULK_RETAIL"),

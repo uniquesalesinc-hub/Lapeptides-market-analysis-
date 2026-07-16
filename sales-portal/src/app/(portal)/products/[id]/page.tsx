@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { requireUser } from "@/lib/session";
+import { getEffectiveViewer } from "@/lib/viewAs";
 import { prisma } from "@/lib/prisma";
 import { getProductDetail, getWizardCatalog } from "@/lib/data/catalog";
 import { listOrderModeCustomers } from "@/lib/data/customers";
@@ -16,7 +16,7 @@ export const metadata = { title: "Product | LA Peptides Sales Portal" };
  * up the layout tree - /order stays untouched.
  */
 export default async function ProductDetailPage({ params }: { params: { id: string } }) {
-  const user = await requireUser();
+  const user = await getEffectiveViewer();
 
   const detail = await getProductDetail(params.id);
   if (!detail) notFound();
