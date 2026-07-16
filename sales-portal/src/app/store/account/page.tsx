@@ -19,12 +19,12 @@ export default async function StoreAccountPage() {
         Welcome, {client.name}
       </h1>
       <p className="mb-8 max-w-xl text-lap-slate">
-        Your wholesale account is active. The full catalog with your account pricing, cart,
-        and order history land here next.
+        Your wholesale account is active. Browse the catalog with your account pricing; order
+        history and checkout land here next.
       </p>
       <div className="flex flex-wrap items-center gap-4">
         <Link href="/store" className="font-semibold text-lap-teal hover:underline">
-          Storefront coming soon
+          Browse the catalog
         </Link>
         <form action={clientLogoutAction}>
           <button type="submit" className="btn-secondary px-5 text-sm">
