@@ -122,7 +122,8 @@ decisions already made so nothing is relearned later.
 ### 7. Explicitly out of scope (all phases unless re-decided)
 AI copilot ("Kai"), image/barcode search, offline mode, ERP sync, multiple named
 carts, wishlists, claims, per-customer SKU visibility, coupon/promo codes,
-storefront theme picker, login-as-user impersonation, WordPress/page builder.
+storefront theme picker, credential-swap impersonation (Addendum A adds a
+cookie-scoped admin view-as instead), WordPress/page builder.
 
 ---
 
