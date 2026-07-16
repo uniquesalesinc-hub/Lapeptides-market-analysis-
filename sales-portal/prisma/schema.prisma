@@ -52,6 +52,10 @@ model User {
   approvedAdjustments Adjustment[]     @relation("AdjustmentApprover")
   uploadedPriceSources UploadedPricingSource[] @relation("PricingUploader")
   passwordResetTokens PasswordResetToken[]
+  activities    Activity[]
+  tasksAssigned Task[] @relation("TaskAssignee")
+  tasksCreated  Task[] @relation("TaskCreator")
+  reviewedLeads Lead[] @relation("LeadReviewer")
 
   @@index([role])
   @@index([status])
@@ -136,6 +140,13 @@ model Customer {
   taxExempt         Boolean  @default(false)
   taxIdOrExemptionNotes String?
 
+  /// CRM lifecycle stage (v2): LEAD = not yet buying, ACTIVE = ordering, DORMANT = gone quiet.
+  crmStatus         CustomerCrmStatus @default(ACTIVE)
+  /// Freeform one-line addresses for the v2 CRM surfaces. The structured billing/shipping
+  /// field groups above remain the source of truth for quote/invoice documents.
+  billingAddress    String?
+  shippingAddress   String?
+
   /// Which wholesale price list this account quotes against. Never inferred automatically —
   /// see PRICING_AUDIT.md §4.1 on why Bulk Retail and Bulk Wholesale are not interchangeable.
   defaultPriceListCode String  @default("BULK_RETAIL")
@@ -157,6 +168,11 @@ model Customer {
   quotes    Quote[]
   invoices  Invoice[]
   activityLogs ActivityLog[] @relation("ActivityCustomer")
+  activities   Activity[]
+  tasks        Task[]
+  matchedLeads     Lead[] @relation("LeadMatchedCustomer")
+  createdFromLeads Lead[] @relation("LeadCreatedCustomer")
+  portalUsers  PortalUser[]
 
   @@index([assignedRepId])
   @@index([businessName])
@@ -721,4 +737,157 @@ model CompanySettings {
 model NumberSequence {
   id      String @id // e.g. "QUOTE-2026" or "INVOICE-2026"
   nextSeq Int    @default(1)
+}
+
+// ---------------------------------------------------------------------------
+// CRM (v2 Phase 1): ACTIVITIES, TASKS, LEADS, PORTAL USERS
+// Strictly additive — the database is shared with the live v1 portal.
+// ---------------------------------------------------------------------------
+
+/// Standardized payment terms for the v2 CRM. NOTE: Customer.paymentTerms and
+/// Invoice.paymentTerms are pre-existing free-text columns ("Prepaid", ...) shared with the
+/// live v1 portal and cannot be retyped in place; this enum is created now so follow-up
+/// (additive) work can adopt it without another type migration.
+enum PaymentTerms {
+  PIA
+  NET15
+  NET30
+  NET60
+}
+
+/// CRM lifecycle status for a Customer (named to avoid clashing with other status enums).
+enum CustomerCrmStatus {
+  LEAD
+  ACTIVE
+  DORMANT
+}
+
+enum ActivityType {
+  CALL
+  EMAIL
+  VISIT
+  MEETING
+  NOTE
+}
+
+enum TaskPriority {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+enum TaskStatus {
+  OPEN
+  DONE
+  CANCELLED
+}
+
+enum TaskSource {
+  MANUAL
+  REORDER_RADAR
+  ABANDONED_CART
+}
+
+enum LeadSource {
+  MANUAL
+  WEBSITE
+}
+
+enum LeadReviewStatus {
+  OPEN
+  APPROVED
+  REJECTED
+}
+
+enum PortalUserStatus {
+  PENDING_INVITE
+  INVITED
+  ACTIVE
+  DISABLED
+}
+
+/// A CRM touchpoint (call/email/visit/meeting/note) logged by a rep against a customer.
+/// Distinct from ActivityLog, which is the system audit trail.
+model Activity {
+  id         String       @id @default(cuid())
+  type       ActivityType
+  customerId String
+  customer   Customer     @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  userId     String?
+  user       User?        @relation(fields: [userId], references: [id], onDelete: SetNull)
+  occurredAt DateTime     @default(now())
+  note       String       @db.Text
+
+  createdAt  DateTime     @default(now())
+
+  @@index([customerId, occurredAt])
+}
+
+/// A follow-up item for a rep — created manually or by the reorder radar / abandoned-cart flows.
+model Task {
+  id          String       @id @default(cuid())
+  title       String
+  note        String?      @db.Text
+  customerId  String?
+  customer    Customer?    @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  assigneeId  String?
+  assignee    User?        @relation("TaskAssignee", fields: [assigneeId], references: [id], onDelete: SetNull)
+  creatorId   String?
+  creator     User?        @relation("TaskCreator", fields: [creatorId], references: [id], onDelete: SetNull)
+  dueDate     DateTime
+  priority    TaskPriority @default(MEDIUM)
+  status      TaskStatus   @default(OPEN)
+  source      TaskSource   @default(MANUAL)
+  completedAt DateTime?
+
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  @@index([assigneeId, status, dueDate])
+}
+
+/// An inbound prospect (manual entry or website signup) awaiting admin review.
+model Lead {
+  id                String           @id @default(cuid())
+  company           String
+  firstName         String
+  lastName          String
+  email             String
+  phone             String?
+  message           String?          @db.Text
+  source            LeadSource       @default(MANUAL)
+  status            LeadReviewStatus @default(OPEN)
+
+  matchedCustomerId String?
+  matchedCustomer   Customer?        @relation("LeadMatchedCustomer", fields: [matchedCustomerId], references: [id], onDelete: SetNull)
+  createdCustomerId String?
+  createdCustomer   Customer?        @relation("LeadCreatedCustomer", fields: [createdCustomerId], references: [id], onDelete: SetNull)
+  reviewedById      String?
+  reviewedBy        User?            @relation("LeadReviewer", fields: [reviewedById], references: [id], onDelete: SetNull)
+  reviewedAt        DateTime?
+
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+
+  @@index([status, createdAt])
+}
+
+/// Phase 2 client-portal login. Separate auth surface from the staff User model on purpose —
+/// client sessions can never reach rep/admin routes. Created now so the model is stable.
+model PortalUser {
+  id           String           @id @default(cuid())
+  customerId   String
+  customer     Customer         @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  name         String
+  email        String           @unique
+  passwordHash String?
+  status       PortalUserStatus @default(PENDING_INVITE)
+  invitedAt    DateTime?
+  lastLoginAt  DateTime?
+  lastActiveAt DateTime?
+
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+
+  @@index([customerId])
 }
