@@ -3,6 +3,10 @@
 
 generator client {
   provider = "prisma-client-js"
+  // omitApi powers the global `omit` in src/lib/prisma.ts: brand-kit Customer columns and
+  // BrandAsset.data are excluded from default selections so pre-migration databases and
+  // multi-megabyte blobs are never touched unless a query explicitly selects them.
+  previewFeatures = ["omitApi"]
 }
 
 datasource db {
@@ -56,6 +60,7 @@ model User {
   tasksAssigned Task[] @relation("TaskAssignee")
   tasksCreated  Task[] @relation("TaskCreator")
   reviewedLeads Lead[] @relation("LeadReviewer")
+  uploadedBrandAssets BrandAsset[] @relation("BrandAssetUploader")
 
   @@index([role])
   @@index([status])
@@ -147,6 +152,16 @@ model Customer {
   billingAddress    String?
   shippingAddress   String?
 
+  /// Brand kit (v2 Phase 1.5): exact brand colors and notes collected in the field so
+  /// label/logo production stops drifting. Globally omitted from default selections
+  /// (src/lib/prisma.ts) until migration 20260716200000_brand_kit is applied everywhere;
+  /// read them via an explicit select (see src/lib/data/brand.ts).
+  brandPrimaryHex   String?
+  brandSecondaryHex String?
+  brandAccentHex    String?
+  brandFontNotes    String?
+  brandNotes        String?
+
   /// Which wholesale price list this account quotes against. Never inferred automatically —
   /// see PRICING_AUDIT.md §4.1 on why Bulk Retail and Bulk Wholesale are not interchangeable.
   defaultPriceListCode String  @default("BULK_RETAIL")
@@ -173,6 +188,7 @@ model Customer {
   matchedLeads     Lead[] @relation("LeadMatchedCustomer")
   createdFromLeads Lead[] @relation("LeadCreatedCustomer")
   portalUsers  PortalUser[]
+  brandAssets  BrandAsset[]
 
   @@index([assignedRepId])
   @@index([businessName])
@@ -870,6 +886,40 @@ model Lead {
   updatedAt         DateTime         @updatedAt
 
   @@index([status, createdAt])
+}
+
+// ---------------------------------------------------------------------------
+// BRAND KIT (v2 Phase 1.5): per-customer brand assets for label/logo production
+// Strictly additive — the database is shared with the live v1 portal.
+// ---------------------------------------------------------------------------
+
+enum BrandAssetKind {
+  LOGO
+  SOCIAL_MEDIA
+  VIAL_LABEL
+  OTHER
+}
+
+/// One uploaded brand file (logo, social art, vial label sheet, ...) for a customer.
+/// Bytes live in Postgres (bytea) and are served only through the authenticated
+/// /api/brand-assets/[id] route with the same rep/admin scoping as the Customer 360.
+/// `data` is globally omitted from default selections (src/lib/prisma.ts) so list queries
+/// never haul multi-megabyte blobs; the serving route selects it explicitly.
+model BrandAsset {
+  id           String         @id @default(cuid())
+  customerId   String
+  customer     Customer       @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  kind         BrandAssetKind
+  fileName     String
+  mimeType     String
+  sizeBytes    Int
+  data         Bytes
+  uploadedById String?
+  uploadedBy   User?          @relation("BrandAssetUploader", fields: [uploadedById], references: [id], onDelete: SetNull)
+  note         String?
+  createdAt    DateTime       @default(now())
+
+  @@index([customerId, kind])
 }
 
 /// Phase 2 client-portal login. Separate auth surface from the staff User model on purpose —

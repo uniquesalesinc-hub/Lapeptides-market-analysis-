@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { requireUser } from "@/lib/session";
 import { getCustomer360 } from "@/lib/data/customers";
+import { getBrandKit } from "@/lib/data/brand";
 import { listSalesReps } from "@/lib/data/users";
 import { PageHeader } from "@/components/shell/PageHeader";
 import { CustomerFacts } from "@/components/customers/CustomerFacts";
@@ -24,6 +25,14 @@ export default async function CustomerDetailPage({ params }: { params: { id: str
 
   const { customer, stats, recent } = result;
   const isAdmin = user.role === "ADMIN";
+
+  // Separate defensive fetch: degrades to a "pending database migration" notice on the
+  // Brand tab instead of crashing the page while the shared DB awaits the brand-kit
+  // migration. Access is already resolved above, so no extra scoping here.
+  const brand = await getBrandKit(customer.id);
+  // Mirrors getCustomer360 scoping: reps edit only their own accounts, admins edit any.
+  // Reps never reach another rep's page at all, so this is belt and suspenders.
+  const canEditBrand = isAdmin || customer.assignedRepId === user.id;
 
   // Rep options for the admin selects. The assigned rep can be an admin account (e.g. JJ),
   // which listSalesReps excludes; keep them selectable so saving never silently reassigns.
@@ -105,6 +114,8 @@ export default async function CustomerDetailPage({ params }: { params: { id: str
             invoices={recent.invoices}
             activities={recent.activities}
             tasks={recent.tasks}
+            brand={brand}
+            canEditBrand={canEditBrand}
           />
         </div>
       </div>

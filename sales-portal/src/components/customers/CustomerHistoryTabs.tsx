@@ -9,14 +9,16 @@ import type {
   Customer360Quote,
   Customer360Task,
 } from "@/lib/data/customers";
+import type { BrandKitData } from "@/lib/data/brand";
 import { logActivityAction } from "@/lib/actions/activity-actions";
 import { cancelTaskAction, completeTaskAction, createTaskAction } from "@/lib/actions/task-actions";
 import { formatDate, formatDateTime, formatMoney } from "@/lib/format";
 import { PlusIcon } from "@/components/shell/icons";
 import { Drawer, Field, inputClass, localDateTimeNow, localDateToday } from "@/components/ui/drawer";
 import { Chip, DocStatusChip, type ChipTone } from "./chips";
+import { BrandKitTab } from "./BrandKitTab";
 
-const TAB_KEYS = ["orders", "quotes", "invoices", "activity", "tasks"] as const;
+const TAB_KEYS = ["orders", "quotes", "invoices", "activity", "tasks", "brand"] as const;
 type TabKey = (typeof TAB_KEYS)[number];
 
 const ACTIVITY_TYPES = [
@@ -43,12 +45,14 @@ export interface CustomerHistoryTabsProps {
   invoices: Customer360Invoice[];
   activities: Customer360Activity[];
   tasks: Customer360Task[];
+  brand: BrandKitData;
+  canEditBrand: boolean;
 }
 
 /**
- * Customer 360 history: Orders | Quotes | Invoices | Activity | Tasks. Data arrives fully
- * resolved from the server page; the Activity and Tasks tabs add inline drawer forms
- * (drawers, not modals) that post to the existing Task-3 CRM actions and refresh the route.
+ * Customer 360 history: Orders | Quotes | Invoices | Activity | Tasks | Brand. Data arrives
+ * fully resolved from the server page; the Activity, Tasks, and Brand tabs add inline drawer
+ * forms (drawers, not modals) that post to server actions and refresh the route.
  */
 export function CustomerHistoryTabs(props: CustomerHistoryTabsProps) {
   const [tab, setTab] = useState<TabKey>("orders");
@@ -59,6 +63,7 @@ export function CustomerHistoryTabs(props: CustomerHistoryTabsProps) {
     invoices: props.invoices.length,
     activity: props.activities.length,
     tasks: props.tasks.length,
+    brand: props.brand.status === "ok" ? props.brand.assets.length : 0,
   };
   const labels: Record<TabKey, string> = {
     orders: "Orders",
@@ -66,6 +71,7 @@ export function CustomerHistoryTabs(props: CustomerHistoryTabsProps) {
     invoices: "Invoices",
     activity: "Activity",
     tasks: "Tasks",
+    brand: "Brand",
   };
 
   return (
@@ -106,6 +112,15 @@ export function CustomerHistoryTabs(props: CustomerHistoryTabsProps) {
             isAdmin={props.isAdmin}
             currentUserId={props.currentUserId}
             reps={props.reps}
+          />
+        )}
+        {tab === "brand" && (
+          <BrandKitTab
+            customerId={props.customerId}
+            brand={props.brand}
+            canEdit={props.canEditBrand}
+            isAdmin={props.isAdmin}
+            currentUserId={props.currentUserId}
           />
         )}
       </div>

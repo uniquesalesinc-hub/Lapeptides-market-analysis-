@@ -3,7 +3,8 @@ const nextConfig = {
   reactStrictMode: true,
   experimental: {
     serverActions: {
-      bodySizeLimit: "5mb",
+      // 10mb: brand-kit uploads allow files up to 8 MB plus multipart overhead.
+      bodySizeLimit: "10mb",
     },
   },
   async headers() {
