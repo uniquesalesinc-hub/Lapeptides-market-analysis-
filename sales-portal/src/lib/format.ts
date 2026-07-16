@@ -3,10 +3,16 @@ export function formatMoney(value: number | string): string {
   return num.toLocaleString("en-US", { style: "currency", currency: "USD" });
 }
 
+// Date rendering is pinned to the business's home timezone (Arizona, no DST). Without an
+// explicit timeZone, the server (UTC on Vercel) and the browser (local) render DIFFERENT
+// strings for the same instant near midnight UTC — a React hydration mismatch that
+// white-screens any client component showing a date (seen live on /reps, 7/15 evening).
+const BUSINESS_TZ = "America/Phoenix";
+
 export function formatDate(value: Date | string | null | undefined): string {
   if (!value) return "—";
   const date = typeof value === "string" ? new Date(value) : value;
-  return date.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" });
+  return date.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric", timeZone: BUSINESS_TZ });
 }
 
 export function formatDateTime(value: Date | string | null | undefined): string {
@@ -18,6 +24,7 @@ export function formatDateTime(value: Date | string | null | undefined): string 
     day: "numeric",
     hour: "numeric",
     minute: "2-digit",
+    timeZone: BUSINESS_TZ,
   });
 }
 
