@@ -274,7 +274,7 @@ function CartBody() {
         <button
           type="button"
           data-testid="create-order"
-          disabled={!canSubmit}
+          disabled={!canSubmitOrder}
           onClick={() => submit("order")}
           className="min-h-touch w-full rounded-[10px] border border-lap-teal px-4 text-sm font-semibold text-lap-teal transition-colors duration-150 hover:bg-lap-teal-wash disabled:cursor-not-allowed disabled:opacity-50"
         >
