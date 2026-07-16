@@ -1,0 +1,724 @@
+// LA Peptides Sales Portal — database schema
+// PostgreSQL via Supabase (or any Postgres). See docs/DATABASE.md for setup.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  // Migrations and CLI tooling need the session-mode (direct) connection; the app itself
+  // runs through the transaction-mode pooler above.
+  directUrl = env("DIRECT_URL")
+}
+
+// ---------------------------------------------------------------------------
+// USERS, ROLES, AUTH
+// ---------------------------------------------------------------------------
+
+enum UserRole {
+  ADMIN
+  SALES_REP
+}
+
+enum UserStatus {
+  PENDING // created by admin, not yet activated
+  ACTIVE
+  DEACTIVATED
+}
+
+model User {
+  id            String     @id @default(cuid())
+  email         String     @unique
+  passwordHash  String?
+  name          String
+  role          UserRole   @default(SALES_REP)
+  status        UserStatus @default(PENDING)
+  phone         String?
+  discountLimitPercent Decimal @default(0) @db.Decimal(5, 2) // max discount % a rep may apply without approval
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+  lastLoginAt   DateTime?
+
+  // NextAuth relations (credentials-based; Google provider can attach later via Account)
+  accounts      Account[]
+  sessions      Session[]
+
+  customers          Customer[]        @relation("AssignedRep")
+  quotes             Quote[]           @relation("QuoteOwner")
+  invoices           Invoice[]         @relation("InvoiceOwner")
+  activityLogs       ActivityLog[]     @relation("ActivityActor")
+  approvedAdjustments Adjustment[]     @relation("AdjustmentApprover")
+  uploadedPriceSources UploadedPricingSource[] @relation("PricingUploader")
+  passwordResetTokens PasswordResetToken[]
+
+  @@index([role])
+  @@index([status])
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+// ---------------------------------------------------------------------------
+// CUSTOMERS
+// ---------------------------------------------------------------------------
+
+enum CustomerType {
+  RESELLER
+  DISTRIBUTOR
+  CLINIC
+  INDIVIDUAL_PRACTITIONER
+  OTHER
+}
+
+model Customer {
+  id                String       @id @default(cuid())
+  businessName      String
+  contactName       String
+  email             String?
+  phone             String?
+  website           String?
+  customerType      CustomerType @default(RESELLER)
+
+  billingAddressLine1 String?
+  billingAddressLine2 String?
+  billingCity         String?
+  billingState        String?
+  billingPostalCode   String?
+  billingCountry      String?  @default("US")
+
+  shippingAddressLine1 String?
+  shippingAddressLine2 String?
+  shippingCity         String?
+  shippingState        String?
+  shippingPostalCode   String?
+  shippingCountry      String?  @default("US")
+  shippingSameAsBilling Boolean @default(true)
+
+  taxExempt         Boolean  @default(false)
+  taxIdOrExemptionNotes String?
+
+  /// Which wholesale price list this account quotes against. Never inferred automatically —
+  /// see PRICING_AUDIT.md §4.1 on why Bulk Retail and Bulk Wholesale are not interchangeable.
+  defaultPriceListCode String  @default("BULK_RETAIL")
+
+  paymentTerms      String   @default("Prepaid") // business is prepaid by default; admin can enable Net terms
+  internalNotes     String?  @db.Text
+  customerFacingNotes String? @db.Text
+
+  assignedRepId     String
+  assignedRep       User     @relation("AssignedRep", fields: [assignedRepId], references: [id])
+
+  isProspect        Boolean  @default(false) // temporary prospect created mid-quote, not yet a full account
+  lastContactDate   DateTime?
+  followUpDate      DateTime?
+
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  quotes    Quote[]
+  invoices  Invoice[]
+  activityLogs ActivityLog[] @relation("ActivityCustomer")
+
+  @@index([assignedRepId])
+  @@index([businessName])
+  @@index([email])
+}
+
+// ---------------------------------------------------------------------------
+// PRODUCT CATALOG (normalized from the uploaded wholesale pricing sheets)
+// ---------------------------------------------------------------------------
+
+enum ProductCategory {
+  INJECTABLE_PEPTIDE
+  INJECTABLE_GLP
+  INJECTABLE_BIOREGULATOR
+  INJECTABLE_BLEND
+  NASAL_SPRAY
+  TOPICAL_CREAM
+  CAPSULE
+}
+
+/// A sellable product family, e.g. "BPC-157" — grouping for its ProductVariants (strengths).
+model Product {
+  id          String          @id @default(cuid())
+  name        String
+  category    ProductCategory
+  description String?         @db.Text // customer-facing, must not contain medical/treatment claims
+  internalNotes String?       @db.Text
+  imageUrl    String?
+  isActive    Boolean         @default(true)
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  variants ProductVariant[]
+
+  @@unique([name, category])
+  @@index([category])
+}
+
+/// A specific strength/size of a Product, e.g. BPC-157 "10mg" — this is what actually has a SKU and price.
+model ProductVariant {
+  id          String   @id @default(cuid())
+  productId   String
+  product     Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  sku         String   @unique
+  size        String   // e.g. "10mg", "20/20mg", "cream"
+  /// Suggested resale price (MSRP) from the source sheet — informational metadata only,
+  /// never used in quote/invoice math. Today only the capsules sheet provides one.
+  suggestedRetailPrice Decimal? @db.Decimal(12, 2)
+  isActive    Boolean  @default(true)
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  priceListEntries PriceListEntry[]
+  quoteLineItems   QuoteLineItem[]
+  invoiceLineItems InvoiceLineItem[]
+  costs            VariantCost[]
+
+  @@index([productId])
+}
+
+/// HARD COST (COGS) per variant per volume band — the company's buy price, transcribed from
+/// the internal cost sheets. ADMIN-ONLY: never queried by, serialized to, or rendered for
+/// SALES_REP sessions. Every read path must sit behind requireAdmin().
+model VariantCost {
+  id         String  @id @default(cuid())
+  variantId  String
+  variant    ProductVariant @relation(fields: [variantId], references: [id], onDelete: Cascade)
+  tierNumber Int     // mirrors the Bulk Wholesale bands: 1 (<100) ... 5 (1000+)
+  minQty     Int
+  maxQty     Int?
+  unitCost   Decimal @db.Decimal(12, 2)
+
+  @@unique([variantId, tierNumber])
+  @@index([variantId])
+}
+
+// ---------------------------------------------------------------------------
+// PRICE LISTS (source of truth from the uploaded sheets; versioned, never mutated in place)
+// ---------------------------------------------------------------------------
+
+enum PriceListCode {
+  BULK_RETAIL
+  BULK_WHOLESALE
+  WHOLESALE_SPRAYS
+  WHOLESALE_CREAMS
+  WHOLESALE_CAPSULES
+}
+
+enum MinimumBasis {
+  FLOOR_ONLY      // "20+ bottles" — qty >= minQty qualifies, no stated ceiling
+  BAND            // "100–299 bottles" — qty must fall within [minQty, maxQty]
+}
+
+/// One versioned publication of a price list, e.g. "Bulk Wholesale — May 2026". Historical
+/// versions are preserved forever; quotes/invoices snapshot the version active at creation time
+/// and are never retroactively changed when a new version is published.
+///
+/// DB-level invariant (not expressible as a plain Prisma @@unique): a partial unique index on
+/// (code) WHERE isActive — see migration 20260715171000_price_list_one_active_per_code —
+/// guarantees at most one active PriceList per code, even under concurrent publishes.
+model PriceList {
+  id            String        @id @default(cuid())
+  code          PriceListCode
+  name          String
+  effectiveDate DateTime
+  isActive      Boolean       @default(true) // the currently-published version for this code
+  sourceId      String?
+  source        UploadedPricingSource? @relation(fields: [sourceId], references: [id])
+  createdAt     DateTime      @default(now())
+
+  tiers   PricingTier[]
+  entries PriceListEntry[]
+
+  @@index([code, isActive])
+}
+
+/// A single tier/band within a PriceList, e.g. "Tier 3, min 75, floor-only".
+model PricingTier {
+  id           String       @id @default(cuid())
+  priceListId  String
+  priceList    PriceList    @relation(fields: [priceListId], references: [id], onDelete: Cascade)
+  tierNumber   Int
+  label        String
+  minimumBasis MinimumBasis
+  minQty       Int
+  maxQty       Int?
+
+  entries PriceListEntry[]
+
+  @@unique([priceListId, tierNumber])
+}
+
+/// The price of one ProductVariant at one PricingTier within one PriceList. This is the atomic
+/// "row" that traces directly back to a single cell in one of the ten uploaded PDFs.
+model PriceListEntry {
+  id               String         @id @default(cuid())
+  priceListId      String
+  priceList        PriceList      @relation(fields: [priceListId], references: [id], onDelete: Cascade)
+  pricingTierId    String
+  pricingTier      PricingTier    @relation(fields: [pricingTierId], references: [id], onDelete: Cascade)
+  productVariantId String
+  productVariant   ProductVariant @relation(fields: [productVariantId], references: [id], onDelete: Cascade)
+  unitPrice        Decimal        @db.Decimal(10, 2)
+
+  @@unique([priceListId, pricingTierId, productVariantId])
+  @@index([productVariantId])
+}
+
+/// Record of a pricing file uploaded by an admin, and the diff-preview/publish workflow around it.
+model UploadedPricingSource {
+  id           String   @id @default(cuid())
+  fileName     String
+  priceListCode PriceListCode
+  uploadedById String
+  uploadedBy   User     @relation("PricingUploader", fields: [uploadedById], references: [id])
+  uploadedAt   DateTime @default(now())
+  effectiveDate DateTime?
+  status       String   @default("PENDING_REVIEW") // PENDING_REVIEW | PUBLISHED | REJECTED
+  rawFileUrl   String?  // storage location of the original uploaded file
+  parsedRowCount Int?
+  notes        String?  @db.Text
+
+  priceLists PriceList[]
+
+  @@index([priceListCode])
+}
+
+// ---------------------------------------------------------------------------
+// QUOTES
+// ---------------------------------------------------------------------------
+
+enum QuoteStatus {
+  DRAFT
+  SENT
+  VIEWED
+  AWAITING_APPROVAL
+  APPROVED
+  DECLINED
+  EXPIRED
+  CONVERTED_TO_INVOICE
+  CANCELLED
+}
+
+model Quote {
+  id            String      @id @default(cuid())
+  quoteNumber   String      @unique // e.g. LAQ-2026-00001, format configurable via CompanySettings
+
+  customerId    String
+  customer      Customer    @relation(fields: [customerId], references: [id])
+  ownerId       String
+  owner         User        @relation("QuoteOwner", fields: [ownerId], references: [id])
+
+  priceListCode PriceListCode // which of the two bulk programs this quote is priced against
+
+  status        QuoteStatus @default(DRAFT)
+  quoteDate     DateTime    @default(now())
+  expirationDate DateTime?
+
+  subtotal      Decimal     @default(0) @db.Decimal(12, 2)
+  discountTotal Decimal     @default(0) @db.Decimal(12, 2)
+  feeTotal      Decimal     @default(0) @db.Decimal(12, 2)
+  shippingTotal Decimal     @default(0) @db.Decimal(12, 2)
+  taxTotal      Decimal     @default(0) @db.Decimal(12, 2)
+  grandTotal    Decimal     @default(0) @db.Decimal(12, 2)
+  depositRequired Decimal   @default(0) @db.Decimal(12, 2)
+
+  paymentTerms  String?
+  internalNotes String?     @db.Text
+  customerFacingNotes String? @db.Text
+  termsAndConditions String? @db.Text
+
+  // No @default here on purpose: this gates an unauthenticated public URL, so it must always
+  // be an explicit cryptographically-random value (see src/lib/security/token.ts), never
+  // Prisma's default cuid() — cuid embeds a timestamp/counter/host fingerprint and is
+  // guessable in a way a security credential must not be.
+  publicToken   String      @unique
+
+  sentAt        DateTime?
+  sentToEmail   String?
+  viewedAt      DateTime?
+  approvedAt    DateTime?
+  declinedAt    DateTime?
+  expiredAt     DateTime?
+  cancelledAt   DateTime?
+  convertedAt   DateTime?
+
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  lineItems   QuoteLineItem[]
+  adjustments Adjustment[]
+  approvalRecord ApprovalRecord?
+  invoice     Invoice?
+  activityLogs ActivityLog[] @relation("ActivityQuote")
+
+  @@index([customerId])
+  @@index([ownerId])
+  @@index([status])
+  @@index([expirationDate])
+}
+
+/// Pricing snapshot for one line — deliberately duplicates product/pricing data rather than
+/// relying on live joins, so historical quotes never change when the catalog/pricing updates.
+model QuoteLineItem {
+  id               String   @id @default(cuid())
+  quoteId          String
+  quote            Quote    @relation(fields: [quoteId], references: [id], onDelete: Cascade)
+  productVariantId String?
+  productVariant   ProductVariant? @relation(fields: [productVariantId], references: [id])
+  sortOrder        Int      @default(0)
+
+  // --- pricing snapshot (immutable once created) ---
+  productName      String
+  sku              String
+  strength         String
+  quantity         Int
+  unitPrice        Decimal  @db.Decimal(10, 2)
+  lineTotal        Decimal  @db.Decimal(12, 2)
+  pricingTierLabel String   // e.g. "Bulk Wholesale — Tier 3 (300–499)"
+  priceListCode    PriceListCode
+  priceListName    String
+  effectiveDate    DateTime
+  minimumMet       Boolean  @default(true)
+  minimumRequired  Int?
+
+  createdAt DateTime @default(now())
+
+  @@index([quoteId])
+}
+
+// ---------------------------------------------------------------------------
+// INVOICES
+// ---------------------------------------------------------------------------
+
+enum InvoiceStatus {
+  DRAFT
+  SENT
+  PARTIALLY_PAID
+  PAID
+  OVERDUE
+  CANCELLED
+  REFUNDED
+  VOIDED
+}
+
+model Invoice {
+  id            String        @id @default(cuid())
+  invoiceNumber String        @unique // e.g. LAI-2026-00001
+
+  quoteId       String?       @unique
+  quote         Quote?        @relation(fields: [quoteId], references: [id])
+
+  customerId    String
+  customer      Customer      @relation(fields: [customerId], references: [id])
+  ownerId       String
+  owner         User          @relation("InvoiceOwner", fields: [ownerId], references: [id])
+
+  priceListCode PriceListCode
+
+  status        InvoiceStatus @default(DRAFT)
+  issueDate     DateTime      @default(now())
+  dueDate       DateTime?
+  paymentTerms  String        @default("Prepaid") // never Net 15/30 unless admin explicitly enables it
+
+  subtotal      Decimal       @default(0) @db.Decimal(12, 2)
+  discountTotal Decimal       @default(0) @db.Decimal(12, 2)
+  feeTotal      Decimal       @default(0) @db.Decimal(12, 2)
+  shippingTotal Decimal       @default(0) @db.Decimal(12, 2)
+  taxTotal      Decimal       @default(0) @db.Decimal(12, 2)
+  grandTotal    Decimal       @default(0) @db.Decimal(12, 2)
+  depositRequired Decimal     @default(0) @db.Decimal(12, 2)
+  amountPaid    Decimal       @default(0) @db.Decimal(12, 2)
+  balanceDue    Decimal       @default(0) @db.Decimal(12, 2)
+
+  achInstructions String?     @db.Text
+  paymentInstructions String? @db.Text
+  internalPaymentNotes String? @db.Text
+  internalNotes String?       @db.Text
+  customerFacingNotes String? @db.Text
+
+  // Same rationale as Quote.publicToken above — always set explicitly via
+  // src/lib/security/token.ts, never left to Prisma's default cuid().
+  publicToken   String        @unique
+
+  sentAt        DateTime?
+  sentToEmail   String?
+  paidAt        DateTime?
+
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  lineItems   InvoiceLineItem[]
+  adjustments Adjustment[]
+  payments    Payment[]
+  activityLogs ActivityLog[] @relation("ActivityInvoice")
+
+  @@index([customerId])
+  @@index([ownerId])
+  @@index([status])
+  @@index([dueDate])
+}
+
+model InvoiceLineItem {
+  id               String   @id @default(cuid())
+  invoiceId        String
+  invoice          Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  productVariantId String?
+  productVariant   ProductVariant? @relation(fields: [productVariantId], references: [id])
+  sortOrder        Int      @default(0)
+
+  productName      String
+  sku              String
+  strength         String
+  quantity         Int
+  unitPrice        Decimal  @db.Decimal(10, 2)
+  lineTotal        Decimal  @db.Decimal(12, 2)
+  pricingTierLabel String
+  priceListCode    PriceListCode
+  priceListName    String
+  effectiveDate    DateTime
+
+  createdAt DateTime @default(now())
+
+  @@index([invoiceId])
+}
+
+enum PaymentMethod {
+  ACH
+  WIRE
+  CREDIT_CARD
+  CHECK
+  CASH
+  OTHER
+}
+
+model Payment {
+  id            String        @id @default(cuid())
+  invoiceId     String
+  invoice       Invoice       @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  amount        Decimal       @db.Decimal(12, 2)
+  method        PaymentMethod
+  paidAt        DateTime      @default(now())
+  referenceNote String?
+  internalNote  String?       @db.Text
+  recordedById  String
+  createdAt     DateTime      @default(now())
+
+  @@index([invoiceId])
+}
+
+// ---------------------------------------------------------------------------
+// ADJUSTMENTS (discounts/fees) — always stored separately, never overwriting the source price
+// ---------------------------------------------------------------------------
+
+enum AdjustmentType {
+  SHIPPING
+  HANDLING
+  TESTING_FEE
+  PACKAGING_FEE
+  RUSH_FEE
+  SALES_TAX
+  CUSTOMER_DISCOUNT
+  REP_DISCOUNT
+  ADMIN_CUSTOM_ADJUSTMENT
+  ADDITIONAL_FEE
+}
+
+enum AdjustmentValueType {
+  PERCENT
+  FIXED_AMOUNT
+}
+
+model Adjustment {
+  id          String              @id @default(cuid())
+  quoteId     String?
+  quote       Quote?              @relation(fields: [quoteId], references: [id], onDelete: Cascade)
+  invoiceId   String?
+  invoice     Invoice?            @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+
+  type        AdjustmentType
+  label       String
+  valueType   AdjustmentValueType
+  value       Decimal             @db.Decimal(10, 2) // percent (0-100) or a fixed dollar amount, per valueType
+  amount      Decimal             @db.Decimal(12, 2) // resolved dollar impact at time of calculation
+
+  requiresApproval Boolean        @default(false)
+  approvedById     String?
+  approver         User?          @relation("AdjustmentApprover", fields: [approvedById], references: [id])
+  approvedAt       DateTime?
+
+  createdAt   DateTime            @default(now())
+
+  @@index([quoteId])
+  @@index([invoiceId])
+}
+
+// ---------------------------------------------------------------------------
+// CUSTOMER APPROVAL RECORD
+// ---------------------------------------------------------------------------
+
+enum ApprovalDecision {
+  APPROVED
+  DECLINED
+}
+
+model ApprovalRecord {
+  id            String            @id @default(cuid())
+  quoteId       String            @unique
+  quote         Quote             @relation(fields: [quoteId], references: [id], onDelete: Cascade)
+  decision      ApprovalDecision
+  respondentName String
+  respondentTitle String?
+  comments      String?           @db.Text
+  billingConfirmed Boolean        @default(false)
+  shippingConfirmed Boolean       @default(false)
+  termsAccepted Boolean           @default(false)
+  ipAddress     String?
+  userAgent     String?
+  decidedAt     DateTime          @default(now())
+}
+
+// ---------------------------------------------------------------------------
+// ACTIVITY / AUDIT LOG
+// ---------------------------------------------------------------------------
+
+enum ActivityAction {
+  QUOTE_CREATED
+  QUOTE_EDITED
+  PRICING_APPLIED
+  DISCOUNT_ADDED
+  QUOTE_SENT
+  QUOTE_VIEWED
+  QUOTE_APPROVED
+  QUOTE_DECLINED
+  QUOTE_CONVERTED
+  QUOTE_CANCELLED
+  INVOICE_CREATED
+  INVOICE_SENT
+  PAYMENT_RECORDED
+  INVOICE_MARKED_PAID
+  DOCUMENT_DOWNLOADED
+  USER_LOGIN
+  USER_LOGOUT
+  ADMIN_PRICING_UPDATE
+  CUSTOMER_CREATED
+  CUSTOMER_EDITED
+}
+
+model ActivityLog {
+  id          String         @id @default(cuid())
+  action      ActivityAction
+  actorId     String?
+  actor       User?          @relation("ActivityActor", fields: [actorId], references: [id])
+  customerId  String?
+  customer    Customer?      @relation("ActivityCustomer", fields: [customerId], references: [id])
+  quoteId     String?
+  quote       Quote?         @relation("ActivityQuote", fields: [quoteId], references: [id])
+  invoiceId   String?
+  invoice     Invoice?       @relation("ActivityInvoice", fields: [invoiceId], references: [id])
+
+  previousValue Json?
+  updatedValue  Json?
+  description   String?
+
+  createdAt   DateTime       @default(now())
+
+  @@index([action])
+  @@index([customerId])
+  @@index([quoteId])
+  @@index([invoiceId])
+  @@index([actorId])
+  @@index([createdAt])
+}
+
+// ---------------------------------------------------------------------------
+// COMPANY SETTINGS (singleton)
+// ---------------------------------------------------------------------------
+
+model CompanySettings {
+  id                  String   @id @default("singleton")
+  companyName         String   @default("LA Peptides")
+  dbaName             String?
+  addressLine1        String?
+  addressLine2        String?
+  city                String?
+  state               String?
+  postalCode          String?
+  country             String?  @default("US")
+  phone               String?
+  email               String?
+  website             String?  @default("lapeptides.net")
+  logoUrl             String?
+
+  quotePrefix         String   @default("LAQ")
+  invoicePrefix       String   @default("LAI")
+  numberFormat        String   @default("{PREFIX}-{YEAR}-{SEQ:5}")
+
+  defaultQuoteExpirationDays Int @default(30)
+  defaultPaymentTerms  String  @default("Prepaid")
+  allowNetTerms        Boolean @default(false)
+
+  achInstructions      String? @db.Text
+  defaultQuoteNotes    String? @db.Text
+  defaultTermsAndConditions String? @db.Text
+  pdfFooterText        String? @db.Text
+  customerApprovalLanguage String? @db.Text
+
+  shippingMethods      Json? // [{ name, description, defaultCost }]
+  taxBehavior          String  @default("EXCLUSIVE") // EXCLUSIVE | INCLUSIVE | EXEMPT_BY_DEFAULT
+  defaultTaxRatePercent Decimal @default(0) @db.Decimal(5, 2)
+
+  repDiscountLimitPercent Decimal @default(5) @db.Decimal(5, 2) // default cap; per-user override on User.discountLimitPercent
+
+  updatedAt            DateTime @updatedAt
+}
+
+// ---------------------------------------------------------------------------
+// SEQUENCES for quote/invoice numbering (per year)
+// ---------------------------------------------------------------------------
+
+model NumberSequence {
+  id      String @id // e.g. "QUOTE-2026" or "INVOICE-2026"
+  nextSeq Int    @default(1)
+}
