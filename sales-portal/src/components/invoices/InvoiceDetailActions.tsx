@@ -49,7 +49,7 @@ export function InvoiceDetailActions({
 
   return (
     <div className="no-print space-y-2">
-      {message && <p className="text-sm text-brand-teal">{message}</p>}
+      {message && <p className="text-sm text-lap-teal">{message}</p>}
       <div className="grid grid-cols-2 gap-2">
         <a href={`/api/invoices/${invoiceId}/pdf`} target="_blank" rel="noreferrer" className="btn-secondary">
           Download PDF

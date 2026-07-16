@@ -11,7 +11,7 @@ export default async function RepsPage() {
 
   return (
     <div className="space-y-4">
-      <h1 className="text-xl font-semibold text-white">Sales Representatives</h1>
+      <h1 className="font-heading text-xl font-semibold text-lap-ink">Sales Representatives</h1>
       <CreateRepForm />
 
       <div className="space-y-2">
@@ -28,16 +28,16 @@ export default async function RepsPage() {
             lastLoginAt={r.lastLoginAt}
           />
         ))}
-        {reps.length === 0 && <p className="text-sm text-brand-slate-400">No sales representatives yet.</p>}
+        {reps.length === 0 && <p className="text-sm text-lap-slate">No sales representatives yet.</p>}
       </div>
 
       <section>
-        <h2 className="mb-2 font-semibold text-white">Administrators</h2>
+        <h2 className="mb-2 font-heading text-base font-semibold text-lap-ink">Administrators</h2>
         <ul className="space-y-2">
           {admins.map((a) => (
             <li key={a.id} className="card p-3 text-sm">
-              <p className="text-white">{a.name}</p>
-              <p className="text-brand-slate-400">{a.email}</p>
+              <p className="text-lap-ink">{a.name}</p>
+              <p className="text-lap-slate">{a.email}</p>
             </li>
           ))}
         </ul>

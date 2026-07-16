@@ -12,7 +12,7 @@ export default async function NewCustomerPage() {
 
   return (
     <div className="space-y-4">
-      <h1 className="text-xl font-semibold text-white">New Customer</h1>
+      <h1 className="font-heading text-xl font-semibold text-lap-ink">New Customer</h1>
       <CustomerForm action={createCustomer} reps={reps} isAdmin={user.role === "ADMIN"} />
     </div>
   );

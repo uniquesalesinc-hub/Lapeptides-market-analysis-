@@ -15,22 +15,22 @@ export function ProductCard({ product }: { product: CatalogProduct }) {
     <div className="card p-4">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <p className="font-semibold text-white">
+          <p className="font-semibold text-lap-ink">
             <Link href={`/products/${product.id}`} className="hover:underline">
               {product.name}
             </Link>
           </p>
-          <p className="font-mono text-xs text-brand-slate-400">{variant.sku}</p>
+          <p className="font-mono text-xs text-lap-slate">{variant.sku}</p>
         </div>
         <p className="whitespace-nowrap text-right">
-          <span className="text-lg font-bold text-brand-teal">
-            {variant.entryPrice != null ? formatMoney(variant.entryPrice) : "—"}
+          <span className="font-mono text-lg font-bold text-lap-teal">
+            {variant.entryPrice != null ? formatMoney(variant.entryPrice) : "-"}
           </span>
-          <span className="block text-xs text-brand-slate-400">from, per unit</span>
+          <span className="block text-xs text-lap-slate">from, per unit</span>
         </p>
       </div>
 
-      {product.description && <p className="mt-2 text-sm text-brand-slate-300">{product.description}</p>}
+      {product.description && <p className="mt-2 text-sm text-lap-slate">{product.description}</p>}
 
       {product.variants.length > 1 && (
         <div className="mt-3">
@@ -45,7 +45,7 @@ export function ProductCard({ product }: { product: CatalogProduct }) {
           >
             {product.variants.map((v) => (
               <option key={v.id} value={v.id}>
-                {v.size} — {v.sku}
+                {v.size} - {v.sku}
               </option>
             ))}
           </select>
@@ -55,7 +55,7 @@ export function ProductCard({ product }: { product: CatalogProduct }) {
       <button
         type="button"
         onClick={() => setShowTiers((s) => !s)}
-        className="mt-3 text-sm font-medium text-brand-teal"
+        className="mt-3 text-sm font-medium text-lap-teal"
       >
         {showTiers ? "Hide" : "View"} quantity tiers
       </button>
@@ -64,7 +64,7 @@ export function ProductCard({ product }: { product: CatalogProduct }) {
         <div className="table-scroll mt-2">
           <table className="w-full text-sm">
             <thead>
-              <tr className="text-left text-brand-slate-400">
+              <tr className="text-left text-lap-slate">
                 <th className="py-1 pr-3 font-medium">Tier</th>
                 <th className="py-1 pr-3 font-medium">Minimum</th>
                 <th className="py-1 font-medium">Unit price</th>
@@ -72,12 +72,12 @@ export function ProductCard({ product }: { product: CatalogProduct }) {
             </thead>
             <tbody>
               {variant.tierPrices.map((t) => (
-                <tr key={t.tierNumber} className="border-t border-brand-border">
+                <tr key={t.tierNumber} className="border-t border-lap-border">
                   <td className="py-1.5 pr-3">{t.label}</td>
                   <td className="py-1.5 pr-3">
                     {t.maxQty ? `${t.minQty}–${t.maxQty}` : `${t.minQty}+`}
                   </td>
-                  <td className="py-1.5 font-medium text-white">{formatMoney(t.unitPrice)}</td>
+                  <td className="py-1.5 font-mono font-medium text-lap-ink">{formatMoney(t.unitPrice)}</td>
                 </tr>
               ))}
             </tbody>

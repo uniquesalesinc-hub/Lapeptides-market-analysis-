@@ -34,8 +34,8 @@ export function ProductDescriptionForm({
     <form onSubmit={handleSubmit} className="card space-y-3 p-4">
       <div>
         <label className="label-text">Customer-facing description</label>
-        <p className="mb-1 text-xs text-brand-slate-400">
-          No medical, treatment, or dosage claims — research-use-only language only.
+        <p className="mb-1 text-xs text-lap-slate">
+          No medical, treatment, or dosage claims - research-use-only language only.
         </p>
         <textarea name="description" defaultValue={description} rows={3} className="input-field !h-auto py-2" />
       </div>
@@ -43,7 +43,7 @@ export function ProductDescriptionForm({
         <label className="label-text">Internal notes (never shown to customers)</label>
         <textarea name="internalNotes" defaultValue={internalNotes} rows={3} className="input-field !h-auto py-2" />
       </div>
-      {saved && <p className="text-sm text-brand-teal">Saved.</p>}
+      {saved && <p className="text-sm text-lap-green">Saved.</p>}
       <button type="submit" className="btn-primary w-full" disabled={pending}>
         {pending ? "Saving…" : "Save"}
       </button>

@@ -24,7 +24,7 @@ function ResetPasswordForm() {
   }
 
   if (!token) {
-    return <p className="text-sm text-brand-danger">Missing or invalid reset link.</p>;
+    return <p className="text-sm text-lap-red">Missing or invalid reset link.</p>;
   }
 
   return (
@@ -48,11 +48,11 @@ function ResetPasswordForm() {
         </button>
       </form>
       {message && (
-        <p className={`mt-4 text-sm ${success ? "text-brand-success" : "text-brand-danger"}`}>{message}</p>
+        <p className={`mt-4 text-sm ${success ? "text-lap-green" : "text-lap-red"}`}>{message}</p>
       )}
       {success && (
         <div className="mt-4 text-center">
-          <a href="/login" className="text-sm text-brand-teal">
+          <a href="/login" className="text-sm text-lap-teal hover:underline">
             Continue to sign in
           </a>
         </div>
@@ -68,8 +68,8 @@ export default function ResetPasswordPage() {
         <Logo />
       </div>
       <div className="card w-full max-w-sm p-6">
-        <h1 className="mb-1 text-xl font-semibold text-white">Set a new password</h1>
-        <p className="mb-6 text-sm text-brand-slate-400">Choose a new password for your account.</p>
+        <h1 className="mb-1 font-heading text-xl font-semibold text-lap-ink">Set a new password</h1>
+        <p className="mb-6 text-sm text-lap-slate">Choose a new password for your account.</p>
         <Suspense>
           <ResetPasswordForm />
         </Suspense>

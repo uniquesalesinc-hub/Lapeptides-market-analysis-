@@ -35,31 +35,30 @@
 }
 
 @layer components {
-  /* Legacy v1 component classes below (dark navy). Unmigrated pages keep using them until
-     Task 10; .card carries its own light text color so legacy content stays readable now
-     that the body defaults to dark ink on a light canvas. */
+  /* LA Peptides light design system (DESIGN.md): white surfaces on the tinted page canvas,
+     hairline borders, subtle teal-cast shadow, teal primary actions. */
   .card {
-    @apply rounded-card border border-brand-border bg-brand-surface text-brand-slate-100 shadow-card;
+    @apply rounded-[10px] border border-lap-border bg-lap-surface text-lap-ink shadow-lap;
   }
 
   .btn-primary {
-    @apply inline-flex min-h-touch items-center justify-center gap-2 rounded-lg bg-brand-teal px-5 font-semibold text-brand-navy transition active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50;
+    @apply inline-flex min-h-touch items-center justify-center gap-2 rounded-[10px] bg-lap-teal px-5 font-semibold text-white transition-colors duration-150 hover:bg-lap-teal-dark disabled:cursor-not-allowed disabled:opacity-50;
   }
 
   .btn-secondary {
-    @apply inline-flex min-h-touch items-center justify-center gap-2 rounded-lg border border-brand-border bg-brand-surfaceAlt px-5 font-semibold text-brand-slate-100 transition active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50;
+    @apply inline-flex min-h-touch items-center justify-center gap-2 rounded-[10px] border border-lap-border bg-lap-surface px-5 font-semibold text-lap-ink transition-colors duration-150 hover:bg-lap-page disabled:cursor-not-allowed disabled:opacity-50;
   }
 
   .btn-danger {
-    @apply inline-flex min-h-touch items-center justify-center gap-2 rounded-lg border border-brand-danger/40 bg-brand-danger/10 px-5 font-semibold text-brand-danger transition active:scale-[0.98];
+    @apply inline-flex min-h-touch items-center justify-center gap-2 rounded-[10px] border border-lap-red/40 bg-lap-red/10 px-5 font-semibold text-lap-red transition-colors duration-150 hover:bg-lap-red/15 disabled:cursor-not-allowed disabled:opacity-50;
   }
 
   .input-field {
-    @apply min-h-touch w-full rounded-lg border border-brand-border bg-brand-navy px-3 text-brand-slate-100 placeholder:text-brand-slate-400 focus:border-brand-teal focus:outline-none focus:ring-1 focus:ring-brand-teal;
+    @apply min-h-touch w-full rounded-[10px] border border-lap-border bg-lap-surface px-3 text-lap-ink placeholder:text-lap-slate/60 focus:border-lap-teal focus:outline-none focus:ring-2 focus:ring-lap-teal-bright/40;
   }
 
   .label-text {
-    @apply mb-1 block text-sm font-medium text-brand-slate-300;
+    @apply mb-1 block text-sm font-medium text-lap-slate;
   }
 
   .badge {

@@ -18,7 +18,7 @@ export function VariantActiveToggle({ variantId, isActive }: { variantId: string
           router.refresh();
         })
       }
-      className={`badge ${isActive ? "border-brand-success/40 bg-brand-success/10 text-brand-success" : "border-brand-slate-400/40 bg-brand-slate-400/10 text-brand-slate-400"}`}
+      className={`badge ${isActive ? "border-lap-green/40 bg-lap-green/10 text-lap-green" : "border-lap-border bg-lap-page text-lap-slate"}`}
     >
       {isActive ? "Active" : "Inactive"}
     </button>

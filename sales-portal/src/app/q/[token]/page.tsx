@@ -23,13 +23,13 @@ export default async function PublicQuotePage({ params }: { params: Promise<{ to
       </div>
 
       <div className="card mb-4 p-4">
-        <p className="font-mono text-sm text-brand-slate-400">{quote.quoteNumber}</p>
-        <h1 className="text-xl font-semibold text-white">Quote for {quote.customer.businessName}</h1>
-        <p className="mt-1 text-sm text-brand-slate-400">
+        <p className="font-mono text-sm text-lap-slate">{quote.quoteNumber}</p>
+        <h1 className="font-heading text-xl font-semibold text-lap-ink">Quote for {quote.customer.businessName}</h1>
+        <p className="mt-1 text-sm text-lap-slate">
           Prepared by {quote.owner.name} · {formatDate(quote.quoteDate)}
           {quote.expirationDate ? ` · Expires ${formatDate(quote.expirationDate)}` : ""}
         </p>
-        <p className="mt-1 text-xs text-brand-slate-400">{PRICE_LIST_LABELS[quote.priceListCode]}</p>
+        <p className="mt-1 text-xs text-lap-slate">{PRICE_LIST_LABELS[quote.priceListCode]}</p>
       </div>
 
       <div className="mb-4">
@@ -38,18 +38,18 @@ export default async function PublicQuotePage({ params }: { params: Promise<{ to
         </a>
       </div>
 
-      <div className="card mb-4 divide-y divide-brand-border p-4">
+      <div className="card mb-4 divide-y divide-lap-border p-4">
         {quote.lineItems.map((li) => (
           <div key={li.id} className="flex items-center justify-between py-2 first:pt-0 last:pb-0">
             <div>
-              <p className="text-sm font-medium text-white">
+              <p className="text-sm font-medium text-lap-ink">
                 {li.productName} {li.strength}
               </p>
-              <p className="text-xs text-brand-slate-400">
+              <p className="text-xs text-lap-slate">
                 {li.quantity} × {formatMoney(Number(li.unitPrice))}
               </p>
             </div>
-            <p className="font-semibold text-white">{formatMoney(Number(li.lineTotal))}</p>
+            <p className="font-mono font-semibold text-lap-ink">{formatMoney(Number(li.lineTotal))}</p>
           </div>
         ))}
       </div>
@@ -59,21 +59,21 @@ export default async function PublicQuotePage({ params }: { params: Promise<{ to
         {quote.adjustments.map((a) => (
           <Row key={a.id} label={a.label} value={formatMoney(Number(a.amount))} />
         ))}
-        <div className="border-t border-brand-border pt-1.5">
+        <div className="border-t border-lap-border pt-1.5">
           <Row label="Total" value={formatMoney(Number(quote.grandTotal))} bold />
         </div>
         {Number(quote.depositRequired) > 0 && <Row label="Deposit required" value={formatMoney(Number(quote.depositRequired))} />}
       </div>
 
       {quote.customerFacingNotes && (
-        <div className="card mb-4 p-4 text-sm text-brand-slate-300">
+        <div className="card mb-4 p-4 text-sm text-lap-slate">
           <p className="label-text !mb-1">Notes</p>
           <p>{quote.customerFacingNotes}</p>
         </div>
       )}
 
       {quote.termsAndConditions && (
-        <div className="card mb-4 p-4 text-xs text-brand-slate-400">
+        <div className="card mb-4 p-4 text-xs text-lap-slate">
           <p className="label-text !mb-1">Terms &amp; Conditions</p>
           <p>{quote.termsAndConditions}</p>
         </div>
@@ -81,17 +81,17 @@ export default async function PublicQuotePage({ params }: { params: Promise<{ to
 
       {quote.approvalRecord ? (
         <div className="card p-4 text-sm">
-          <p className="font-semibold text-white">
+          <p className="font-semibold text-lap-ink">
             {quote.approvalRecord.decision === "APPROVED" ? "You approved this quote" : "You declined this quote"}
           </p>
-          <p className="text-brand-slate-400">
+          <p className="text-lap-slate">
             {quote.approvalRecord.respondentName} · {formatDate(quote.approvalRecord.decidedAt)}
           </p>
         </div>
       ) : canRespond ? (
         <PublicApprovalForm token={token} approvalLanguage={settings.customerApprovalLanguage ?? ""} />
       ) : (
-        <div className="card p-4 text-center text-sm text-brand-slate-400">
+        <div className="card p-4 text-center text-sm text-lap-slate">
           This quote is no longer awaiting a response.
         </div>
       )}
@@ -101,9 +101,9 @@ export default async function PublicQuotePage({ params }: { params: Promise<{ to
 
 function Row({ label, value, bold }: { label: string; value: string; bold?: boolean }) {
   return (
-    <div className={`flex items-center justify-between ${bold ? "font-semibold text-white" : "text-brand-slate-300"}`}>
+    <div className={`flex items-center justify-between ${bold ? "font-semibold text-lap-ink" : "text-lap-slate"}`}>
       <span>{label}</span>
-      <span>{value}</span>
+      <span className="font-mono">{value}</span>
     </div>
   );
 }

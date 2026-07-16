@@ -46,18 +46,18 @@ export function RepRow({
     <div className="card p-4">
       <div className="flex items-start justify-between">
         <div>
-          <p className="font-semibold text-white">{name}</p>
-          <p className="text-sm text-brand-slate-400">{email}</p>
-          <p className="text-xs text-brand-slate-400">
+          <p className="font-semibold text-lap-ink">{name}</p>
+          <p className="text-sm text-lap-slate">{email}</p>
+          <p className="text-xs text-lap-slate">
             {customerCount} customers · {quoteCount} quotes · last login {formatDate(lastLoginAt)}
           </p>
         </div>
-        <span className={`badge ${status === "ACTIVE" ? "border-brand-success/40 bg-brand-success/10 text-brand-success" : "border-brand-slate-400/40 bg-brand-slate-400/10 text-brand-slate-400"}`}>
+        <span className={`badge ${status === "ACTIVE" ? "border-lap-green/40 bg-lap-green/10 text-lap-green" : "border-lap-border bg-lap-page text-lap-slate"}`}>
           {status}
         </span>
       </div>
       <div className="mt-3 flex items-center gap-2">
-        <label className="text-xs text-brand-slate-400">Discount limit</label>
+        <label className="text-xs text-lap-slate">Discount limit</label>
         <input
           type="number"
           min={0}
@@ -66,7 +66,7 @@ export function RepRow({
           onChange={(e) => setLimit(Number(e.target.value))}
           className="input-field !h-9 w-20 !py-1 text-center"
         />
-        <span className="text-xs text-brand-slate-400">%</span>
+        <span className="text-xs text-lap-slate">%</span>
         <button type="button" className="btn-secondary !min-h-0 !px-3 !py-1.5 text-xs" onClick={saveLimit} disabled={pending}>
           Save
         </button>

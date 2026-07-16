@@ -58,9 +58,9 @@ export function PricingUploadForm() {
 
   if (published) {
     return (
-      <div className="card border-brand-success/40 bg-brand-success/10 p-4 text-center">
-        <p className="font-semibold text-brand-success">Pricing published.</p>
-        <p className="mt-1 text-sm text-brand-slate-300">
+      <div className="card border-lap-green/40 bg-lap-green/10 p-4 text-center">
+        <p className="font-semibold text-lap-green">Pricing published.</p>
+        <p className="mt-1 text-sm text-lap-slate">
           Historical quotes and invoices keep the pricing that was active when they were created.
         </p>
       </div>
@@ -86,8 +86,8 @@ export function PricingUploadForm() {
         </div>
         <div>
           <label className="label-text">CSV file</label>
-          <p className="mb-1 text-xs text-brand-slate-400">
-            Format: <code>sku,tier1,tier2,...</code> — one column per tier, in tier order, matching the
+          <p className="mb-1 text-xs text-lap-slate">
+            Format: <code>sku,tier1,tier2,...</code> - one column per tier, in tier order, matching the
             price list selected above. SKUs must match existing catalog SKUs exactly.
           </p>
           <input type="file" accept=".csv,text/csv" onChange={handleFile} className="input-field !h-auto py-2" />
@@ -98,7 +98,7 @@ export function PricingUploadForm() {
       </div>
 
       {errors.length > 0 && (
-        <div className="card border-brand-danger/40 p-4 text-sm text-brand-danger">
+        <div className="card border-lap-red/40 p-4 text-sm text-lap-red">
           <ul className="list-inside list-disc">
             {errors.map((e, i) => (
               <li key={i}>{e}</li>
@@ -108,21 +108,21 @@ export function PricingUploadForm() {
       )}
 
       {unmatched.length > 0 && (
-        <div className="card border-brand-warning/40 p-4 text-sm text-brand-warning">
-          <p className="font-semibold">{unmatched.length} SKU(s) not found in the catalog — skipped:</p>
+        <div className="card border-lap-amber/40 p-4 text-sm text-[#9A6318]">
+          <p className="font-semibold">{unmatched.length} SKU(s) not found in the catalog - skipped:</p>
           <p className="font-mono text-xs">{unmatched.join(", ")}</p>
         </div>
       )}
 
       {diff && (
         <div className="card p-4">
-          <h2 className="mb-2 font-semibold text-white">
+          <h2 className="mb-2 font-semibold text-lap-ink">
             {changedCount} of {diff.length} price entries will change
           </h2>
           <div className="table-scroll">
             <table className="w-full text-sm">
               <thead>
-                <tr className="text-left text-brand-slate-400">
+                <tr className="text-left text-lap-slate">
                   <th className="py-1 pr-3">SKU</th>
                   <th className="py-1 pr-3">Tier</th>
                   <th className="py-1 pr-3">Old</th>
@@ -133,17 +133,17 @@ export function PricingUploadForm() {
                 {diff
                   .filter((d) => d.changed)
                   .map((d, i) => (
-                    <tr key={i} className="border-t border-brand-border">
+                    <tr key={i} className="border-t border-lap-border">
                       <td className="py-1.5 pr-3 font-mono text-xs">{d.sku}</td>
-                      <td className="py-1.5 pr-3 text-xs text-brand-slate-400">{d.tierLabel}</td>
-                      <td className="py-1.5 pr-3 text-brand-slate-400 line-through">{d.oldPrice != null ? formatMoney(d.oldPrice) : "—"}</td>
-                      <td className="py-1.5 font-semibold text-brand-teal">{formatMoney(d.newPrice)}</td>
+                      <td className="py-1.5 pr-3 text-xs text-lap-slate">{d.tierLabel}</td>
+                      <td className="py-1.5 pr-3 font-mono text-lap-slate line-through">{d.oldPrice != null ? formatMoney(d.oldPrice) : "-"}</td>
+                      <td className="py-1.5 font-mono font-semibold text-lap-teal">{formatMoney(d.newPrice)}</td>
                     </tr>
                   ))}
               </tbody>
             </table>
           </div>
-          {changedCount === 0 && <p className="text-sm text-brand-slate-400">No price changes detected.</p>}
+          {changedCount === 0 && <p className="text-sm text-lap-slate">No price changes detected.</p>}
           <button type="button" className="btn-primary mt-4 w-full" onClick={handlePublish} disabled={pending || changedCount === 0}>
             {pending ? "Publishing…" : `Confirm & Publish (effective ${effectiveDate})`}
           </button>

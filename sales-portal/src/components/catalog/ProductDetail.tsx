@@ -241,7 +241,7 @@ export function ProductDetail({ detail }: { detail: ProductDetailData }) {
         )}
 
         <p className="mt-4 text-[11px] uppercase tracking-wide text-lap-slate">
-          For research purposes only. Not for human consumption.
+          For research purposes only - not for human consumption.
         </p>
       </section>
 

@@ -54,11 +54,11 @@ export function CustomerStep({
     const isProspect = mode === "prospect";
     return (
       <div className="card space-y-4 p-4">
-        <h2 className="font-semibold text-white">
+        <h2 className="font-semibold text-lap-ink">
           {isProspect ? "Continue with a temporary prospect" : "Add a new customer"}
         </h2>
         {isProspect && (
-          <p className="text-sm text-brand-slate-400">
+          <p className="text-sm text-lap-slate">
             Use this for a fast quote before the account is fully set up. You can fill in full
             details later from the customer record.
           </p>
@@ -84,7 +84,7 @@ export function CustomerStep({
               </div>
             </>
           )}
-          {error && <p className="text-sm text-brand-danger">{error}</p>}
+          {error && <p className="text-sm text-lap-red">{error}</p>}
           <div className="flex gap-2">
             <button type="button" className="btn-secondary flex-1" onClick={() => setMode("list")}>
               Cancel
@@ -125,19 +125,19 @@ export function CustomerStep({
               type="button"
               onClick={() => onSelect(c)}
               className={`card flex w-full items-center justify-between p-3 text-left ${
-                selectedCustomerId === c.id ? "border-brand-teal" : ""
+                selectedCustomerId === c.id ? "border-lap-teal" : ""
               }`}
             >
               <div>
-                <p className="font-semibold text-white">{c.businessName}</p>
-                <p className="text-sm text-brand-slate-400">{c.contactName}</p>
+                <p className="font-semibold text-lap-ink">{c.businessName}</p>
+                <p className="text-sm text-lap-slate">{c.contactName}</p>
               </div>
-              <span className="text-xs text-brand-slate-400">{c.defaultPriceListCode.replace(/_/g, " ")}</span>
+              <span className="text-xs text-lap-slate">{c.defaultPriceListCode.replace(/_/g, " ")}</span>
             </button>
           </li>
         ))}
         {filtered.length === 0 && (
-          <p className="py-6 text-center text-sm text-brand-slate-400">No customers match your search.</p>
+          <p className="py-6 text-center text-sm text-lap-slate">No customers match your search.</p>
         )}
       </ul>
     </div>

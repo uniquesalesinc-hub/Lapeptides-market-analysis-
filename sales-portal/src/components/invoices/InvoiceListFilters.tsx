@@ -40,7 +40,7 @@ export function InvoiceListFilters({
           update("q", e.target.value);
         }}
       />
-      <label className="flex items-center gap-2 text-sm text-brand-slate-300">
+      <label className="flex items-center gap-2 text-sm text-lap-slate">
         <input type="checkbox" checked={!!defaultUnpaid} onChange={(e) => update("unpaid", e.target.checked ? "1" : "")} />
         Unpaid only
       </label>
@@ -50,7 +50,7 @@ export function InvoiceListFilters({
             type="button"
             onClick={() => update("status", "")}
             className={`min-h-touch whitespace-nowrap rounded-full border px-3 text-xs font-semibold ${
-              !defaultStatus ? "border-brand-teal text-brand-teal" : "border-brand-border text-brand-slate-400"
+              !defaultStatus ? "border-lap-teal bg-lap-teal-wash text-lap-teal" : "border-lap-border text-lap-slate"
             }`}
           >
             All
@@ -61,7 +61,7 @@ export function InvoiceListFilters({
               type="button"
               onClick={() => update("status", s)}
               className={`min-h-touch whitespace-nowrap rounded-full border px-3 text-xs font-semibold ${
-                defaultStatus === s ? "border-brand-teal text-brand-teal" : "border-brand-border text-brand-slate-400"
+                defaultStatus === s ? "border-lap-teal bg-lap-teal-wash text-lap-teal" : "border-lap-border text-lap-slate"
               }`}
             >
               {s.replace(/_/g, " ")}

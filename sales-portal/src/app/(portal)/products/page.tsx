@@ -19,7 +19,7 @@ export default async function ProductsPage({
 
   return (
     <div className="space-y-4">
-      <h1 className="text-xl font-semibold text-white">Product Catalog</h1>
+      <h1 className="font-heading text-xl font-semibold text-lap-ink">Product Catalog</h1>
       <CatalogFilters priceListCode={priceListCode} category={category} search={sp.q} />
 
       {products.length === 0 ? (

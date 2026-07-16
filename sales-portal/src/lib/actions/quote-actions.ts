@@ -103,7 +103,7 @@ export async function saveQuoteDraft(rawInput: QuoteDraftInput): Promise<SaveQuo
       quantity: requested.quantity,
       unitPrice: line.unitPrice ?? 0,
       lineTotal: line.lineTotal ?? 0,
-      pricingTierLabel: line.appliedTier?.label ?? "Below minimum — not priced",
+      pricingTierLabel: line.appliedTier?.label ?? "Below minimum - not priced",
       priceListCode: line.effectivePriceListCode,
       priceListName: line.priceListName,
       effectiveDate: line.effectiveDate,

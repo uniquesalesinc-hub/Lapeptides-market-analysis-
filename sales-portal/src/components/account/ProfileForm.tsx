@@ -30,7 +30,7 @@ export function ProfileForm({ name, phone }: { name: string; phone: string }) {
         <label className="label-text">Phone</label>
         <input name="phone" type="tel" inputMode="tel" defaultValue={phone} className="input-field" />
       </div>
-      {message && <p className="text-sm text-brand-teal">{message}</p>}
+      {message && <p className="text-sm text-lap-teal">{message}</p>}
       <button type="submit" className="btn-primary w-full" disabled={pending}>
         {pending ? "Saving…" : "Save Profile"}
       </button>

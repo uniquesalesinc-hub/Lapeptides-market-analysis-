@@ -9,15 +9,15 @@ export default function LoginPage() {
         <Logo />
       </div>
       <div className="card w-full max-w-sm p-6">
-        <h1 className="mb-1 text-xl font-semibold text-white">Sales Portal sign in</h1>
-        <p className="mb-6 text-sm text-brand-slate-400">
+        <h1 className="mb-1 font-heading text-xl font-semibold text-lap-ink">Sales Portal sign in</h1>
+        <p className="mb-6 text-sm text-lap-slate">
           Authorized LA Peptides sales representatives and administrators only.
         </p>
         <Suspense>
           <LoginForm />
         </Suspense>
       </div>
-      <p className="mt-8 max-w-sm text-center text-xs text-brand-slate-400">
+      <p className="mt-8 max-w-sm text-center text-xs text-lap-slate">
         Access is administrator-controlled. New accounts must be activated before sign in is
         permitted.
       </p>

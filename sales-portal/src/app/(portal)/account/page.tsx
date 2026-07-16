@@ -9,19 +9,19 @@ export default async function AccountPage() {
 
   return (
     <div className="space-y-4">
-      <h1 className="text-xl font-semibold text-white">Account</h1>
+      <h1 className="font-heading text-xl font-semibold text-lap-ink">Account</h1>
 
       <div className="card p-4 text-sm">
         <p className="label-text !mb-0">Role</p>
-        <p className="text-white">{user.role === "ADMIN" ? "Administrator" : "Sales Representative"}</p>
+        <p className="text-lap-ink">{user.role === "ADMIN" ? "Administrator" : "Sales Representative"}</p>
         {user.role === "SALES_REP" && (
           <>
             <p className="label-text !mb-0 mt-2">Discount limit</p>
-            <p className="text-white">{Number(user.discountLimitPercent)}% without administrator approval</p>
+            <p className="text-lap-ink">{Number(user.discountLimitPercent)}% without administrator approval</p>
           </>
         )}
         <p className="label-text !mb-0 mt-2">Email</p>
-        <p className="text-white">{user.email}</p>
+        <p className="text-lap-ink">{user.email}</p>
       </div>
 
       <ProfileForm name={user.name} phone={user.phone ?? ""} />

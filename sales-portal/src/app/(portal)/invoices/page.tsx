@@ -23,7 +23,7 @@ export default async function InvoicesPage({
 
   return (
     <div className="space-y-4">
-      <h1 className="text-xl font-semibold text-white">Invoices</h1>
+      <h1 className="font-heading text-xl font-semibold text-lap-ink">Invoices</h1>
       <InvoiceListFilters defaultSearch={sp.q} defaultStatus={sp.status} defaultUnpaid={sp.unpaid === "1"} />
 
       {invoices.length === 0 ? (
@@ -34,14 +34,14 @@ export default async function InvoicesPage({
             <li key={inv.id}>
               <Link href={`/invoices/${inv.id}`} className="card flex items-center justify-between p-4">
                 <div>
-                  <p className="font-mono text-sm text-white">{inv.invoiceNumber}</p>
-                  <p className="text-sm text-brand-slate-400">{inv.customer.businessName}</p>
-                  <p className="text-xs text-brand-slate-400">
+                  <p className="font-mono text-sm text-lap-ink">{inv.invoiceNumber}</p>
+                  <p className="text-sm text-lap-slate">{inv.customer.businessName}</p>
+                  <p className="text-xs text-lap-slate">
                     {formatDate(inv.issueDate)} · {inv.owner.name}
                   </p>
                 </div>
                 <div className="text-right">
-                  <p className="mb-1 font-semibold text-white">{formatMoney(Number(inv.balanceDue))} due</p>
+                  <p className="mb-1 font-mono font-semibold text-lap-ink">{formatMoney(Number(inv.balanceDue))} due</p>
                   <StatusBadge status={displayInvoiceStatus(inv)} />
                 </div>
               </Link>

@@ -142,7 +142,7 @@ export function ProductsStep({
             </option>
           ))}
         </select>
-        <p className="mt-1 text-xs text-brand-slate-400">
+        <p className="mt-1 text-xs text-lap-slate">
           Sprays, creams, and capsules always price from their own sheets. Every unit on the
           quote counts toward volume tiers (mix &amp; match), except capsules (priced per SKU, 1–49).
         </p>
@@ -177,7 +177,7 @@ export function ProductsStep({
                   key={entry!.variant.id}
                   type="button"
                   onClick={() => addToCart(entry!.product, entry!.variant.id, 1)}
-                  className="min-h-touch whitespace-nowrap rounded-full border border-brand-border bg-brand-surface px-3 text-sm text-brand-slate-200"
+                  className="min-h-touch whitespace-nowrap rounded-full border border-lap-border bg-lap-surface px-3 text-sm text-lap-ink"
                 >
                   {entry!.product.name} {entry!.variant.size}
                 </button>
@@ -189,27 +189,27 @@ export function ProductsStep({
 
       {cart.length > 0 && (
         <div className="card p-4">
-          <h2 className="mb-2 font-semibold text-white">Cart ({cart.length})</h2>
+          <h2 className="mb-2 font-semibold text-lap-ink">Cart ({cart.length})</h2>
           <ul className="space-y-3">
             {cart.map((line) => {
               const warning = lineWarnings.find((w) => w.sku === line.sku);
               return (
-                <li key={line.variantId} className="border-t border-brand-border pt-3 first:border-t-0 first:pt-0">
+                <li key={line.variantId} className="border-t border-lap-border pt-3 first:border-t-0 first:pt-0">
                   <div className="flex items-start justify-between gap-2">
                     <div>
-                      <p className="font-medium text-white">
+                      <p className="font-medium text-lap-ink">
                         {line.productName} {line.strength}
                       </p>
-                      <p className="font-mono text-xs text-brand-slate-400">{line.sku}</p>
+                      <p className="font-mono text-xs text-lap-slate">{line.sku}</p>
                       {line.pricing.qualifies ? (
-                        <p className="text-xs text-brand-slate-400">{line.pricing.appliedTier?.label}</p>
+                        <p className="text-xs text-lap-slate">{line.pricing.appliedTier?.label}</p>
                       ) : (
-                        <p className="text-xs text-brand-danger">{line.pricing.warning}</p>
+                        <p className="text-xs text-lap-red">{line.pricing.warning}</p>
                       )}
-                      {warning && <p className="text-xs text-brand-danger">{warning.warning}</p>}
+                      {warning && <p className="text-xs text-lap-red">{warning.warning}</p>}
                     </div>
-                    <p className="whitespace-nowrap text-right font-semibold text-white">
-                      {line.pricing.qualifies ? formatMoney(line.pricing.lineTotal!) : "—"}
+                    <p className="whitespace-nowrap text-right font-mono font-semibold text-lap-ink">
+                      {line.pricing.qualifies ? formatMoney(line.pricing.lineTotal!) : "-"}
                     </p>
                   </div>
                   <div className="mt-2 flex items-center gap-2">
@@ -233,7 +233,7 @@ export function ProductsStep({
       )}
 
       {loading ? (
-        <p className="text-center text-sm text-brand-slate-400">Loading catalog…</p>
+        <p className="text-center text-sm text-lap-slate">Loading catalog…</p>
       ) : (
         <div className="space-y-3">
           {filtered.map((product) => (
@@ -258,8 +258,8 @@ function CategoryChip({ label, active, onClick }: { label: string; active: boole
       onClick={onClick}
       className={`min-h-touch whitespace-nowrap rounded-full border px-4 text-sm font-semibold transition-colors ${
         active
-          ? "border-brand-teal bg-brand-teal text-white"
-          : "border-brand-border bg-brand-surface text-brand-slate-200"
+          ? "border-lap-teal bg-lap-teal text-white"
+          : "border-lap-border bg-lap-surface text-lap-slate"
       }`}
     >
       {label}
@@ -290,17 +290,17 @@ function ProductAddCard({
     <div className="card p-4">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <p className="font-semibold text-white">{product.name}</p>
-          <p className="font-mono text-xs text-brand-slate-400">{variant.sku}</p>
+          <p className="font-semibold text-lap-ink">{product.name}</p>
+          <p className="font-mono text-xs text-lap-slate">{variant.sku}</p>
         </div>
-        <p className="text-right text-sm text-brand-slate-400">
+        <p className="text-right text-sm text-lap-slate">
           {preview.qualifies ? (
             <>
-              <span className="block font-semibold text-brand-teal">{formatMoney(preview.unitPrice!)}/unit</span>
+              <span className="block font-mono font-semibold text-lap-teal">{formatMoney(preview.unitPrice!)}/unit</span>
               {preview.appliedTier?.label}
             </>
           ) : (
-            <span className="text-brand-danger">{preview.warning}</span>
+            <span className="text-lap-red">{preview.warning}</span>
           )}
         </p>
       </div>
@@ -317,11 +317,11 @@ function ProductAddCard({
                 <div
                   key={t.tierNumber}
                   className={`rounded-lg border px-2.5 py-1.5 text-center ${
-                    isApplied ? "border-brand-teal bg-brand-teal/10" : "border-brand-border"
+                    isApplied ? "border-lap-teal bg-lap-teal-wash" : "border-lap-border"
                   }`}
                 >
-                  <div className="text-[10px] uppercase tracking-wide text-brand-slate-400">{range}</div>
-                  <div className={`text-sm font-semibold ${isApplied ? "text-brand-teal" : "text-white"}`}>
+                  <div className="font-mono text-[10px] uppercase tracking-wide text-lap-slate">{range}</div>
+                  <div className={`font-mono text-sm font-semibold ${isApplied ? "text-lap-teal" : "text-lap-ink"}`}>
                     {formatMoney(t.unitPrice)}
                   </div>
                 </div>

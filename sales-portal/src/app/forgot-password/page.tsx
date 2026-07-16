@@ -25,8 +25,8 @@ export default function ForgotPasswordPage() {
         <Logo />
       </div>
       <div className="card w-full max-w-sm p-6">
-        <h1 className="mb-1 text-xl font-semibold text-white">Reset your password</h1>
-        <p className="mb-6 text-sm text-brand-slate-400">
+        <h1 className="mb-1 font-heading text-xl font-semibold text-lap-ink">Reset your password</h1>
+        <p className="mb-6 text-sm text-lap-slate">
           Enter your account email and we&apos;ll send a reset link.
         </p>
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -41,9 +41,9 @@ export default function ForgotPasswordPage() {
           </button>
         </form>
 
-        {message && <p className="mt-4 text-sm text-brand-slate-300">{message}</p>}
+        {message && <p className="mt-4 text-sm text-lap-slate">{message}</p>}
         {devResetUrl && (
-          <p className="mt-2 rounded-lg border border-brand-warning/40 bg-brand-warning/10 p-3 text-xs text-brand-warning">
+          <p className="mt-2 rounded-lg border border-lap-amber/40 bg-lap-amber/10 p-3 text-xs text-[#9A6318]">
             Email delivery is not configured in this environment. Development reset link:{" "}
             <a href={devResetUrl} className="underline">
               {devResetUrl}
@@ -52,7 +52,7 @@ export default function ForgotPasswordPage() {
         )}
 
         <div className="mt-6 text-center">
-          <a href="/login" className="text-sm text-brand-teal">
+          <a href="/login" className="text-sm text-lap-teal hover:underline">
             Back to sign in
           </a>
         </div>

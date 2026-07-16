@@ -1,28 +1,38 @@
+// Lap-token status chips (DESIGN.md): approval-ish states are amber with explicit words,
+// confirmed/paid green, overdue/declined red. Tone classes mirror src/components/customers/chips.tsx.
+const TONE = {
+  slate: "border-lap-border bg-lap-page text-lap-slate",
+  teal: "border-lap-teal/30 bg-lap-teal-wash text-lap-teal",
+  amber: "border-lap-amber/40 bg-lap-amber/10 text-[#9A6318]",
+  green: "border-lap-green/40 bg-lap-green/10 text-lap-green",
+  red: "border-lap-red/40 bg-lap-red/10 text-lap-red",
+} as const;
+
 const QUOTE_STYLES: Record<string, string> = {
-  DRAFT: "border-brand-slate-400/40 bg-brand-slate-400/10 text-brand-slate-300",
-  SENT: "border-sky-400/40 bg-sky-400/10 text-sky-300",
-  VIEWED: "border-sky-400/40 bg-sky-400/10 text-sky-300",
-  AWAITING_APPROVAL: "border-brand-warning/40 bg-brand-warning/10 text-brand-warning",
-  APPROVED: "border-brand-success/40 bg-brand-success/10 text-brand-success",
-  DECLINED: "border-brand-danger/40 bg-brand-danger/10 text-brand-danger",
-  EXPIRED: "border-brand-danger/40 bg-brand-danger/10 text-brand-danger",
-  CONVERTED_TO_INVOICE: "border-brand-teal/40 bg-brand-teal/10 text-brand-teal",
-  CANCELLED: "border-brand-slate-400/40 bg-brand-slate-400/10 text-brand-slate-400",
-  PARTIALLY_PAID: "border-brand-warning/40 bg-brand-warning/10 text-brand-warning",
-  PAID: "border-brand-success/40 bg-brand-success/10 text-brand-success",
-  OVERDUE: "border-brand-danger/40 bg-brand-danger/10 text-brand-danger",
-  REFUNDED: "border-brand-slate-400/40 bg-brand-slate-400/10 text-brand-slate-400",
-  VOIDED: "border-brand-slate-400/40 bg-brand-slate-400/10 text-brand-slate-400",
+  DRAFT: TONE.slate,
+  SENT: TONE.teal,
+  VIEWED: TONE.teal,
+  AWAITING_APPROVAL: TONE.amber,
+  APPROVED: TONE.green,
+  DECLINED: TONE.red,
+  EXPIRED: TONE.red,
+  CONVERTED_TO_INVOICE: TONE.teal,
+  CANCELLED: TONE.slate,
+  PARTIALLY_PAID: TONE.amber,
+  PAID: TONE.green,
+  OVERDUE: TONE.red,
+  REFUNDED: TONE.slate,
+  VOIDED: TONE.slate,
 };
 
 const LABELS: Record<string, string> = {
-  AWAITING_APPROVAL: "Awaiting Approval",
+  AWAITING_APPROVAL: "Awaiting approval",
   CONVERTED_TO_INVOICE: "Converted",
-  PARTIALLY_PAID: "Partially Paid",
+  PARTIALLY_PAID: "Partially paid",
 };
 
 export function StatusBadge({ status }: { status: string }) {
-  const style = QUOTE_STYLES[status] ?? "border-brand-border bg-brand-surfaceAlt text-brand-slate-300";
+  const style = QUOTE_STYLES[status] ?? TONE.slate;
   const label = LABELS[status] ?? status.charAt(0) + status.slice(1).toLowerCase().replace(/_/g, " ");
   return <span className={`badge ${style}`}>{label}</span>;
 }

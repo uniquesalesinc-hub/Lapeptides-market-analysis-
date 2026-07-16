@@ -19,7 +19,7 @@ export default async function QuotesPage({
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-semibold text-white">Quotes</h1>
+        <h1 className="font-heading text-xl font-semibold text-lap-ink">Quotes</h1>
         <Link href="/quotes/new" className="btn-primary !min-h-0 !px-4 !py-2 text-sm">
           + New
         </Link>
@@ -35,12 +35,12 @@ export default async function QuotesPage({
             <li key={q.id}>
               <Link href={`/quotes/${q.id}`} className="card flex items-center justify-between p-4">
                 <div>
-                  <p className="font-mono text-sm text-white">{q.quoteNumber}</p>
-                  <p className="text-sm text-brand-slate-400">{q.customer.businessName}</p>
-                  <p className="text-xs text-brand-slate-400">{formatDate(q.quoteDate)} · {q.owner.name}</p>
+                  <p className="font-mono text-sm text-lap-ink">{q.quoteNumber}</p>
+                  <p className="text-sm text-lap-slate">{q.customer.businessName}</p>
+                  <p className="text-xs text-lap-slate">{formatDate(q.quoteDate)} · {q.owner.name}</p>
                 </div>
                 <div className="text-right">
-                  <p className="mb-1 font-semibold text-white">{formatMoney(Number(q.grandTotal))}</p>
+                  <p className="mb-1 font-mono font-semibold text-lap-ink">{formatMoney(Number(q.grandTotal))}</p>
                   <StatusBadge status={q.status} />
                 </div>
               </Link>

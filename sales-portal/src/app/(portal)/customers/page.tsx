@@ -17,7 +17,7 @@ export default async function CustomersPage({
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-semibold text-white">Customers</h1>
+        <h1 className="font-heading text-xl font-semibold text-lap-ink">Customers</h1>
         <Link href="/customers/new" className="btn-primary !min-h-0 !px-4 !py-2 text-sm">
           + New
         </Link>
@@ -41,15 +41,15 @@ export default async function CustomersPage({
             <li key={c.id}>
               <Link href={`/customers/${c.id}`} className="card flex items-center justify-between p-4">
                 <div>
-                  <p className="font-semibold text-white">{c.businessName}</p>
-                  <p className="text-sm text-brand-slate-400">
+                  <p className="font-semibold text-lap-ink">{c.businessName}</p>
+                  <p className="text-sm text-lap-slate">
                     {c.contactName} · {c.assignedRep.name}
                   </p>
                   {c.followUpDate && (
-                    <p className="text-xs text-brand-warning">Follow up {formatDate(c.followUpDate)}</p>
+                    <p className="text-xs text-[#9A6318]">Follow up {formatDate(c.followUpDate)}</p>
                   )}
                 </div>
-                <div className="text-right text-xs text-brand-slate-400">
+                <div className="text-right text-xs text-lap-slate">
                   <p>{c._count.quotes} quotes</p>
                   <p>{c._count.invoices} invoices</p>
                 </div>

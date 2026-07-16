@@ -33,8 +33,8 @@ export function StepTabs({
               onClick={() => onChange(s.id)}
               className={`min-h-touch whitespace-nowrap rounded-full border px-4 text-sm font-semibold disabled:opacity-40 ${
                 current === s.id
-                  ? "border-brand-teal bg-brand-teal text-brand-navy"
-                  : "border-brand-border bg-brand-surface text-brand-slate-300"
+                  ? "border-lap-teal bg-lap-teal text-white"
+                  : "border-lap-border bg-lap-surface text-lap-slate"
               }`}
             >
               {s.label}

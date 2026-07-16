@@ -7,11 +7,11 @@ export function Logo({ className, showWordmark = true }: { className?: string; s
   return (
     <span className={`inline-flex items-center gap-2 ${className ?? ""}`}>
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-        <path d="M12 2L22 20H2L12 2Z" fill="#00C4A7" />
+        <path d="M12 2L22 20H2L12 2Z" fill="#0DA5BC" />
       </svg>
       {showWordmark && (
-        <span className="text-lg font-bold tracking-tight text-white">
-          LA <span className="text-brand-teal">PEPTIDES</span>
+        <span className="font-heading text-lg font-semibold tracking-tight text-lap-ink">
+          LA <span className="text-lap-teal">PEPTIDES</span>
         </span>
       )}
     </span>

@@ -47,15 +47,15 @@ export function CustomerForm({
       {confirmDuplicate && <input type="hidden" name="confirmDuplicate" value="true" />}
 
       {state.duplicates && state.duplicates.length > 0 && (
-        <div className="card border-brand-warning/40 bg-brand-warning/10 p-4">
-          <p className="font-semibold text-brand-warning">Possible duplicate customer</p>
-          <ul className="mt-2 space-y-1 text-sm text-brand-slate-200">
+        <div className="card border-lap-amber/40 bg-lap-amber/10 p-4">
+          <p className="font-semibold text-[#9A6318]">Possible duplicate customer</p>
+          <ul className="mt-2 space-y-1 text-sm text-lap-ink">
             {state.duplicates.map((d) => (
               <li key={d.id}>
                 <a href={`/customers/${d.id}`} className="underline">
                   {d.businessName}
                 </a>{" "}
-                — {d.contactName} {d.email ? `(${d.email})` : ""}
+                - {d.contactName} {d.email ? `(${d.email})` : ""}
               </li>
             ))}
           </ul>
@@ -70,13 +70,13 @@ export function CustomerForm({
       )}
 
       {state.message && !state.ok && !state.duplicates && (
-        <p className="rounded-lg border border-brand-danger/40 bg-brand-danger/10 px-3 py-2 text-sm text-brand-danger">
+        <p className="rounded-lg border border-lap-red/40 bg-lap-red/10 px-3 py-2 text-sm text-lap-red">
           {state.message}
         </p>
       )}
 
       <section className="card space-y-4 p-4">
-        <h2 className="font-semibold text-white">Business Information</h2>
+        <h2 className="font-semibold text-lap-ink">Business Information</h2>
         <Field label="Business name" name="businessName" defaultValue={customer?.businessName} error={err("businessName")} required />
         <Field label="Contact name" name="contactName" defaultValue={customer?.contactName} error={err("contactName")} required />
         <div className="grid grid-cols-2 gap-3">
@@ -124,7 +124,7 @@ export function CustomerForm({
       </section>
 
       <section className="card space-y-4 p-4">
-        <h2 className="font-semibold text-white">Billing Address</h2>
+        <h2 className="font-semibold text-lap-ink">Billing Address</h2>
         <Field label="Address line 1" name="billingAddressLine1" defaultValue={customer?.billingAddressLine1 ?? ""} />
         <Field label="Address line 2" name="billingAddressLine2" defaultValue={customer?.billingAddressLine2 ?? ""} />
         <div className="grid grid-cols-3 gap-3">
@@ -136,8 +136,8 @@ export function CustomerForm({
 
       <section className="card space-y-4 p-4">
         <div className="flex items-center justify-between">
-          <h2 className="font-semibold text-white">Shipping Address</h2>
-          <label className="flex items-center gap-2 text-sm text-brand-slate-300">
+          <h2 className="font-semibold text-lap-ink">Shipping Address</h2>
+          <label className="flex items-center gap-2 text-sm text-lap-slate">
             <input
               type="checkbox"
               name="shippingSameAsBilling"
@@ -161,7 +161,7 @@ export function CustomerForm({
       </section>
 
       <section className="card space-y-4 p-4">
-        <h2 className="font-semibold text-white">Billing & Notes</h2>
+        <h2 className="font-semibold text-lap-ink">Billing & Notes</h2>
         <div>
           <label className="label-text">Payment terms</label>
           <select name="paymentTerms" defaultValue={customer?.paymentTerms ?? "Prepaid"} className="input-field">
@@ -170,7 +170,7 @@ export function CustomerForm({
             <option value="Net 30">Net 30 (requires admin enablement)</option>
           </select>
         </div>
-        <label className="flex items-center gap-2 text-sm text-brand-slate-300">
+        <label className="flex items-center gap-2 text-sm text-lap-slate">
           <input type="checkbox" name="taxExempt" defaultChecked={customer?.taxExempt} />
           Tax-exempt
         </label>
@@ -230,7 +230,7 @@ function Field({
     <div>
       <label className="label-text" htmlFor={name}>
         {label}
-        {required && <span className="text-brand-danger"> *</span>}
+        {required && <span className="text-lap-red"> *</span>}
       </label>
       <input
         id={name}
@@ -241,7 +241,7 @@ function Field({
         required={required}
         className="input-field"
       />
-      {error && <p className="mt-1 text-xs text-brand-danger">{error}</p>}
+      {error && <p className="mt-1 text-xs text-lap-red">{error}</p>}
     </div>
   );
 }

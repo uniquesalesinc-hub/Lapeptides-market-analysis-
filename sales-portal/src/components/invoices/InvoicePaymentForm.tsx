@@ -44,7 +44,7 @@ export function InvoicePaymentForm({ invoiceId, balanceDue }: { invoiceId: strin
 
   return (
     <form onSubmit={handleSubmit} className="card space-y-3 p-4">
-      <h2 className="font-semibold text-white">Record a payment</h2>
+      <h2 className="font-semibold text-lap-ink">Record a payment</h2>
       <div>
         <label className="label-text">Amount</label>
         <input
@@ -78,7 +78,7 @@ export function InvoicePaymentForm({ invoiceId, balanceDue }: { invoiceId: strin
         <label className="label-text">Internal note (optional)</label>
         <textarea name="internalNote" rows={2} className="input-field !h-auto py-2" />
       </div>
-      {error && <p className="text-sm text-brand-danger">{error}</p>}
+      {error && <p className="text-sm text-lap-red">{error}</p>}
       <div className="flex gap-2">
         <button type="button" className="btn-secondary flex-1" onClick={() => setOpen(false)}>
           Cancel

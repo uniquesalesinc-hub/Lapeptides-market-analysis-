@@ -38,8 +38,8 @@ export function CatalogFilters({
               onClick={() => updateParam("priceList", code)}
               className={`min-h-touch whitespace-nowrap rounded-full border px-4 text-sm font-semibold ${
                 priceListCode === code
-                  ? "border-brand-teal bg-brand-teal text-brand-navy"
-                  : "border-brand-border bg-brand-surface text-brand-slate-300"
+                  ? "border-lap-teal bg-lap-teal text-white"
+                  : "border-lap-border bg-lap-surface text-lap-slate"
               }`}
             >
               {PRICE_LIST_LABELS[code]}
@@ -67,8 +67,8 @@ export function CatalogFilters({
             onClick={() => updateParam("category", undefined)}
             className={`min-h-touch whitespace-nowrap rounded-full border px-3 text-xs font-semibold ${
               !category
-                ? "border-brand-teal text-brand-teal"
-                : "border-brand-border text-brand-slate-400"
+                ? "border-lap-teal bg-lap-teal-wash text-lap-teal"
+                : "border-lap-border text-lap-slate"
             }`}
           >
             All categories
@@ -80,8 +80,8 @@ export function CatalogFilters({
               onClick={() => updateParam("category", cat)}
               className={`min-h-touch whitespace-nowrap rounded-full border px-3 text-xs font-semibold ${
                 category === cat
-                  ? "border-brand-teal text-brand-teal"
-                  : "border-brand-border text-brand-slate-400"
+                  ? "border-lap-teal bg-lap-teal-wash text-lap-teal"
+                  : "border-lap-border text-lap-slate"
               }`}
             >
               {CATEGORY_LABELS[cat]}

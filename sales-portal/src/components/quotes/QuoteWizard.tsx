@@ -176,17 +176,17 @@ export function QuoteWizard({
       />
 
       {error && (
-        <p className="rounded-lg border border-brand-danger/40 bg-brand-danger/10 px-3 py-2 text-sm text-brand-danger">
+        <p className="rounded-lg border border-lap-red/40 bg-lap-red/10 px-3 py-2 text-sm text-lap-red">
           {error}
         </p>
       )}
       {blockingApprovals.length > 0 && (
-        <div className="rounded-lg border border-brand-warning/40 bg-brand-warning/10 px-3 py-2 text-sm text-brand-warning">
+        <div className="rounded-lg border border-lap-amber/40 bg-lap-amber/10 px-3 py-2 text-sm text-[#9A6318]">
           <p className="font-semibold">Requires administrator approval:</p>
           <ul className="list-inside list-disc">
             {blockingApprovals.map((b, i) => (
               <li key={i}>
-                {b.label} — {b.reason}
+                {b.label} - {b.reason}
               </li>
             ))}
           </ul>
@@ -252,18 +252,18 @@ export function QuoteWizard({
 
       {step !== "review" && cart.length > 0 && (
         <div
-          className="no-print fixed inset-x-0 z-30 border-t border-brand-border bg-brand-surface/95 px-4 py-3 backdrop-blur"
-          // BottomNav is also `fixed bottom-0` and adds `env(safe-area-inset-bottom)` on top of
-          // its own ~52px content height — a hardcoded `bottom-16` (64px) sits *inside* that
-          // nav's real footprint on notched phones (iPhone X and later), covering part of the
+          className="no-print fixed inset-x-0 z-30 border-t border-lap-border bg-lap-surface px-4 py-3"
+          // The shell's MobileNav is also `fixed bottom-0` and adds `env(safe-area-inset-bottom)`
+          // on top of its own ~52px content height - a hardcoded `bottom-16` (64px) sits *inside*
+          // that nav's real footprint on notched phones (iPhone X and later), covering part of the
           // Continue/Review Quote button. Push this bar up by the same safe-area inset so it
           // always clears the nav regardless of device.
           style={{ bottom: "calc(4rem + env(safe-area-inset-bottom))" }}
         >
           <div className="mx-auto flex max-w-2xl items-center justify-between">
             <div>
-              <p className="text-xs text-brand-slate-400">{cart.length} line item(s)</p>
-              <p className="font-semibold text-white">{totals.subtotal.toLocaleString("en-US", { style: "currency", currency: "USD" })}</p>
+              <p className="text-xs text-lap-slate">{cart.length} line item(s)</p>
+              <p className="font-mono font-semibold text-lap-ink">{totals.subtotal.toLocaleString("en-US", { style: "currency", currency: "USD" })}</p>
             </div>
             <button
               type="button"

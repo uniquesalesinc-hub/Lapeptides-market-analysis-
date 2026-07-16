@@ -60,7 +60,7 @@ export function AppSidebar({ role }: { role: PortalRole }) {
       </nav>
 
       <p className="hidden border-t border-white/10 px-5 py-3 text-[10px] uppercase leading-relaxed tracking-wide text-white/40 xl:block">
-        For research purposes only. Not for human consumption.
+        For research purposes only - not for human consumption.
       </p>
     </aside>
   );

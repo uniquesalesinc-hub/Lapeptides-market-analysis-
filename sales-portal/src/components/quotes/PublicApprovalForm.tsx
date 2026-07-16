@@ -13,11 +13,11 @@ export function PublicApprovalForm({ token, approvalLanguage }: { token: string;
 
   if (result?.ok) {
     return (
-      <div className="card border-brand-success/40 bg-brand-success/10 p-4 text-center">
-        <p className="font-semibold text-brand-success">
+      <div className="card border-lap-green/40 bg-lap-green/10 p-4 text-center">
+        <p className="font-semibold text-lap-green">
           {decision === "APPROVED" ? "Quote approved. Thank you!" : "Quote declined."}
         </p>
-        <p className="mt-1 text-sm text-brand-slate-300">Your sales representative has been notified.</p>
+        <p className="mt-1 text-sm text-lap-slate">Your sales representative has been notified.</p>
       </div>
     );
   }
@@ -43,14 +43,14 @@ export function PublicApprovalForm({ token, approvalLanguage }: { token: string;
 
   return (
     <div className="card space-y-4 p-4">
-      <h2 className="font-semibold text-white">Respond to this quote</h2>
+      <h2 className="font-semibold text-lap-ink">Respond to this quote</h2>
 
       <div className="grid grid-cols-2 gap-2">
         <button
           type="button"
           onClick={() => setDecision("APPROVED")}
           className={`min-h-touch rounded-lg border px-4 font-semibold ${
-            decision === "APPROVED" ? "border-brand-success bg-brand-success/10 text-brand-success" : "border-brand-border text-brand-slate-300"
+            decision === "APPROVED" ? "border-lap-green bg-lap-green/10 text-lap-green" : "border-lap-border text-lap-slate"
           }`}
         >
           Approve
@@ -59,7 +59,7 @@ export function PublicApprovalForm({ token, approvalLanguage }: { token: string;
           type="button"
           onClick={() => setDecision("DECLINED")}
           className={`min-h-touch rounded-lg border px-4 font-semibold ${
-            decision === "DECLINED" ? "border-brand-danger bg-brand-danger/10 text-brand-danger" : "border-brand-border text-brand-slate-300"
+            decision === "DECLINED" ? "border-lap-red bg-lap-red/10 text-lap-red" : "border-lap-border text-lap-slate"
           }`}
         >
           Decline
@@ -82,7 +82,7 @@ export function PublicApprovalForm({ token, approvalLanguage }: { token: string;
           </div>
 
           {decision === "APPROVED" && (
-            <div className="space-y-2 text-sm text-brand-slate-300">
+            <div className="space-y-2 text-sm text-lap-slate">
               <label className="flex items-start gap-2">
                 <input
                   type="checkbox"
@@ -114,7 +114,7 @@ export function PublicApprovalForm({ token, approvalLanguage }: { token: string;
             </div>
           )}
 
-          {result && !result.ok && <p className="text-sm text-brand-danger">{result.message}</p>}
+          {result && !result.ok && <p className="text-sm text-lap-red">{result.message}</p>}
 
           <button
             type="submit"

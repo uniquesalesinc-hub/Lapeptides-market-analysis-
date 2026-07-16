@@ -25,7 +25,7 @@ export function tiersFor(code: PriceListCode): TierDefinition[] {
     case PRICE_LIST_CODES.BULK_RETAIL:
       return BULK_RETAIL_TIERS.map((t) => ({
         tier: t.tier,
-        label: `Bulk Retail — ${t.label} (${t.minQty}+ bottles)`,
+        label: `Bulk Retail - ${t.label} (${t.minQty}+ bottles)`,
         minimumBasis: "FLOOR_ONLY" as const,
         minQty: t.minQty,
         maxQty: t.maxQty,
@@ -33,7 +33,7 @@ export function tiersFor(code: PriceListCode): TierDefinition[] {
     case PRICE_LIST_CODES.BULK_WHOLESALE:
       return BULK_WHOLESALE_TIERS.map((t) => ({
         tier: t.tier,
-        label: `Bulk Wholesale — ${t.label} (${t.maxQty ? `${t.minQty}–${t.maxQty}` : `${t.minQty}+`} bottles)`,
+        label: `Bulk Wholesale - ${t.label} (${t.maxQty ? `${t.minQty}–${t.maxQty}` : `${t.minQty}+`} bottles)`,
         minimumBasis: "BAND" as const,
         minQty: t.minQty,
         maxQty: t.maxQty,

@@ -55,7 +55,7 @@ export function SettingsForm({ settings }: { settings: SerializableCompanySettin
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <section className="card space-y-3 p-4">
-        <h2 className="font-semibold text-white">Company Information</h2>
+        <h2 className="font-heading text-base font-semibold text-lap-ink">Company Information</h2>
         <Field label="Company name" name="companyName" defaultValue={settings.companyName} required />
         <Field label="DBA name" name="dbaName" defaultValue={settings.dbaName ?? ""} />
         <Field label="Address line 1" name="addressLine1" defaultValue={settings.addressLine1 ?? ""} />
@@ -71,7 +71,7 @@ export function SettingsForm({ settings }: { settings: SerializableCompanySettin
       </section>
 
       <section className="card space-y-3 p-4">
-        <h2 className="font-semibold text-white">Numbering & Terms</h2>
+        <h2 className="font-heading text-base font-semibold text-lap-ink">Numbering & Terms</h2>
         <div className="grid grid-cols-2 gap-2">
           <Field label="Quote prefix" name="quotePrefix" defaultValue={settings.quotePrefix} />
           <Field label="Invoice prefix" name="invoicePrefix" defaultValue={settings.invoicePrefix} />
@@ -90,14 +90,14 @@ export function SettingsForm({ settings }: { settings: SerializableCompanySettin
             <option value="Net 30">Net 30</option>
           </select>
         </div>
-        <label className="flex items-center gap-2 text-sm text-brand-slate-300">
+        <label className="flex items-center gap-2 text-sm text-lap-slate">
           <input type="checkbox" checked={allowNetTerms} onChange={(e) => setAllowNetTerms(e.target.checked)} />
           Allow representatives to offer Net terms (business is prepaid by default)
         </label>
       </section>
 
       <section className="card space-y-3 p-4">
-        <h2 className="font-semibold text-white">Tax & Discounts</h2>
+        <h2 className="font-heading text-base font-semibold text-lap-ink">Tax & Discounts</h2>
         <div>
           <label className="label-text">Tax behavior</label>
           <select name="taxBehavior" defaultValue={settings.taxBehavior} className="input-field">
@@ -121,7 +121,7 @@ export function SettingsForm({ settings }: { settings: SerializableCompanySettin
       </section>
 
       <section className="card space-y-3 p-4">
-        <h2 className="font-semibold text-white">Documents & Payment</h2>
+        <h2 className="font-heading text-base font-semibold text-lap-ink">Documents & Payment</h2>
         <div>
           <label className="label-text">ACH instructions</label>
           <textarea name="achInstructions" rows={3} defaultValue={settings.achInstructions ?? ""} className="input-field !h-auto py-2" />
@@ -154,7 +154,7 @@ export function SettingsForm({ settings }: { settings: SerializableCompanySettin
         </div>
       </section>
 
-      {message && <p className="text-sm text-brand-teal">{message}</p>}
+      {message && <p className="text-sm text-lap-teal">{message}</p>}
       <button type="submit" className="btn-primary sticky bottom-24 w-full" disabled={pending}>
         {pending ? "Saving…" : "Save Settings"}
       </button>

@@ -83,7 +83,7 @@ export default async function EditQuotePage({ params }: { params: Promise<{ id: 
 
   return (
     <div className="space-y-4">
-      <h1 className="text-xl font-semibold text-white">Edit {quote.quoteNumber}</h1>
+      <h1 className="font-heading text-xl font-semibold text-lap-ink">Edit {quote.quoteNumber}</h1>
       <QuoteWizard
         customers={customerOptions}
         repDiscountLimitPercent={Number(currentUser?.discountLimitPercent ?? settings.repDiscountLimitPercent)}

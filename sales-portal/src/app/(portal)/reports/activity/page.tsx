@@ -43,7 +43,7 @@ export default async function ActivityLogPage({
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-semibold text-white">Activity Log</h1>
+        <h1 className="font-heading text-xl font-semibold text-lap-ink">Activity Log</h1>
         <CsvExportButton filename="activity-log.csv" rows={csvRows} />
       </div>
 
@@ -61,20 +61,20 @@ export default async function ActivityLogPage({
         </button>
       </form>
 
-      <ul className="card divide-y divide-brand-border p-4">
+      <ul className="card divide-y divide-lap-border p-4">
         {logs.map((l) => (
           <li key={l.id} className="py-2 text-sm first:pt-0 last:pb-0">
-            <p className="text-white">{ACTIVITY_LABELS[l.action]}</p>
-            <p className="text-xs text-brand-slate-400">
+            <p className="text-lap-ink">{ACTIVITY_LABELS[l.action]}</p>
+            <p className="text-xs text-lap-slate">
               {l.actor?.name ?? "System"} · {formatDateTime(l.createdAt)}
               {l.customer ? ` · ${l.customer.businessName}` : ""}
               {l.quote ? ` · ${l.quote.quoteNumber}` : ""}
               {l.invoice ? ` · ${l.invoice.invoiceNumber}` : ""}
             </p>
-            {l.description && <p className="text-xs text-brand-slate-400">{l.description}</p>}
+            {l.description && <p className="text-xs text-lap-slate">{l.description}</p>}
           </li>
         ))}
-        {logs.length === 0 && <p className="py-4 text-center text-sm text-brand-slate-400">No activity recorded yet.</p>}
+        {logs.length === 0 && <p className="py-4 text-center text-sm text-lap-slate">No activity recorded yet.</p>}
       </ul>
     </div>
   );

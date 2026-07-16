@@ -4,7 +4,7 @@ import { useState, useTransition } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
 
-/** Only ever follow a same-origin, relative path from `?next=` — never an absolute or
+/** Only ever follow a same-origin, relative path from `?next=` - never an absolute or
  *  protocol-relative URL, which would let a crafted login link redirect a freshly-authenticated
  *  user off-site (e.g. `/login?next=https://evil.example` or `//evil.example`). */
 function sanitizeNextPath(value: string | null): string {
@@ -80,7 +80,7 @@ export function LoginForm() {
       </div>
 
       {error && (
-        <p className="rounded-lg border border-brand-danger/40 bg-brand-danger/10 px-3 py-2 text-sm text-brand-danger">
+        <p className="rounded-lg border border-lap-red/40 bg-lap-red/10 px-3 py-2 text-sm text-lap-red">
           {error}
         </p>
       )}
@@ -90,7 +90,7 @@ export function LoginForm() {
       </button>
 
       <div className="text-center">
-        <a href="/forgot-password" className="text-sm text-brand-teal">
+        <a href="/forgot-password" className="text-sm text-lap-teal hover:underline">
           Forgot your password?
         </a>
       </div>

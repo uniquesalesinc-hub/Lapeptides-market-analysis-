@@ -64,7 +64,7 @@ export function ChargesStep({
   return (
     <div className="space-y-4">
       <div className="card space-y-3 p-4">
-        <h2 className="font-semibold text-white">Add a charge or discount</h2>
+        <h2 className="font-semibold text-lap-ink">Add a charge or discount</h2>
         <div>
           <label className="label-text">Type</label>
           <select className="input-field" value={kind} onChange={(e) => setKind(e.target.value as WizardAdjustment["kind"])}>
@@ -116,17 +116,17 @@ export function ChargesStep({
 
       {adjustments.length > 0 && (
         <div className="card p-4">
-          <h2 className="mb-2 font-semibold text-white">Applied charges</h2>
-          <ul className="divide-y divide-brand-border">
+          <h2 className="mb-2 font-semibold text-lap-ink">Applied charges</h2>
+          <ul className="divide-y divide-lap-border">
             {adjustments.map((a) => (
               <li key={a.id} className="flex items-center justify-between py-2">
                 <div>
-                  <p className="text-sm text-white">{a.label}</p>
-                  <p className="text-xs text-brand-slate-400">
+                  <p className="text-sm text-lap-ink">{a.label}</p>
+                  <p className="font-mono text-xs text-lap-slate">
                     {a.valueType === "PERCENT" ? `${a.value}%` : formatMoney(a.value)}
                   </p>
                 </div>
-                <button type="button" className="text-sm text-brand-danger" onClick={() => removeAdjustment(a.id)}>
+                <button type="button" className="text-sm text-lap-red" onClick={() => removeAdjustment(a.id)}>
                   Remove
                 </button>
               </li>
@@ -136,7 +136,7 @@ export function ChargesStep({
       )}
 
       <div className="card space-y-3 p-4">
-        <h2 className="font-semibold text-white">Deposit & Terms</h2>
+        <h2 className="font-semibold text-lap-ink">Deposit & Terms</h2>
         <div>
           <label className="label-text">Deposit required (% of total)</label>
           <input
@@ -212,7 +212,7 @@ function DiscountLimitPreview({
   const auth = authorizeDiscount({ kind, label: "", valueType, value }, subtotal, limit);
   if (auth.authorized) return null;
   return (
-    <p className="rounded-lg border border-brand-warning/40 bg-brand-warning/10 px-3 py-2 text-xs text-brand-warning">
+    <p className="rounded-lg border border-lap-amber/40 bg-lap-amber/10 px-3 py-2 text-xs text-[#9A6318]">
       {auth.reason}
     </p>
   );

@@ -9,8 +9,8 @@ export function EmptyState({
 }) {
   return (
     <div className="card flex flex-col items-center gap-3 px-6 py-10 text-center">
-      <p className="font-semibold text-white">{title}</p>
-      {description && <p className="text-sm text-brand-slate-400">{description}</p>}
+      <p className="font-semibold text-lap-ink">{title}</p>
+      {description && <p className="text-sm text-lap-slate">{description}</p>}
       {action}
     </div>
   );

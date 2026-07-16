@@ -52,7 +52,7 @@ interface OrderModeContextValue {
   setLineNote: (variantId: string, note: string) => void;
   setLineDiscount: (variantId: string, discountPercent: number | null) => void;
   clearCart: () => void;
-  /** Registers a brand-new customer (from the drawer inline form) and selects it. */
+  /** Registers a newly created customer (from the drawer inline form) and selects it. */
   adoptNewCustomer: (customer: OrderCustomer) => void;
 }
 

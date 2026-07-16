@@ -110,8 +110,8 @@ async function main() {
     [PRICE_LIST_CODES.WHOLESALE_CAPSULES]: ["Bulk_Wholesale_Capsules_Draft.pdf"],
   };
   const listNames: Record<string, string> = {
-    [PRICE_LIST_CODES.BULK_RETAIL]: "Bulk Retail — May 2026",
-    [PRICE_LIST_CODES.BULK_WHOLESALE]: "Bulk Wholesale — May 2026",
+    [PRICE_LIST_CODES.BULK_RETAIL]: "Bulk Retail - May 2026",
+    [PRICE_LIST_CODES.BULK_WHOLESALE]: "Bulk Wholesale - May 2026",
     [PRICE_LIST_CODES.WHOLESALE_SPRAYS]: "Wholesale Sprays — May 2026",
     [PRICE_LIST_CODES.WHOLESALE_CREAMS]: "Wholesale Creams — May 2026",
     // Source sheet is titled "Draft" — kept visible in the name so nobody mistakes it for final.

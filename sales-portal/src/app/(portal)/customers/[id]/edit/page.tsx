@@ -20,7 +20,7 @@ export default async function EditCustomerPage({ params }: { params: Promise<{ i
 
   return (
     <div className="space-y-4">
-      <h1 className="text-xl font-semibold text-white">Edit {customer.businessName}</h1>
+      <h1 className="font-heading text-xl font-semibold text-lap-ink">Edit {customer.businessName}</h1>
       <CustomerForm action={boundAction} customer={customer} reps={reps} isAdmin={user.role === "ADMIN"} />
     </div>
   );

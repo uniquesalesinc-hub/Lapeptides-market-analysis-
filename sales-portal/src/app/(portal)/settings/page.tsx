@@ -8,7 +8,7 @@ export default async function SettingsPage() {
 
   return (
     <div className="space-y-4">
-      <h1 className="text-xl font-semibold text-white">Settings</h1>
+      <h1 className="font-heading text-xl font-semibold text-lap-ink">Settings</h1>
       <SettingsForm
         settings={{
           ...settings,
