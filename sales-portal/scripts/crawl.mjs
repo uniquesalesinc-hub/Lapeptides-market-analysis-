@@ -9,7 +9,9 @@ const REP_ROUTES = ["/dashboard", "/order", "/quotes", "/quotes/new", "/customer
 const ADMIN_ROUTES = [...REP_ROUTES, "/pricing", "/reps", "/reports", "/settings"];
 const USERS = [
   { label: "admin", email: "uniquesalesinc@gmail.com", routes: ADMIN_ROUTES },
-  { label: "rep", email: "spencer@demo.lapeptides.net", routes: REP_ROUTES },
+  // rep1 (not spencer): the rep crawl must reach a customer detail page, and rep1 is the
+  // demo rep that owns a customer.
+  { label: "rep", email: "rep1@demo.lapeptides.net", routes: REP_ROUTES },
 ];
 
 const failures = [];
@@ -52,6 +54,20 @@ async function crawlUser(browser, { label, email, routes }) {
   }
 
   for (const route of routes) await visit(route);
+
+  // Representative customer detail page (Customer 360): first customer link on /customers.
+  await page.goto(`${BASE}/customers`, { waitUntil: "load", timeout: 30000 });
+  const customerHref = await page.$$eval('a[href^="/customers/"]', (anchors) =>
+    anchors
+      .map((a) => a.getAttribute("href"))
+      .find((h) => h && h !== "/customers" && h !== "/customers/new" && !h.endsWith("/edit"))
+  );
+  if (customerHref) {
+    await visit(customerHref);
+  } else {
+    failures.push({ label, route: "/customers/[id]", errors: ["no customer detail link found on /customers"] });
+    console.log(`FAIL [${label}] /customers/[id] (no detail link found)`);
+  }
 
   // Representative product detail page: the first detail link found on /products.
   await page.goto(`${BASE}/products`, { waitUntil: "load", timeout: 30000 });

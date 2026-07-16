@@ -2,10 +2,12 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { z } from "zod";
 import { prisma } from "@/lib/prisma";
-import { requireUser } from "@/lib/session";
+import { requireAdmin, requireUser } from "@/lib/session";
 import { customerSchema } from "@/lib/validation/customer";
 import { findPossibleDuplicates } from "@/lib/data/customers";
+import { PAYMENT_TERMS_VALUES } from "@/lib/data/leads";
 
 function formToObject(formData: FormData) {
   const obj: Record<string, unknown> = {};
@@ -198,4 +200,73 @@ export async function updateCustomer(
 
 export async function redirectToNewCustomer(customerId: string) {
   redirect(`/customers/${customerId}`);
+}
+
+// Commercial terms are admin territory: the price list and payment terms drive every price
+// and due date the customer ever sees, so reps never get this mutation path.
+const commercialsSchema = z.object({
+  customerId: z.string().min(1),
+  // Bulk ladders only - the same subset Customer.defaultPriceListCode uses everywhere else.
+  defaultPriceListCode: z.enum(["BULK_RETAIL", "BULK_WHOLESALE"]),
+  // TEXT column shared with live v1 ("Prepaid" / "Net N"), parsed by invoiceTerms.computeDueDate.
+  paymentTerms: z.enum(PAYMENT_TERMS_VALUES),
+  assignedRepId: z.string().min(1, "Assign a sales representative."),
+  crmStatus: z.enum(["LEAD", "ACTIVE", "DORMANT"]),
+  billingAddress: z.string().optional(),
+  shippingAddress: z.string().optional(),
+});
+
+export interface CommercialsActionResult {
+  ok: boolean;
+  error?: string;
+}
+
+/** ADMIN ONLY: patch a customer's commercial settings from the Customer 360 controls card. */
+export async function updateCustomerCommercials(input: unknown): Promise<CommercialsActionResult> {
+  const admin = await requireAdmin();
+
+  const parsed = commercialsSchema.safeParse(input);
+  if (!parsed.success) {
+    return { ok: false, error: parsed.error.issues[0]?.message ?? "Invalid commercial settings." };
+  }
+  const data = parsed.data;
+
+  const existing = await prisma.customer.findUnique({
+    where: { id: data.customerId },
+    select: { id: true, businessName: true },
+  });
+  if (!existing) return { ok: false, error: "Customer not found." };
+
+  const rep = await prisma.user.findUnique({ where: { id: data.assignedRepId }, select: { id: true } });
+  if (!rep) return { ok: false, error: "Selected representative does not exist." };
+
+  try {
+    await prisma.customer.update({
+      where: { id: data.customerId },
+      data: {
+        defaultPriceListCode: data.defaultPriceListCode,
+        paymentTerms: data.paymentTerms,
+        assignedRepId: data.assignedRepId,
+        crmStatus: data.crmStatus,
+        billingAddress: data.billingAddress?.trim() || null,
+        shippingAddress: data.shippingAddress?.trim() || null,
+      },
+    });
+
+    await prisma.activityLog.create({
+      data: {
+        action: "CUSTOMER_EDITED",
+        actorId: admin.id,
+        customerId: data.customerId,
+        description: `${existing.businessName} commercial settings updated by ${admin.name}`,
+      },
+    });
+  } catch (err) {
+    console.error("[customer:commercials-failed]", err);
+    return { ok: false, error: "Could not save the commercial settings. Please try again." };
+  }
+
+  revalidatePath("/customers");
+  revalidatePath(`/customers/${data.customerId}`);
+  return { ok: true };
 }
