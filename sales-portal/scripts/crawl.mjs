@@ -21,6 +21,7 @@ const REP_ROUTES = [
 const ADMIN_ROUTES = [
   ...REP_ROUTES,
   "/dashboard/leads",
+  "/customers/portal-users",
   "/pricing",
   "/reps",
   "/reports",
@@ -94,7 +95,7 @@ async function crawlUser(browser, { label, email, routes }) {
 
   // Admin-only routes: a rep hitting them must be redirected away (requireAdmin).
   if (label === "rep") {
-    for (const adminRoute of ["/dashboard/leads", "/reports"]) {
+    for (const adminRoute of ["/dashboard/leads", "/reports", "/customers/portal-users"]) {
       await page.goto(`${BASE}${adminRoute}`, { waitUntil: "load", timeout: 30000 });
       await page.waitForTimeout(500);
       await settleNetwork();
@@ -114,7 +115,10 @@ async function crawlUser(browser, { label, email, routes }) {
   const customerHref = await page.$$eval('a[href^="/customers/"]', (anchors) =>
     anchors
       .map((a) => a.getAttribute("href"))
-      .find((h) => h && h !== "/customers" && h !== "/customers/new" && !h.endsWith("/edit"))
+      .find(
+        (h) =>
+          h && h !== "/customers" && h !== "/customers/new" && h !== "/customers/portal-users" && !h.endsWith("/edit")
+      )
   );
   if (customerHref) {
     await visit(customerHref);

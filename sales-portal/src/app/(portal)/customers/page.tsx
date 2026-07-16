@@ -4,6 +4,7 @@ import { listCustomers } from "@/lib/data/customers";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { formatDate } from "@/lib/format";
 import { CustomerSearch } from "@/components/customers/CustomerSearch";
+import { CustomerAreaTabs } from "@/components/customers/CustomerAreaTabs";
 
 export default async function CustomersPage({
   searchParams,
@@ -16,6 +17,7 @@ export default async function CustomersPage({
 
   return (
     <div className="space-y-4">
+      <CustomerAreaTabs isAdmin={user.role === "ADMIN"} />
       <div className="flex items-center justify-between">
         <h1 className="font-heading text-xl font-semibold text-lap-ink">Customers</h1>
         <Link href="/customers/new" className="btn-primary !min-h-0 !px-4 !py-2 text-sm">

@@ -189,6 +189,7 @@ model Customer {
   createdFromLeads Lead[] @relation("LeadCreatedCustomer")
   portalUsers  PortalUser[]
   brandAssets  BrandAsset[]
+  clientCarts  ClientCart[]
 
   @@index([assignedRepId])
   @@index([businessName])
@@ -246,6 +247,7 @@ model ProductVariant {
   quoteLineItems   QuoteLineItem[]
   invoiceLineItems InvoiceLineItem[]
   costs            VariantCost[]
+  clientCartItems  ClientCartItem[]
 
   @@index([productId])
 }
@@ -373,6 +375,13 @@ enum QuoteStatus {
   CANCELLED
 }
 
+/// Who created a Quote (v2 Phase 2): REP = staff-built in the portal (the historical default),
+/// CLIENT = self-serve order placed through the client storefront, awaiting rep/admin approval.
+enum QuoteOrigin {
+  REP
+  CLIENT
+}
+
 model Quote {
   id            String      @id @default(cuid())
   quoteNumber   String      @unique // e.g. LAQ-2026-00001, format configurable via CompanySettings
@@ -383,6 +392,13 @@ model Quote {
   owner         User        @relation("QuoteOwner", fields: [ownerId], references: [id])
 
   priceListCode PriceListCode // which of the two bulk programs this quote is priced against
+
+  /// Phase 2 client-portal columns. Globally omitted from default selections (src/lib/prisma.ts)
+  /// until the client_portal migration is applied everywhere; read them via an explicit select.
+  origin        QuoteOrigin @default(REP)
+  /// Timestamp of the client's recorded "research use only" acknowledgment at checkout.
+  /// REQUIRED (non-null) for every CLIENT-origin order; always null on rep-built quotes.
+  ruoAcknowledgedAt DateTime?
 
   status        QuoteStatus @default(DRAFT)
   quoteDate     DateTime    @default(now())
@@ -939,5 +955,46 @@ model PortalUser {
   createdAt    DateTime         @default(now())
   updatedAt    DateTime         @updatedAt
 
+  cart         ClientCart?
+
   @@index([customerId])
+}
+
+// ---------------------------------------------------------------------------
+// CLIENT PORTAL CART (v2 Phase 2): persistent server-side cart for storefront buyers.
+// Strictly additive — the database is shared with the live v1 portal.
+// ---------------------------------------------------------------------------
+
+/// The one active cart per portal user (portalUserId is unique). customerId is denormalized
+/// from the owning PortalUser so admin abandoned-cart views join straight to the account.
+model ClientCart {
+  id           String     @id @default(cuid())
+  customerId   String
+  customer     Customer   @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  portalUserId String     @unique
+  portalUser   PortalUser @relation(fields: [portalUserId], references: [id], onDelete: Cascade)
+
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  items        ClientCartItem[]
+
+  @@index([customerId])
+}
+
+/// One variant line in a client cart. Quantity-only plus an optional buyer note; pricing is
+/// NEVER stored here — it is recomputed server-side on the customer's assigned ladder at
+/// render and at checkout, so a stale cart can never lock in an old price.
+model ClientCartItem {
+  id               String         @id @default(cuid())
+  cartId           String
+  cart             ClientCart     @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  productVariantId String
+  productVariant   ProductVariant @relation(fields: [productVariantId], references: [id], onDelete: Cascade)
+  quantity         Int
+  note             String?
+
+  createdAt        DateTime       @default(now())
+
+  @@unique([cartId, productVariantId])
 }
