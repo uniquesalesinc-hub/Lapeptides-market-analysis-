@@ -217,25 +217,20 @@ async function main() {
 
   // 4b. Hard costs (ADMIN-ONLY data; see cost-source.ts header). A cost row that doesn't
   // match a catalog SKU is a transcription error — fail loudly rather than skip.
-  let costRows = 0;
-  for (const [name, size, ...cs] of COSTS) {
+  const costData = COSTS.flatMap(([name, size, ...cs]) => {
     const sku = makeSku(name, size);
     const variantId = variantCache.get(sku);
     if (!variantId) throw new Error(`cost-source row has no matching catalog SKU: ${name} ${size} (${sku})`);
-    for (const band of COST_BANDS) {
-      await prisma.variantCost.create({
-        data: {
-          variantId,
-          tierNumber: band.tier,
-          minQty: band.minQty,
-          maxQty: band.maxQty,
-          unitCost: cs[band.tier - 1]!,
-        },
-      });
-      costRows++;
-    }
-  }
-  console.log(`Hard costs seeded: ${COSTS.length} SKUs, ${costRows} cost rows (admin-only).`);
+    return COST_BANDS.map((band) => ({
+      variantId,
+      tierNumber: band.tier,
+      minQty: band.minQty,
+      maxQty: band.maxQty,
+      unitCost: cs[band.tier - 1]!,
+    }));
+  });
+  await prisma.variantCost.createMany({ data: costData, skipDuplicates: true });
+  console.log(`Hard costs seeded: ${COSTS.length} SKUs, ${costData.length} cost rows (admin-only).`);
 
   // 5. Demo customers (fictional — not real customer data)
   const customerAcme = await prisma.customer.create({
