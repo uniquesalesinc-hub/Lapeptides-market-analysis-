@@ -15,7 +15,6 @@ function applyTheme(doc, labelSpec, theme) {
   }
 
   applyFonts(doc, labelSpec, theme);
-  applyQrCaption(doc, labelSpec, theme);
 
   return doc;
 }
@@ -41,18 +40,11 @@ function applyFonts(doc, labelSpec, theme) {
   );
   styleEl.textContent = css;
 
-  // Brand name / product name read the bolder brand font directly.
-  for (const id of ['branding-name', 'product-name']) {
+  // Brand/product headings read the bolder brand font directly.
+  for (const id of (target.brandFontElementIds || [])) {
     const el = byId(doc, id);
     if (el) el.setAttribute('font-family', theme.fonts.brandFont);
   }
-}
-
-function applyQrCaption(doc, labelSpec, theme) {
-  const spec = labelSpec.qrCaptionStyle;
-  if (!spec || !theme.qrCaptionStyle || !theme.qrCaptionStyle.text) return;
-  const el = byId(doc, spec.elementId);
-  if (el) el.textContent = theme.qrCaptionStyle.text;
 }
 
 module.exports = { applyTheme, getToken };

@@ -1,0 +1,73 @@
+{
+  "$schema": "./schema/layout.schema.json",
+  "templateId": "la-peptides-universal-label",
+  "templateVersion": "1.1.0",
+  "sourceFile": "./master-label.svg",
+  "description": "Percentage-based coordinates for every editable region in master-label.svg, so a web application, the sales app, or a backend tool can position an overlay/editor or recompute pixel positions at any render resolution without parsing the SVG or redesigning the label. Every region's \"id\" is identical to its SVG element id and to its fieldKey in label-spec.json.",
+
+  "canvas": {
+    "widthPt": 127.44,
+    "heightPt": 55.44,
+    "widthPx300dpi": 531,
+    "heightPx300dpi": 231,
+    "aspectRatio": 2.29870
+  },
+
+  "coordinateSystem": {
+    "origin": "top-left",
+    "unit": "percent",
+    "xAxis": "percent of canvas width (0-100)",
+    "yAxis": "percent of canvas height (0-100)",
+    "widthAxis": "percent of canvas width (0-100)",
+    "heightAxis": "percent of canvas height (0-100)",
+    "note": "width%/height% are computed against DIFFERENT absolute axes (canvas width vs. canvas height respectively), matching how CSS percentage sizing works on a fixed-aspect-ratio box. Because the canvas itself is not square (127.44 x 55.44pt), a square element's width% and height% are NOT equal (e.g. coa_qr is 18x18pt but reports width=14.124%, height=32.468%). This is correct: render the canvas at its true aspect ratio (any size proportional to 127.44:55.44, e.g. 531x231px) and converting each percentage back with widthPx = widthPct/100*canvasWidthPx, heightPx = heightPct/100*canvasHeightPx reproduces the exact original square. Do not derive a single 'scale factor' from width alone and apply it to height, or vice versa.",
+    "textRegions": "For type=\"text\" regions, x/y/width/height describe the ALLOTTED box the field is safe to fill (matches the maxLength budget in label-spec.json's \"fields\"), not the as-drawn bounding box of the current placeholder string. baselineYPct is the SVG text baseline position (percent of canvas height) if you need to render actual SVG <text> rather than an HTML box. textAnchor \"middle\" means the field's text is horizontally centered within the region rather than left-aligned from x."
+  },
+
+  "panels": [
+    { "id": "background_layer",   "label": "Background Layer" },
+    { "id": "brand_panel",         "label": "Left Branding Panel" },
+    { "id": "divider_layer",       "label": "Divider Layer" },
+    { "id": "product_panel",       "label": "Product Panel" },
+    { "id": "verification_panel",  "label": "Verification Panel" }
+  ],
+
+  "regions": [
+    { "id": "background_fill", "panel": "background_layer", "type": "shape", "x": 0, "y": 0, "width": 100, "height": 100 },
+    { "id": "border_frame", "panel": "background_layer", "type": "shape", "x": 1.177, "y": 2.706, "width": 97.646, "height": 94.589 },
+
+    { "id": "divider_1", "panel": "divider_layer", "type": "shape", "x": 32.957, "y": 10.823, "width": 0.471, "height": 78.463 },
+    { "id": "divider_2", "panel": "divider_layer", "type": "shape", "x": 69.052, "y": 10.823, "width": 0.471, "height": 78.463 },
+
+    { "id": "brand_logo", "panel": "brand_panel", "type": "image", "x": 4.708, "y": 10.823, "width": 10.201, "height": 23.449 },
+    { "id": "brand_logo_secondary", "panel": "brand_panel", "type": "use", "x": 16.871, "y": 13.528, "width": 6.277, "height": 14.43 },
+    { "id": "brand_name", "panel": "brand_panel", "type": "text", "x": 4.708, "y": 39.394, "width": 26.679, "height": 10.786, "baselineYPct": 46.898, "textAnchor": "start" },
+    { "id": "brand_subtitle", "panel": "brand_panel", "type": "text", "x": 4.708, "y": 51.154, "width": 26.679, "height": 6.854, "baselineYPct": 55.916, "textAnchor": "start" },
+    { "id": "brand_decorative_graphic", "panel": "brand_panel", "type": "use", "x": 4.708, "y": 60.606, "width": 2.511, "height": 5.772 },
+    { "id": "brand_tagline", "panel": "brand_panel", "type": "text", "x": 8.318, "y": 61.688, "width": 23.07, "height": 6.223, "baselineYPct": 66.017, "textAnchor": "start" },
+
+    { "id": "product_name", "panel": "product_panel", "type": "text", "x": 36.095, "y": 22.547, "width": 31.387, "height": 10.372, "baselineYPct": 29.762, "textAnchor": "start" },
+    { "id": "product_descriptor", "panel": "product_panel", "type": "text", "x": 36.095, "y": 34.127, "width": 31.387, "height": 5.393, "baselineYPct": 37.879, "textAnchor": "start" },
+    { "id": "product_strength", "panel": "product_panel", "type": "text", "x": 36.095, "y": 42.208, "width": 31.387, "height": 19.706, "baselineYPct": 55.916, "textAnchor": "start" },
+    { "id": "product_concentration", "panel": "product_panel", "type": "text", "x": 36.095, "y": 60.75, "width": 15.694, "height": 6.016, "baselineYPct": 64.935, "textAnchor": "start" },
+    { "id": "product_vial_size", "panel": "product_panel", "type": "text", "x": 53.358, "y": 60.75, "width": 14.124, "height": 6.016, "baselineYPct": 64.935, "textAnchor": "start" },
+    { "id": "purity_icon", "panel": "product_panel", "type": "use", "x": 36.095, "y": 68.543, "width": 2.511, "height": 5.772 },
+    { "id": "purity_claim", "panel": "product_panel", "type": "text", "x": 39.47, "y": 69.769, "width": 28.013, "height": 6.016, "baselineYPct": 73.954, "textAnchor": "start" },
+    { "id": "lab_icon", "panel": "product_panel", "type": "use", "x": 36.095, "y": 77.561, "width": 2.511, "height": 5.772 },
+    { "id": "lab_claim", "panel": "product_panel", "type": "text", "x": 39.47, "y": 78.788, "width": 28.013, "height": 6.016, "baselineYPct": 82.973, "textAnchor": "start" },
+
+    { "id": "country_icon", "panel": "verification_panel", "type": "use", "x": 71.798, "y": 10.823, "width": 4.394, "height": 10.101 },
+    { "id": "coa_qr", "panel": "verification_panel", "type": "image", "x": 76.114, "y": 15.332, "width": 14.124, "height": 32.468 },
+    { "id": "qr_caption", "panel": "verification_panel", "type": "text", "x": 71.798, "y": 50.216, "width": 25.502, "height": 5.601, "baselineYPct": 54.113, "textAnchor": "middle" },
+    { "id": "lot_label", "panel": "verification_panel", "type": "text", "x": 71.798, "y": 59.885, "width": 5.885, "height": 5.186, "baselineYPct": 63.492, "textAnchor": "start" },
+    { "id": "lot_number", "panel": "verification_panel", "type": "text", "x": 78.861, "y": 59.019, "width": 18.44, "height": 6.43, "baselineYPct": 63.492, "textAnchor": "start" },
+    { "id": "ubd_label", "panel": "verification_panel", "type": "text", "x": 71.798, "y": 68.543, "width": 5.885, "height": 5.186, "baselineYPct": 72.15, "textAnchor": "start" },
+    { "id": "ubd", "panel": "verification_panel", "type": "text", "x": 78.861, "y": 67.677, "width": 18.44, "height": 6.43, "baselineYPct": 72.15, "textAnchor": "start" },
+    { "id": "coa_url", "panel": "verification_panel", "type": "text", "x": 71.406, "y": 79.365, "width": 25.895, "height": 4.149, "baselineYPct": 82.251, "textAnchor": "start" }
+  ],
+
+  "themeLayer": {
+    "note": "Theme (colors/fonts/spacing/icon set/etc.) is not positional and has no coordinates — see default-theme.json / example-brand-theme.json and label-spec.json -> themeTargets for the token-to-element mapping.",
+    "tokenCategories": ["colors", "fonts", "logo", "border", "qrCaptionStyle"]
+  }
+}

@@ -2,6 +2,20 @@
 
 All notable changes to this template package are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versions follow [Semantic Versioning](https://semver.org/).
 
+## [1.1.0] — 2026-07-17
+
+### Added
+
+- `layout.json`: percentage-based `x`/`y`/`width`/`height` (plus `baselineYPct`/`textAnchor` for text) for every one of the 27 editable regions in `master-label.svg`, organized by layer/panel (Background, Divider, Brand, Product, Verification) matching the requested structure. Percentages are computed against the canvas's two independent axes (width% of 127.44pt, height% of 55.44pt) — documented explicitly so a consumer doesn't naively apply one axis's scale factor to the other and distort square elements like `coa_qr`.
+- `manifest.json`: a single package-level entry point listing every canonical source, derived deliverable, placeholder asset, schema, and doc, plus the full `editableRegionIds` / `contentFieldIds` / `requiredContentFieldIds` lists — everything a web app, the sales app, or a backend tool needs to discover before touching any other file.
+- `schema/layout.schema.json` and `schema/manifest.schema.json`, alongside the existing label-spec/theme/field-map schemas.
+
+### Changed (breaking)
+
+- **Every element id and field key was renamed to a flat, snake_case scheme** so one identifier is used identically as the SVG element id, the `label-spec.json` fieldKey/elementId, and the `layout.json` region id — e.g. `branding-name` → `brand_name`, `tracking-qr` → `coa_qr`, `tracking-lot-value` → `lot_number`, `verification-origin-graphic` → `country_icon`, `icon-purity-use` → `purity_icon`. Field-map files written against v1.0.0's dotted keys (`branding.name`, `tracking.qr.destination`, etc.) must be updated to the new flat keys — see `README.md` and `schema/field-map.schema.json` for the full current list.
+- `qr_caption` is now a regular content field (settable per field-map) rather than a theme-only override; `scripts/lib/applyTheme.js` no longer special-cases QR caption text.
+- `scripts/lib/applyTheme.js`'s brand-font application now reads its target element ids from `label-spec.json` → `fontTargets.brandFontElementIds` instead of a hardcoded list.
+
 ## [1.0.0] — 2026-07-17
 
 ### Added

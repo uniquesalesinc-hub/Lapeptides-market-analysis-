@@ -1,6 +1,6 @@
 {
   "name": "la-peptides-universal-label-template",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "private": true,
   "description": "Portable, brand-neutral, theme-driven vial-label template (1.77in x 0.77in, three-section layout). Build the master deliverables or a specific brand partner's finished label from master-label.svg + a theme JSON + (optionally) a field-map JSON.",
   "type": "commonjs",
