@@ -14,6 +14,19 @@ export function isBrandKitPendingMigration(err: unknown): boolean {
   );
 }
 
+/**
+ * Provenance marker for files uploaded by portal users (clients) rather than staff.
+ * BrandAsset.uploadedById points at the staff User table, so client uploads carry null there
+ * and record who uploaded them in the note instead: "Uploaded via client portal by [name]".
+ * The prefix doubles as the permission gate - clients may only delete assets whose note
+ * carries it (their own portal's uploads); staff uploads are read-only on the client surface.
+ */
+export const CLIENT_PORTAL_UPLOAD_PREFIX = "Uploaded via client portal";
+
+export function isClientPortalUpload(note: string | null): boolean {
+  return note !== null && note.startsWith(CLIENT_PORTAL_UPLOAD_PREFIX);
+}
+
 export interface BrandAssetSummary {
   id: string;
   kind: string;

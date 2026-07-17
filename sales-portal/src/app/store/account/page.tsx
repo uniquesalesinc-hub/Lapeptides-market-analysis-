@@ -31,11 +31,16 @@ export default async function StoreAccountPage() {
           </p>
           <h1 className="font-heading text-3xl font-semibold text-lap-ink">Welcome, {client.name}</h1>
         </div>
-        <form action={clientLogoutAction}>
-          <button type="submit" className="btn-secondary px-5 text-sm">
-            Log out
-          </button>
-        </form>
+        <div className="flex items-center gap-3">
+          <Link href="/store/account/brand" className="btn-secondary px-5 text-sm" data-testid="account-brand-link">
+            Brand kit
+          </Link>
+          <form action={clientLogoutAction}>
+            <button type="submit" className="btn-secondary px-5 text-sm">
+              Log out
+            </button>
+          </form>
+        </div>
       </div>
 
       <div className="mt-8">

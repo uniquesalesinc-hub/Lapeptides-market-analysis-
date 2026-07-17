@@ -46,3 +46,13 @@ export const brandUploadSchema = z.object({
   kind: z.enum(BRAND_ASSET_KINDS),
   note: z.string().trim().max(300, "Keep the note under 300 characters.").optional(),
 });
+
+/**
+ * Client-portal upload metadata: same kinds and limits, but NO customerId field - the
+ * action takes it from the client session only, so the form can never target another
+ * customer. Note cap is lower because the provenance prefix is prepended server-side.
+ */
+export const clientBrandUploadSchema = z.object({
+  kind: z.enum(BRAND_ASSET_KINDS),
+  note: z.string().trim().max(240, "Keep the note under 240 characters.").optional(),
+});

@@ -2,9 +2,11 @@ import { getEffectiveViewer } from "@/lib/viewAs";
 import { getDashboardHome } from "@/lib/data/dashboard";
 import { listActivities } from "@/lib/data/activities";
 import { getReorderRadar } from "@/lib/data/reorderRadar";
+import { listOpenClientCarts, type OpenClientCarts as OpenClientCartsData } from "@/lib/data/clientCarts";
 import { PageHeader } from "@/components/shell/PageHeader";
 import { DashboardTabs } from "@/components/dashboard/DashboardTabs";
 import { KpiRow } from "@/components/dashboard/KpiRow";
+import { OpenClientCarts } from "@/components/dashboard/OpenClientCarts";
 import { RecentColumns, type ActivityFeedRow } from "@/components/dashboard/RecentColumns";
 import { ReorderRadar } from "@/components/dashboard/ReorderRadar";
 
@@ -19,10 +21,12 @@ export default async function DashboardHomePage() {
   const viewer = { id: user.id, role: user.role } as const;
   const isAdmin = user.role === "ADMIN";
 
-  const [{ summary, recentOrders, recentQuotes }, activityRows, radarRows] = await Promise.all([
+  const [{ summary, recentOrders, recentQuotes }, activityRows, radarRows, openCarts] = await Promise.all([
     getDashboardHome(viewer),
     listActivities(isAdmin ? {} : { userId: user.id }),
     getReorderRadar(viewer),
+    // Abandoned-cart radar is admin-only; reps never load it.
+    isAdmin ? listOpenClientCarts(5) : Promise.resolve<OpenClientCartsData | null>(null),
   ]);
 
   const activities: ActivityFeedRow[] = activityRows.slice(0, 6).map((a) => ({
@@ -52,6 +56,7 @@ export default async function DashboardHomePage() {
           <KpiRow summary={summary} scopeLabel={isAdmin ? "all reps" : "your accounts"} />
           <ReorderRadar rows={radarRows.slice(0, 8)} />
         </div>
+        {isAdmin && openCarts && <OpenClientCarts rows={openCarts.rows} totalCount={openCarts.totalCount} />}
         <RecentColumns orders={recentOrders} activities={activities} quotes={recentQuotes} />
       </div>
     </div>

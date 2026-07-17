@@ -55,6 +55,15 @@ export default auth((req) => {
     PUBLIC_PATHS.includes(pathname) || PUBLIC_PREFIXES.some((p) => matchesPrefix(pathname, p));
   if (isPublic) return NextResponse.next();
 
+  // Brand-asset bytes serve BOTH auth surfaces (staff Brand tab and the client portal's
+  // /store/account/brand thumbnails). A request carrying the client cookie passes through
+  // here so the route handler can do the authoritative check: verified client sessions may
+  // read only their own customer's assets. Staff requests without the client cookie keep
+  // flowing through the NextAuth gate below, and requests with neither still 307 to /login.
+  if (matchesPrefix(pathname, "/api/brand-assets") && req.cookies.get(CLIENT_SESSION_COOKIE)?.value) {
+    return NextResponse.next();
+  }
+
   const session = req.auth;
   if (!session?.user) {
     const loginUrl = new URL("/login", req.nextUrl.origin);
