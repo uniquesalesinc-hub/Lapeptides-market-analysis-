@@ -194,3 +194,15 @@ cookie-scoped admin view-as instead), WordPress/page builder.
    sessions; never a credential swap; all writes still audit as the admin.
 4. Client portal (Phase 2) additionally gains: reorder from history (already
    specced) + brand info upload by the customer themselves.
+
+## Addendum B (7/16, IGF-1 LR3 analysis - evidence for JJ's pending ruling)
+Across 46 injectable SKUs sold on both the site and the sheets, site retail runs
+a median 1.6x the Bulk Retail Tier 1 price. IGF-1 LR3 1mg is the ONLY SKU below
+1.0x, at 0.63x ($59.99 site vs $95.00 T1; at the family pattern its site price
+would be ~$152). The sheet ladder is internally coherent (95/88/80.50 retail,
+73.50-45.00 wholesale, $19 cost) - not a transcription artifact. The cost sheet
+marks the $19-cost grade "<95%" purity. Conclusion: the anomaly is on the
+WEBSITE (stale price, or it sells the budget <95% grade at a budget price), not
+in the portal. Portal action either way: keep IGF-1 LR3 out of the retail band
+(already done via RETAIL_EXCLUDED). The pending decision is a lapeptides.net
+pricing/labeling fix, owned by whoever manages the site.
