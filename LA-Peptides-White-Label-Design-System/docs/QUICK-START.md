@@ -13,7 +13,7 @@ npm install
 
 ```bash
 npm run build:default   # LA Peptides house brand
-npm run build:example    # "True North" white-label example
+npm run build:example    # generic alternate-palette white-label example
 ```
 
 Each writes to `dist/<name>/`:

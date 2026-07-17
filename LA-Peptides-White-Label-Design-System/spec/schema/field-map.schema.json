@@ -9,7 +9,7 @@
     "branding.name": { "type": "string", "maxLength": 28 },
     "branding.tagline": { "type": "string", "maxLength": 42 },
     "branding.defaultClaim": { "type": "string", "maxLength": 90 },
-    "product.name": { "type": "string", "maxLength": 24 },
+    "product.name": { "type": "string", "maxLength": 14 },
     "product.strength": { "type": "string", "maxLength": 16 },
     "tracking.qr.destination": { "type": "string", "format": "uri" },
     "tracking.lotValue": { "type": "string", "maxLength": 20 },

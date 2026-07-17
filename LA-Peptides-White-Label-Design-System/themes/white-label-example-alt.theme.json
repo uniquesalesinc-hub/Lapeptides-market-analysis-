@@ -1,7 +1,7 @@
 {
   "$schema": "../spec/schema/theme.schema.json",
-  "themeId": "white-label-example-true-north",
-  "name": "White-Label Example — True North",
+  "themeId": "white-label-example-alt",
+  "name": "White-Label Example — Alternate Palette",
   "colors": {
     "background": "#FCFBF7",
     "border": "#0F3D3E",

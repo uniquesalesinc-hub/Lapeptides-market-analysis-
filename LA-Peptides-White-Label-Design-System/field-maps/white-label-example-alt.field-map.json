@@ -1,0 +1,11 @@
+{
+  "$schema": "../spec/schema/field-map.schema.json",
+  "branding.logo.primary": "assets/logos/client-logo-placeholder.svg",
+  "branding.name": "EXAMPLE BRAND CO",
+  "branding.tagline": "QUALITY YOU CAN TRUST.",
+  "product.name": "DEMO PEPTIDE",
+  "product.strength": "10MG",
+  "tracking.qr.destination": "https://example.com/coa/EX010125",
+  "tracking.lotValue": "EX010125",
+  "tracking.ubdValue": "06/2026"
+}

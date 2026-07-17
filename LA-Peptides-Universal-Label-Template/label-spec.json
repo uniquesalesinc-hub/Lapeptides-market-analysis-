@@ -1,0 +1,144 @@
+{
+  "$schema": "./schema/label-spec.schema.json",
+  "templateId": "la-peptides-universal-label",
+  "templateVersion": "1.0.0",
+  "sourceFile": "./master-label.svg",
+  "description": "Canonical, portable, brand-neutral vial-label template with a left/center/right (branding/product/verification) layout. This file is the single source of truth for physical dimensions and the field/theme registry tying dotted field-map keys and theme tokens to element ids inside master-label.svg. Every derived deliverable (preview PNG, editable PDF, exact-size print PDF, a specific brand partner's finished label) must be reproducible from master-label.svg + a theme JSON + (optionally) a field-map JSON.",
+
+  "physicalSize": { "width": 1.77, "height": 0.77, "unit": "in", "mm": { "width": 44.958, "height": 19.558 } },
+  "orientation": "landscape",
+  "margins": "none",
+  "cropMarks": "none",
+
+  "coordinateSystem": {
+    "userUnitsPerInch": 72,
+    "viewBox": "0 0 127.44 55.44",
+    "note": "1 SVG user unit == 1pt. The exact-size print PDF page box is generated at physicalSize with no unit conversion, then verified against this value by scripts/lib/verifyPdf.js."
+  },
+
+  "colorProfile": {
+    "authoring": "sRGB",
+    "print": "Convert to the printer/press CMYK profile at RIP time if required by your vendor. Do not bake CMYK conversion into the canonical SVG. For direct Epson ColorWorks printing, print at 100%/Actual Size — see README.md."
+  },
+
+  "fonts": {
+    "note": "Font family names are theme tokens (fonts.brandFont / fonts.bodyFont / fonts.monoFont) applied to the <style id=\"label-fonts\"> block in master-label.svg."
+  },
+
+  "sections": [
+    { "id": "branding-group",     "label": "Branding (left)",       "xRange": [0, 42] },
+    { "id": "product-group",      "label": "Product (center)",      "xRange": [42, 88] },
+    { "id": "verification-group", "label": "Verification (right)",  "xRange": [88, 127.44] }
+  ],
+
+  "elements": [
+    { "id": "bg-fill",                     "type": "shape", "role": "background fill" },
+    { "id": "border-frame",                "type": "shape", "role": "border stroke, radius, thickness" },
+    { "id": "divider-line-1",              "type": "shape", "role": "branding/product divider" },
+    { "id": "divider-line-2",              "type": "shape", "role": "product/verification divider" },
+
+    { "id": "branding-logo-primary",       "type": "image", "role": "primary brand logo" },
+    { "id": "branding-logo-secondary",     "type": "use",   "role": "optional secondary logo/certification badge" },
+    { "id": "branding-name",               "type": "text",  "role": "brand name" },
+    { "id": "branding-subtitle",           "type": "text",  "role": "brand subtitle" },
+    { "id": "branding-decorative-graphic", "type": "use",   "role": "optional decorative brand accent" },
+    { "id": "branding-tagline",            "type": "text",  "role": "brand tagline" },
+
+    { "id": "product-name",                "type": "text", "role": "peptide/product name" },
+    { "id": "product-descriptor",          "type": "text", "role": "product descriptor" },
+    { "id": "product-strength",            "type": "text", "role": "strength, e.g. 10MG" },
+    { "id": "product-concentration",       "type": "text", "role": "concentration, e.g. 5MG/ML" },
+    { "id": "product-vial-size",           "type": "text", "role": "vial size, e.g. 2ML VIAL" },
+    { "id": "icon-purity-use",             "type": "use",  "role": "purity icon" },
+    { "id": "purity-claim",                "type": "text", "role": "purity claim text" },
+    { "id": "icon-lab-tested-use",         "type": "use",  "role": "lab-tested icon" },
+    { "id": "labtested-claim",             "type": "text", "role": "lab-tested claim text" },
+
+    { "id": "verification-origin-graphic", "type": "use",   "role": "country/region of origin graphic" },
+    { "id": "tracking-qr",                 "type": "image", "role": "QR code linking to COA" },
+    { "id": "tracking-qr-caption",         "type": "text",  "role": "QR caption" },
+    { "id": "tracking-lot-label",          "type": "text",  "role": "lot field label" },
+    { "id": "tracking-lot-value",          "type": "text",  "role": "lot number" },
+    { "id": "tracking-ubd-label",          "type": "text",  "role": "UBD field label" },
+    { "id": "tracking-ubd-value",          "type": "text",  "role": "use-by date" },
+    { "id": "tracking-coa-url",            "type": "text",  "role": "printed COA URL" }
+  ],
+
+  "fields": [
+    { "fieldKey": "branding.logo.primary",     "elementId": "branding-logo-primary",       "applyAs": "attr:href", "attrs": ["href", "xlink:href"], "required": true,  "description": "Relative path to the primary brand logo asset (svg/png)." },
+    { "fieldKey": "branding.logo.secondary",   "elementId": "branding-logo-secondary",     "applyAs": "attr:href", "attrs": ["href", "xlink:href"], "required": false, "description": "Optional secondary logo/certification badge — points at a symbol id (e.g. \"#icon-logo-secondary\") or a swapped-in asset." },
+    { "fieldKey": "branding.name",              "elementId": "branding-name",               "applyAs": "text", "required": true,  "maxLength": 22, "description": "Brand name." },
+    { "fieldKey": "branding.subtitle",          "elementId": "branding-subtitle",           "applyAs": "text", "required": false, "maxLength": 26, "description": "Brand subtitle, shown under the brand name." },
+    { "fieldKey": "branding.tagline",           "elementId": "branding-tagline",             "applyAs": "text", "required": false, "maxLength": 30, "description": "Short brand tagline next to the decorative accent graphic." },
+    { "fieldKey": "branding.decorativeGraphic", "elementId": "branding-decorative-graphic", "applyAs": "attr:href", "attrs": ["href", "xlink:href"], "required": false, "description": "Optional decorative accent graphic — points at a symbol id or a swapped-in asset." },
+
+    { "fieldKey": "product.name",               "elementId": "product-name",         "applyAs": "text", "required": true,  "maxLength": 20, "description": "Peptide/product name." },
+    { "fieldKey": "product.descriptor",         "elementId": "product-descriptor",   "applyAs": "text", "required": false, "maxLength": 26, "description": "Short product descriptor, e.g. \"PURE PEPTIDE\"." },
+    { "fieldKey": "product.strength",           "elementId": "product-strength",     "applyAs": "text", "required": true,  "maxLength": 10, "description": "Strength, e.g. \"10MG\"." },
+    { "fieldKey": "product.concentration",      "elementId": "product-concentration","applyAs": "text", "required": false, "maxLength": 12, "description": "Concentration, e.g. \"5MG/ML\"." },
+    { "fieldKey": "product.vialSize",           "elementId": "product-vial-size",    "applyAs": "text", "required": false, "maxLength": 12, "description": "Vial size, e.g. \"2ML VIAL\"." },
+    { "fieldKey": "product.purityIcon",         "elementId": "icon-purity-use",      "applyAs": "attr:href", "attrs": ["href", "xlink:href"], "required": false, "description": "Purity icon — points at a symbol id or a swapped-in asset." },
+    { "fieldKey": "product.purityClaim",        "elementId": "purity-claim",         "applyAs": "text", "required": false, "maxLength": 16, "description": "Purity claim, e.g. \"≥99% PURITY\"." },
+    { "fieldKey": "product.labTestedIcon",      "elementId": "icon-lab-tested-use",  "applyAs": "attr:href", "attrs": ["href", "xlink:href"], "required": false, "description": "Lab-tested icon — points at a symbol id or a swapped-in asset." },
+    { "fieldKey": "product.labTestedClaim",     "elementId": "labtested-claim",      "applyAs": "text", "required": false, "maxLength": 16, "description": "Lab-tested claim, e.g. \"LAB TESTED\"." },
+
+    { "fieldKey": "verification.originGraphic", "elementId": "verification-origin-graphic", "applyAs": "attr:href", "attrs": ["href", "xlink:href"], "required": false, "description": "Country/region-of-origin graphic — points at a symbol id or a swapped-in asset. Ships as a generic pennant, not a specific country's flag." },
+    { "fieldKey": "tracking.qr.destination",    "elementId": "tracking-qr",           "applyAs": "qr",   "attrs": ["href", "xlink:href"], "required": true,  "description": "URL encoded into the QR image (typically a COA lookup page)." },
+    { "fieldKey": "tracking.qrCaption",         "elementId": "tracking-qr-caption",  "applyAs": "text", "required": false, "maxLength": 18, "description": "Caption under the QR code." },
+    { "fieldKey": "tracking.lotLabel",          "elementId": "tracking-lot-label",   "applyAs": "text", "required": false, "maxLength": 8,  "description": "Label preceding the lot value, e.g. \"LOT\"." },
+    { "fieldKey": "tracking.lotValue",          "elementId": "tracking-lot-value",   "applyAs": "text", "required": true,  "maxLength": 14, "description": "Lot / batch number." },
+    { "fieldKey": "tracking.ubdLabel",          "elementId": "tracking-ubd-label",   "applyAs": "text", "required": false, "maxLength": 8,  "description": "Label preceding the UBD value, e.g. \"UBD\"." },
+    { "fieldKey": "tracking.ubdValue",          "elementId": "tracking-ubd-value",   "applyAs": "text", "required": true,  "maxLength": 10, "description": "Use-by date, e.g. \"06/2026\"." },
+    { "fieldKey": "tracking.coaUrl",            "elementId": "tracking-coa-url",     "applyAs": "text", "required": false, "maxLength": 34, "description": "Human-readable COA URL printed as text (in addition to the QR)." }
+  ],
+
+  "themeTargets": [
+    { "token": "colors.background", "elementId": "bg-fill",                     "attr": "fill" },
+    { "token": "colors.primary",    "elementId": "border-frame",                "attr": "stroke" },
+    { "token": "colors.primary",    "elementId": "branding-name",               "attr": "fill" },
+    { "token": "colors.primary",    "elementId": "product-name",                "attr": "fill" },
+    { "token": "colors.primary",    "elementId": "product-strength",            "attr": "fill" },
+    { "token": "colors.primary",    "elementId": "tracking-lot-value",          "attr": "fill" },
+    { "token": "colors.primary",    "elementId": "tracking-ubd-value",          "attr": "fill" },
+    { "token": "colors.secondary",  "elementId": "branding-subtitle",           "attr": "fill" },
+    { "token": "colors.secondary",  "elementId": "product-descriptor",          "attr": "fill" },
+    { "token": "colors.secondary",  "elementId": "product-concentration",       "attr": "fill" },
+    { "token": "colors.secondary",  "elementId": "product-vial-size",           "attr": "fill" },
+    { "token": "colors.secondary",  "elementId": "purity-claim",                "attr": "fill" },
+    { "token": "colors.secondary",  "elementId": "labtested-claim",             "attr": "fill" },
+    { "token": "colors.secondary",  "elementId": "tracking-qr-caption",         "attr": "fill" },
+    { "token": "colors.secondary",  "elementId": "tracking-lot-label",          "attr": "fill" },
+    { "token": "colors.secondary",  "elementId": "tracking-ubd-label",          "attr": "fill" },
+    { "token": "colors.secondary",  "elementId": "tracking-coa-url",            "attr": "fill" },
+    { "token": "colors.accent",     "elementId": "divider-line-1",              "attr": "stroke" },
+    { "token": "colors.accent",     "elementId": "divider-line-2",              "attr": "stroke" },
+    { "token": "colors.accent",     "elementId": "branding-decorative-graphic", "attr": "fill" },
+    { "token": "colors.accent",     "elementId": "branding-decorative-graphic", "attr": "stroke" },
+    { "token": "colors.accent",     "elementId": "branding-tagline",            "attr": "fill" },
+    { "token": "colors.darkAccent", "elementId": "branding-logo-secondary",     "attr": "fill" },
+    { "token": "colors.darkAccent", "elementId": "branding-logo-secondary",     "attr": "stroke" },
+    { "token": "colors.darkAccent", "elementId": "icon-purity-use",             "attr": "fill" },
+    { "token": "colors.darkAccent", "elementId": "icon-purity-use",             "attr": "stroke" },
+    { "token": "colors.darkAccent", "elementId": "icon-lab-tested-use",         "attr": "fill" },
+    { "token": "colors.darkAccent", "elementId": "icon-lab-tested-use",         "attr": "stroke" },
+    { "token": "colors.darkAccent", "elementId": "verification-origin-graphic", "attr": "fill" },
+    { "token": "colors.darkAccent", "elementId": "verification-origin-graphic", "attr": "stroke" },
+    { "token": "border.thickness",  "elementId": "border-frame", "attr": "stroke-width" },
+    { "token": "border.radius",     "elementId": "border-frame", "attr": "rx" },
+    { "token": "border.radius",     "elementId": "border-frame", "attr": "ry" }
+  ],
+
+  "fontTargets": {
+    "styleElementId": "label-fonts",
+    "note": "scripts/lib/applyTheme.js rewrites the font-family lists inside <style id=\"label-fonts\"> using theme.fonts.bodyFont for #master-label text and theme.fonts.monoFont for #master-label .mono, and sets theme.fonts.brandFont directly on branding-name/product-name."
+  },
+
+  "borderTokens": {
+    "note": "border.thickness and border.radius are optional theme tokens (numbers, in pt) applied via the themeTargets entries above — if a theme omits them, applyTheme.js's getToken() returns undefined and that entry is skipped, leaving the master's default stroke-width=1.2 / rx=ry=4 in place."
+  },
+
+  "outputs": {
+    "png": { "targetDpi": 300, "widthPx": 531, "heightPx": 231 },
+    "pdf": { "exactSize": true, "unit": "pt", "width": 127.44, "height": 55.44 }
+  }
+}

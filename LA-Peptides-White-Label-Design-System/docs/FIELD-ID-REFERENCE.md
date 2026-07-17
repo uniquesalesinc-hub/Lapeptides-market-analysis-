@@ -8,7 +8,7 @@ Every value that changes per brand/product/batch is a **field**. Fields are matc
 | `branding.name` | `branding-name` | text content | yes | Max 28 chars. |
 | `branding.tagline` | `branding-tagline` | text content | no | Max 42 chars — fixed-width column, does not auto-shrink. |
 | `branding.defaultClaim` | `branding-default-claim` | text content | no | Overrides the theme's `defaultClaims[0]` for this specific label. Max 90 chars. |
-| `product.name` | `product-name` | text content | yes | Max 24 chars. |
+| `product.name` | `product-name` | text content | yes | Max 14 chars — fixed-width column, does not auto-shrink. |
 | `product.strength` | `product-strength` | text content | yes | Max 16 chars, e.g. `"10MG"`. |
 | `tracking.qr.destination` | `tracking-qr` | QR-encoded into `href`/`xlink:href` on an `<image>` | yes | A URL — typically a COA lookup page. The build script generates the QR bitmap; you never hand-draw it. |
 | `tracking.lotValue` | `tracking-lot-value` | text content | yes | Max 20 chars. |
@@ -21,17 +21,17 @@ A field-map is a flat JSON object using exactly these keys (validated by `spec/s
 ```json
 {
   "branding.logo.primary": "assets/logos/client-logo.svg",
-  "branding.name": "TRUE NORTH",
-  "branding.tagline": "PRECISION WELLNESS. GUIDED BY SCIENCE.",
-  "product.name": "TESAMORELIN",
+  "branding.name": "EXAMPLE BRAND CO",
+  "branding.tagline": "QUALITY YOU CAN TRUST.",
+  "product.name": "EXAMPLE PEPTIDE",
   "product.strength": "10MG",
-  "tracking.qr.destination": "https://example.com/coa/TN062224",
-  "tracking.lotValue": "TN062224",
+  "tracking.qr.destination": "https://example.com/coa/EX010125",
+  "tracking.lotValue": "EX010125",
   "tracking.ubdValue": "06/2026"
 }
 ```
 
-See `field-maps/white-label-example-true-north.field-map.json` for this exact example, ready to build.
+See `field-maps/white-label-example-alt.field-map.json` for this exact example, ready to build.
 
 ## Adding a new field in the future
 

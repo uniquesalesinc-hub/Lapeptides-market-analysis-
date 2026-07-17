@@ -54,7 +54,7 @@ LA-Peptides-White-Label-Design-System/
 ```bash
 npm install
 npm run build:default    # LA Peptides house brand + BPC-157 5MG example
-npm run build:example     # "True North" white-label brand + TESAMORELIN 10MG example
+npm run build:example      # generic alternate-palette white-label example
 ```
 
 Or directly, for a custom theme/field-map:

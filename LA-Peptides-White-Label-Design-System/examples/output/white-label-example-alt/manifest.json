@@ -1,22 +1,22 @@
 {
   "templateId": "la-peptides-master-label",
   "templateVersion": "1.0.0",
-  "builtAt": "2026-07-17T16:53:06.329Z",
+  "builtAt": "2026-07-17T17:14:23.774Z",
   "theme": {
-    "themeId": "white-label-example-true-north",
-    "source": "themes/white-label-example-true-north.theme.json"
+    "themeId": "white-label-example-alt",
+    "source": "themes/white-label-example-alt.theme.json"
   },
   "fieldMap": {
-    "source": "field-maps/white-label-example-true-north.field-map.json",
+    "source": "field-maps/white-label-example-alt.field-map.json",
     "appliedFields": {
       "branding.logo.primary": "assets/logos/client-logo-placeholder.svg",
-      "branding.name": "TRUE NORTH",
-      "branding.tagline": "PRECISION WELLNESS. GUIDED BY SCIENCE.",
+      "branding.name": "EXAMPLE BRAND CO",
+      "branding.tagline": "QUALITY YOU CAN TRUST.",
       "branding.defaultClaim": "FOR RESEARCH USE ONLY. NOT FOR HUMAN CONSUMPTION.",
-      "product.name": "TESAMORELIN",
+      "product.name": "DEMO PEPTIDE",
       "product.strength": "10MG",
-      "tracking.qr.destination": "https://example.com/coa/TN062224",
-      "tracking.lotValue": "TN062224",
+      "tracking.qr.destination": "https://example.com/coa/EX010125",
+      "tracking.lotValue": "EX010125",
       "tracking.ubdValue": "06/2026"
     }
   },

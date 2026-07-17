@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://la-peptides.example/schema/universal-label-field-map.schema.json",
+  "title": "LA Peptides Universal Label Field Map",
+  "description": "Optional. Values are matched against label-spec.json's \"fields\" registry by fieldKey. Not required to build the master template deliverables (those use placeholder content) — used when a future app/team fills in a specific brand partner's real values.",
+  "type": "object",
+  "properties": {
+    "branding.logo.primary": { "type": "string" },
+    "branding.logo.secondary": { "type": "string" },
+    "branding.name": { "type": "string", "maxLength": 22 },
+    "branding.subtitle": { "type": "string", "maxLength": 26 },
+    "branding.tagline": { "type": "string", "maxLength": 30 },
+    "branding.decorativeGraphic": { "type": "string" },
+    "product.name": { "type": "string", "maxLength": 20 },
+    "product.descriptor": { "type": "string", "maxLength": 26 },
+    "product.strength": { "type": "string", "maxLength": 10 },
+    "product.concentration": { "type": "string", "maxLength": 12 },
+    "product.vialSize": { "type": "string", "maxLength": 12 },
+    "product.purityIcon": { "type": "string" },
+    "product.purityClaim": { "type": "string", "maxLength": 16 },
+    "product.labTestedIcon": { "type": "string" },
+    "product.labTestedClaim": { "type": "string", "maxLength": 16 },
+    "verification.originGraphic": { "type": "string" },
+    "tracking.qr.destination": { "type": "string", "format": "uri" },
+    "tracking.qrCaption": { "type": "string", "maxLength": 18 },
+    "tracking.lotLabel": { "type": "string", "maxLength": 8 },
+    "tracking.lotValue": { "type": "string", "maxLength": 14 },
+    "tracking.ubdLabel": { "type": "string", "maxLength": 8 },
+    "tracking.ubdValue": { "type": "string", "maxLength": 10 },
+    "tracking.coaUrl": { "type": "string", "maxLength": 34 }
+  },
+  "required": [
+    "branding.logo.primary",
+    "branding.name",
+    "product.name",
+    "product.strength",
+    "tracking.qr.destination",
+    "tracking.lotValue",
+    "tracking.ubdValue"
+  ],
+  "additionalProperties": false
+}

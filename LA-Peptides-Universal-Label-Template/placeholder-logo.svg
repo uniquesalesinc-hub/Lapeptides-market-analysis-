@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40" width="40" height="40">
+  <!-- Generic "insert your logo here" placeholder. Replace this whole file with a
+       real brand mark (svg/png) and repoint branding.logo.primary at it — this
+       graphic is not meant to be retained or retinted. -->
+  <rect x="1.5" y="1.5" width="37" height="37" rx="4" ry="4"
+        fill="none" stroke="#9AA0A6" stroke-width="1.5" stroke-dasharray="3,2.5"/>
+  <text x="20" y="18.5" text-anchor="middle" font-family="Arial, sans-serif"
+        font-size="7" font-weight="700" letter-spacing="0.3" fill="#9AA0A6">YOUR</text>
+  <text x="20" y="27" text-anchor="middle" font-family="Arial, sans-serif"
+        font-size="7" font-weight="700" letter-spacing="0.3" fill="#9AA0A6">LOGO</text>
+</svg>

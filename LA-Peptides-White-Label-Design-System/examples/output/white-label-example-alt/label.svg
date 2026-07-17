@@ -40,14 +40,14 @@
   <g id="branding-group">
     <image id="branding-logo-primary" x="12" y="9" width="15" height="15" href="assets/logos/client-logo-placeholder.svg" xlink:href="assets/logos/client-logo-placeholder.svg" preserveAspectRatio="xMinYMid meet"/>
 
-    <text id="branding-name" x="31" y="20.5" font-size="9" font-weight="700" letter-spacing="0.3" fill="#0F3D3E" font-family="&quot;Archivo&quot;, &quot;Helvetica Neue&quot;, Arial, sans-serif">TRUE NORTH</text>
+    <text id="branding-name" x="31" y="20.5" font-size="9" font-weight="700" letter-spacing="0.3" fill="#0F3D3E" font-family="&quot;Archivo&quot;, &quot;Helvetica Neue&quot;, Arial, sans-serif">EXAMPLE BRAND CO</text>
 
-    <text id="branding-tagline" x="12" y="32" font-size="4.6" letter-spacing="0.2" fill="#5B5B54">PRECISION WELLNESS. GUIDED BY SCIENCE.</text>
+    <text id="branding-tagline" x="12" y="32" font-size="4.6" letter-spacing="0.2" fill="#5B5B54">QUALITY YOU CAN TRUST.</text>
   </g>
 
   <!-- ============ PRODUCT ============ -->
   <g id="product-group">
-    <text id="product-name" x="12" y="58" font-size="15" font-weight="800" letter-spacing="0.2" fill="#0F3D3E" font-family="&quot;Archivo&quot;, &quot;Helvetica Neue&quot;, Arial, sans-serif">TESAMORELIN</text>
+    <text id="product-name" x="12" y="58" font-size="15" font-weight="800" letter-spacing="0.2" fill="#0F3D3E" font-family="&quot;Archivo&quot;, &quot;Helvetica Neue&quot;, Arial, sans-serif">DEMO PEPTIDE</text>
 
     <text id="product-strength" x="12" y="73" font-size="9" font-weight="600" fill="#0F3D3E">10MG</text>
   </g>
@@ -61,7 +61,7 @@
   <!-- ============ TRACKING (lot / UBD / QR) ============ -->
   <g id="tracking-group" class="mono">
     <text id="tracking-lot-label" x="150" y="30" font-size="5" letter-spacing="0.3" fill="#5B5B54">LOT</text>
-    <text id="tracking-lot-value" x="150" y="38" font-size="7" font-weight="600" fill="#0F3D3E">TN062224</text>
+    <text id="tracking-lot-value" x="150" y="38" font-size="7" font-weight="600" fill="#0F3D3E">EX010125</text>
 
     <text id="tracking-ubd-label" x="150" y="50" font-size="5" letter-spacing="0.3" fill="#5B5B54">UBD</text>
     <text id="tracking-ubd-value" x="150" y="58" font-size="7" font-weight="600" fill="#0F3D3E">06/2026</text>

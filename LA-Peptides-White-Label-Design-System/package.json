@@ -10,7 +10,7 @@
   "scripts": {
     "build": "node scripts/build.js",
     "build:default": "node scripts/build.js --theme themes/la-peptides-default.theme.json --fields field-maps/la-peptides-default.field-map.json --out dist/la-peptides-default",
-    "build:example": "node scripts/build.js --theme themes/white-label-example-true-north.theme.json --fields field-maps/white-label-example-true-north.field-map.json --out dist/white-label-example-true-north"
+    "build:example": "node scripts/build.js --theme themes/white-label-example-alt.theme.json --fields field-maps/white-label-example-alt.field-map.json --out dist/white-label-example-alt"
   },
   "dependencies": {
     "@xmldom/xmldom": "^0.8.10",

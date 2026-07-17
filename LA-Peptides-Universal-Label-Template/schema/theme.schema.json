@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://la-peptides.example/schema/universal-label-theme.schema.json",
+  "title": "LA Peptides Universal Label Theme",
+  "type": "object",
+  "required": ["themeId", "name", "colors", "fonts", "logo"],
+  "properties": {
+    "themeId": { "type": "string", "pattern": "^[a-z0-9-]+$" },
+    "name": { "type": "string" },
+    "description": { "type": "string" },
+    "colors": {
+      "type": "object",
+      "required": ["background", "primary", "secondary", "accent", "darkAccent"],
+      "properties": {
+        "background": { "type": "string" },
+        "primary": { "type": "string" },
+        "secondary": { "type": "string" },
+        "accent": { "type": "string" },
+        "darkAccent": { "type": "string" }
+      },
+      "additionalProperties": { "type": "string" }
+    },
+    "fonts": {
+      "type": "object",
+      "required": ["brandFont", "bodyFont", "monoFont"],
+      "properties": {
+        "brandFont": { "type": "string" },
+        "bodyFont": { "type": "string" },
+        "monoFont": { "type": "string" }
+      }
+    },
+    "logo": {
+      "type": "object",
+      "required": ["primary"],
+      "properties": {
+        "primary": { "type": "string", "description": "Relative path to the logo asset from the package root." }
+      }
+    },
+    "border": {
+      "type": "object",
+      "properties": {
+        "thickness": { "type": "number", "description": "Border stroke width in pt." },
+        "radius": { "type": "number", "description": "Border corner radius in pt." }
+      }
+    },
+    "qrCaptionStyle": {
+      "type": "object",
+      "properties": {
+        "text": { "type": "string" }
+      }
+    }
+  },
+  "additionalProperties": false
+}

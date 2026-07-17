@@ -1,7 +1,7 @@
 {
   "templateId": "la-peptides-master-label",
   "templateVersion": "1.0.0",
-  "builtAt": "2026-07-17T16:53:05.397Z",
+  "builtAt": "2026-07-17T17:14:22.860Z",
   "theme": {
     "themeId": "la-peptides-default",
     "source": "themes/la-peptides-default.theme.json"

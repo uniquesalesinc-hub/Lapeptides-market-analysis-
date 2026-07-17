@@ -26,7 +26,7 @@ See `spec/label-spec.json` → `"themeTargets"` / `"fontTargets"` for the machin
 ## Included themes
 
 - `themes/la-peptides-default.theme.json` — LA Peptides house brand (navy/blue).
-- `themes/white-label-example-true-north.theme.json` — example brand-partner theme (forest/gold), demonstrating a full rebrand with zero structural changes.
+- `themes/white-label-example-alt.theme.json` — example brand-partner theme (forest/gold), demonstrating a full rebrand with zero structural changes.
 
 ## Creating a new theme
 
