@@ -1,0 +1,160 @@
+{
+  "$schema": "./schema/label-spec.schema.json",
+  "templateId": "la-peptides-universal-label",
+  "templateVersion": "2.0.0",
+  "sourceFile": "./master-label.svg",
+  "layoutFile": "./layout.json",
+  "description": "Canonical, portable, brand-neutral vial-label template with a left/center/right (brand/product/verification) layout. This file is the single source of truth for physical dimensions and the field/theme registry tying field-map keys and theme tokens to element ids inside master-label.svg. Every field's fieldKey is identical to its SVG element id and to its region id in layout.json — one flat, snake_case identifier used consistently across all three files, so a web app, the sales app, or a backend tool can populate the template without redesigning it. Every derived deliverable (preview PNG, editable PDF, exact-size print PDF, a specific brand partner's finished label) must be reproducible from master-label.svg + a theme JSON + (optionally) a field-map JSON.",
+
+  "physicalSize": { "width": 1.77, "height": 0.77, "unit": "in", "mm": { "width": 44.958, "height": 19.558 } },
+  "orientation": "landscape",
+  "margins": "none",
+  "cropMarks": "none",
+
+  "bleed": {
+    "top": 0, "right": 0, "bottom": 0, "left": 0, "unit": "in",
+    "note": "This format ships as a single pre-sized die-cut/kiss-cut label printed at 100%/Actual Size (see VALIDATION-RULES.md) — the print IS the trim, so bleed is 0 by default. The field exists so a future larger-sheet or edge-to-edge format using this same engine can set a nonzero value without a schema change."
+  },
+  "safeArea": {
+    "insetPt": 3,
+    "unit": "pt",
+    "note": "Recommended minimum distance from the trim edge for any live text/logo content, protecting against minor cut/registration drift. border sits 1.5pt inset with a 1.2pt default stroke-width; every region in layout.json already clears this inset — verifyPdf.js does not currently enforce it automatically (see VALIDATION-RULES.md 'Safe print margins')."
+  },
+
+  "coordinateSystem": {
+    "userUnitsPerInch": 72,
+    "viewBox": "0 0 127.44 55.44",
+    "note": "1 SVG user unit == 1pt. The exact-size print PDF page box is generated at physicalSize with no unit conversion, then verified against this value by scripts/lib/verifyPdf.js. layout.json expresses every region's position/size as a percentage of this canvas, for renderer-agnostic consumption."
+  },
+
+  "colorProfile": {
+    "authoring": "sRGB",
+    "print": "Convert to the printer/press CMYK profile at RIP time if required by your vendor. Do not bake CMYK conversion into the canonical SVG. For direct Epson ColorWorks printing, print at 100%/Actual Size — see README.md."
+  },
+
+  "fonts": {
+    "note": "Font family names are theme tokens (fonts.brandFont / fonts.bodyFont / fonts.monoFont) applied to the <style id=\"label-fonts\"> block in master-label.svg."
+  },
+
+  "layers": [
+    { "id": "background_layer",    "label": "Background Layer",    "xRangePct": [0, 100] },
+    { "id": "brand_layer",          "label": "Left Branding Layer", "xRangePct": [0, 32.96] },
+    { "id": "divider_layer",        "label": "Divider Layer",       "xRangePct": [32.96, 69.05] },
+    { "id": "product_layer",        "label": "Product Layer",       "xRangePct": [32.96, 69.05] },
+    { "id": "verification_layer",   "label": "Verification Layer",  "xRangePct": [69.05, 100] },
+    { "id": "theme_layer",          "label": "Theme Layer",         "xRangePct": null }
+  ],
+
+  "elements": [
+    { "id": "background",           "type": "shape", "layer": "background_layer", "role": "background color" },
+    { "id": "border",              "type": "shape", "layer": "background_layer", "role": "border color, thickness, radius" },
+    { "id": "divider_left",                 "type": "shape", "layer": "divider_layer",     "role": "brand/product vertical divider" },
+    { "id": "divider_right",                 "type": "shape", "layer": "divider_layer",     "role": "product/verification vertical divider" },
+
+    { "id": "brand_logo",                "type": "image", "layer": "brand_layer", "role": "primary brand logo placeholder" },
+    { "id": "brand_logo_secondary",      "type": "use",   "layer": "brand_layer", "role": "optional secondary logo/certification badge" },
+    { "id": "brand_name",                "type": "text",  "layer": "brand_layer", "role": "brand name" },
+    { "id": "brand_subtitle",            "type": "text",  "layer": "brand_layer", "role": "brand subtitle" },
+    { "id": "brand_decorative_graphic",  "type": "use",   "layer": "brand_layer", "role": "optional decorative brand accent graphic" },
+    { "id": "brand_tagline",             "type": "text",  "layer": "brand_layer", "role": "brand tagline" },
+
+    { "id": "product_name",              "type": "text", "layer": "product_layer", "role": "peptide/product name" },
+    { "id": "product_strength",          "type": "text", "layer": "product_layer", "role": "strength, e.g. 10MG" },
+    { "id": "product_descriptor",        "type": "text", "layer": "product_layer", "role": "product descriptor" },
+    { "id": "product_concentration",     "type": "text", "layer": "product_layer", "role": "concentration, e.g. 5MG/ML" },
+    { "id": "product_vial_size",         "type": "text", "layer": "product_layer", "role": "vial size, e.g. 2ML VIAL" },
+    { "id": "purity_icon",               "type": "use",  "layer": "product_layer", "role": "purity icon placeholder" },
+    { "id": "purity_claim",              "type": "text", "layer": "product_layer", "role": "purity claim text" },
+    { "id": "lab_icon",                  "type": "use",  "layer": "product_layer", "role": "lab-tested icon placeholder" },
+    { "id": "lab_claim",                 "type": "text", "layer": "product_layer", "role": "lab-tested claim text" },
+
+    { "id": "country_icon",              "type": "use",   "layer": "verification_layer", "role": "country/region of origin (flag) placeholder" },
+    { "id": "coa_qr",                    "type": "image", "layer": "verification_layer", "role": "QR placeholder / generated QR linking to COA" },
+    { "id": "qr_caption",                "type": "text",  "layer": "verification_layer", "role": "QR caption" },
+    { "id": "lot_label",                 "type": "text",  "layer": "verification_layer", "role": "LOT field label" },
+    { "id": "lot_number",                "type": "text",  "layer": "verification_layer", "role": "lot number" },
+    { "id": "ubd_label",                 "type": "text",  "layer": "verification_layer", "role": "UBD field label" },
+    { "id": "ubd",                       "type": "text",  "layer": "verification_layer", "role": "use-by date" },
+    { "id": "coa_url",                   "type": "text",  "layer": "verification_layer", "role": "printed COA URL" }
+  ],
+
+  "fields": [
+    { "fieldKey": "brand_logo",               "elementId": "brand_logo",               "applyAs": "attr:href", "attrs": ["href", "xlink:href"], "required": true,  "description": "Relative path to the primary brand logo asset (svg/png)." },
+    { "fieldKey": "brand_logo_secondary",     "elementId": "brand_logo_secondary",     "applyAs": "attr:href", "attrs": ["href", "xlink:href"], "required": false, "description": "Optional secondary logo/certification badge — points at a symbol id (e.g. \"#icon-logo-secondary\") or a swapped-in asset." },
+    { "fieldKey": "brand_name",               "elementId": "brand_name",               "applyAs": "text", "required": true,  "maxLength": 22, "description": "Brand name." },
+    { "fieldKey": "brand_subtitle",           "elementId": "brand_subtitle",           "applyAs": "text", "required": false, "maxLength": 18, "description": "Brand subtitle, shown under the brand name. Fixed-width column, does not auto-shrink." },
+    { "fieldKey": "brand_tagline",            "elementId": "brand_tagline",            "applyAs": "text", "required": false, "maxLength": 24, "description": "Short brand tagline next to the decorative accent graphic. Auto-fit: shrinks font-size if needed (see scripts/lib/autoFit.js) — this maxLength is a soft guideline, not a hard cutoff." },
+    { "fieldKey": "brand_decorative_graphic", "elementId": "brand_decorative_graphic", "applyAs": "attr:href", "attrs": ["href", "xlink:href"], "required": false, "description": "Optional decorative accent graphic — points at a symbol id or a swapped-in asset." },
+
+    { "fieldKey": "product_name",             "elementId": "product_name",             "applyAs": "text", "required": true,  "maxLength": 20, "description": "Peptide/product name." },
+    { "fieldKey": "product_descriptor",       "elementId": "product_descriptor",       "applyAs": "text", "required": false, "maxLength": 26, "description": "Short product descriptor, e.g. \"PURE PEPTIDE\"." },
+    { "fieldKey": "product_strength",         "elementId": "product_strength",         "applyAs": "text", "required": true,  "maxLength": 10, "description": "Strength, e.g. \"10MG\"." },
+    { "fieldKey": "product_concentration",    "elementId": "product_concentration",    "applyAs": "text", "required": false, "maxLength": 12, "description": "Concentration, e.g. \"5MG/ML\"." },
+    { "fieldKey": "product_vial_size",        "elementId": "product_vial_size",        "applyAs": "text", "required": false, "maxLength": 12, "description": "Vial size, e.g. \"2ML VIAL\"." },
+    { "fieldKey": "purity_icon",              "elementId": "purity_icon",              "applyAs": "attr:href", "attrs": ["href", "xlink:href"], "required": false, "description": "Purity icon — points at a symbol id or a swapped-in asset." },
+    { "fieldKey": "purity_claim",             "elementId": "purity_claim",             "applyAs": "text", "required": false, "maxLength": 16, "description": "Purity claim, e.g. \"≥99% PURITY\"." },
+    { "fieldKey": "lab_icon",                 "elementId": "lab_icon",                 "applyAs": "attr:href", "attrs": ["href", "xlink:href"], "required": false, "description": "Lab-tested icon — points at a symbol id or a swapped-in asset." },
+    { "fieldKey": "lab_claim",                "elementId": "lab_claim",                "applyAs": "text", "required": false, "maxLength": 16, "description": "Lab-tested claim, e.g. \"LAB TESTED\"." },
+
+    { "fieldKey": "country_icon",             "elementId": "country_icon",  "applyAs": "attr:href", "attrs": ["href", "xlink:href"], "required": false, "description": "Country/region-of-origin (flag) graphic — points at a symbol id or a swapped-in asset. Ships as a generic pennant, not a specific country's flag." },
+    { "fieldKey": "coa_qr",                    "elementId": "coa_qr",        "applyAs": "qr",   "attrs": ["href", "xlink:href"], "required": true,  "description": "URL encoded into the QR image (typically a COA lookup page)." },
+    { "fieldKey": "qr_caption",                "elementId": "qr_caption",    "applyAs": "text", "required": false, "maxLength": 18, "description": "Caption under the QR code." },
+    { "fieldKey": "lot_label",                 "elementId": "lot_label",     "applyAs": "text", "required": false, "maxLength": 8,  "description": "Label preceding the lot value, e.g. \"LOT\"." },
+    { "fieldKey": "lot_number",                "elementId": "lot_number",    "applyAs": "text", "required": true,  "maxLength": 14, "description": "Lot / batch number." },
+    { "fieldKey": "ubd_label",                 "elementId": "ubd_label",     "applyAs": "text", "required": false, "maxLength": 8,  "description": "Label preceding the UBD value, e.g. \"UBD\"." },
+    { "fieldKey": "ubd",                       "elementId": "ubd",           "applyAs": "text", "required": true,  "maxLength": 10, "description": "Use-by date, e.g. \"06/2026\"." },
+    { "fieldKey": "coa_url",                   "elementId": "coa_url",       "applyAs": "text", "required": false, "maxLength": 26, "description": "Human-readable COA URL printed as text (in addition to the QR). Fixed-width column, does not auto-shrink." }
+  ],
+
+  "themeTargets": [
+    { "token": "colors.background", "elementId": "background",        "attr": "fill" },
+    { "token": "colors.border",     "elementId": "border",           "attr": "stroke" },
+    { "token": "colors.primary",    "elementId": "brand_name",             "attr": "fill" },
+    { "token": "colors.primary",    "elementId": "product_name",           "attr": "fill" },
+    { "token": "colors.primary",    "elementId": "product_strength",       "attr": "fill" },
+    { "token": "colors.primary",    "elementId": "lot_number",             "attr": "fill" },
+    { "token": "colors.primary",    "elementId": "ubd",                    "attr": "fill" },
+    { "token": "colors.secondary",  "elementId": "brand_subtitle",         "attr": "fill" },
+    { "token": "colors.secondary",  "elementId": "product_descriptor",     "attr": "fill" },
+    { "token": "colors.secondary",  "elementId": "product_concentration",  "attr": "fill" },
+    { "token": "colors.secondary",  "elementId": "product_vial_size",      "attr": "fill" },
+    { "token": "colors.secondary",  "elementId": "purity_claim",           "attr": "fill" },
+    { "token": "colors.secondary",  "elementId": "lab_claim",              "attr": "fill" },
+    { "token": "colors.secondary",  "elementId": "qr_caption",             "attr": "fill" },
+    { "token": "colors.secondary",  "elementId": "lot_label",              "attr": "fill" },
+    { "token": "colors.secondary",  "elementId": "ubd_label",              "attr": "fill" },
+    { "token": "colors.secondary",  "elementId": "coa_url",                "attr": "fill" },
+    { "token": "colors.accent",     "elementId": "divider_left",              "attr": "stroke" },
+    { "token": "colors.accent",     "elementId": "divider_right",              "attr": "stroke" },
+    { "token": "colors.accent",     "elementId": "brand_decorative_graphic", "attr": "fill" },
+    { "token": "colors.accent",     "elementId": "brand_decorative_graphic", "attr": "stroke" },
+    { "token": "colors.accent",     "elementId": "brand_tagline",          "attr": "fill" },
+    { "token": "colors.darkAccent", "elementId": "brand_logo_secondary",   "attr": "fill" },
+    { "token": "colors.darkAccent", "elementId": "brand_logo_secondary",   "attr": "stroke" },
+    { "token": "colors.darkAccent", "elementId": "purity_icon",            "attr": "fill" },
+    { "token": "colors.darkAccent", "elementId": "purity_icon",            "attr": "stroke" },
+    { "token": "colors.darkAccent", "elementId": "lab_icon",               "attr": "fill" },
+    { "token": "colors.darkAccent", "elementId": "lab_icon",               "attr": "stroke" },
+    { "token": "colors.darkAccent", "elementId": "country_icon",           "attr": "fill" },
+    { "token": "colors.darkAccent", "elementId": "country_icon",           "attr": "stroke" },
+    { "token": "border.thickness",  "elementId": "border", "attr": "stroke-width" },
+    { "token": "border.radius",     "elementId": "border", "attr": "rx" },
+    { "token": "border.radius",     "elementId": "border", "attr": "ry" }
+  ],
+
+  "fontTargets": {
+    "styleElementId": "label-fonts",
+    "headingFontElementIds": ["brand_name", "product_name"],
+    "subheadingFontElementIds": ["brand_subtitle", "product_descriptor", "purity_claim", "lab_claim", "qr_caption"],
+    "note": "scripts/lib/applyTheme.js rewrites the font-family lists inside <style id=\"label-fonts\"> using theme.fonts.body for #master-label text (the package-wide default) and theme.fonts.mono for #master-label .mono (lot/UBD/COA-url tracking block), then sets theme.fonts.heading directly on headingFontElementIds and theme.fonts.subheading directly on subheadingFontElementIds — a per-element attribute always wins over the inherited CSS default."
+  },
+
+  "borderTokens": {
+    "note": "border.thickness and border.radius are optional theme tokens (numbers, in pt) applied via the themeTargets entries above — if a theme omits them, applyTheme.js's getToken() returns undefined and that entry is skipped, leaving the master's default stroke-width=1.2 / rx=ry=4 in place."
+  },
+
+  "outputs": {
+    "png": { "targetDpi": 300, "widthPx": 531, "heightPx": 231 },
+    "pdf": { "exactSize": true, "unit": "pt", "width": 127.44, "height": 55.44 }
+  }
+}

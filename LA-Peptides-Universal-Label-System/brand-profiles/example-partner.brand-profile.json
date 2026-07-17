@@ -1,0 +1,38 @@
+{
+  "$schema": "../schema/brand-profile.schema.json",
+  "brandProfileId": "example-partner",
+  "name": "EXAMPLE BRAND CO",
+  "subtitle": "WELLNESS LABS",
+  "tagline": "QUALITY YOU CAN TRUST",
+  "logo": {
+    "primary": "placeholder-logo.svg",
+    "secondary": null
+  },
+  "decorativeGraphic": "#icon-decorative",
+  "fonts": {
+    "heading": "\"Archivo\", \"Helvetica Neue\", Arial, sans-serif",
+    "subheading": "\"Inter\", \"Helvetica Neue\", Arial, sans-serif",
+    "body": "\"Inter\", \"Helvetica Neue\", Arial, sans-serif",
+    "mono": "\"Roboto Mono\", \"Courier New\", monospace"
+  },
+  "colors": {
+    "background": "#F2F3F5",
+    "primary": "#23303D",
+    "secondary": "#5C7A99",
+    "accent": "#C1652F",
+    "border": "#23303D",
+    "iconColor": "#8F4A22"
+  },
+  "icons": {
+    "purity": "#icon-purity",
+    "labTested": "#icon-lab-tested"
+  },
+  "qrStyle": {
+    "caption": "SCAN FOR COA"
+  },
+  "countryGraphic": "#icon-origin",
+  "border": {
+    "thickness": 1,
+    "radius": 3
+  }
+}

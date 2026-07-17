@@ -1,0 +1,104 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://la-peptides.example/schema/brand-profile.schema.json",
+  "title": "LA Peptides Brand Profile",
+  "description": "Everything that identifies and styles ONE brand partner — set up once per brand, reused across every product/batch that brand sells. Combines with a product-profile.json (per product/batch) to render a finished label — see RENDERING-SPEC.md. Every property below maps to a specific master-label.svg element id or theme token; the exact mapping is implemented in scripts/lib/composeProfiles.js and is 1:1 with label-spec.json's field/theme registries.",
+  "type": "object",
+  "required": ["brandProfileId", "name", "logo", "fonts", "colors"],
+  "properties": {
+    "brandProfileId": {
+      "type": "string",
+      "pattern": "^[a-z0-9-]+$",
+      "description": "Stable identifier for this brand partner, e.g. \"acme-wellness\"."
+    },
+    "name": {
+      "type": "string",
+      "maxLength": 22,
+      "description": "Brand name. -> brand_name (autofit: shrinks to fit if needed, see VALIDATION-RULES.md)."
+    },
+    "subtitle": {
+      "type": "string",
+      "maxLength": 18,
+      "description": "Optional line under the brand name. -> brand_subtitle. Not in the original brand-asset list but supported since master-label.svg has a dedicated element for it. Fixed-width column, does not auto-shrink."
+    },
+    "tagline": {
+      "type": "string",
+      "maxLength": 24,
+      "description": "Short brand tagline next to the decorative accent graphic. -> brand_tagline. Auto-fit: shrinks font-size if longer than this — see VALIDATION-RULES.md."
+    },
+    "logo": {
+      "type": "object",
+      "required": ["primary"],
+      "properties": {
+        "primary": {
+          "type": "string",
+          "description": "Relative path to the primary logo asset (.svg/.png/.jpg — see VALIDATION-RULES.md for format rules). Auto-scaled to fit its allotted box (layout.json -> brand_logo) preserving aspect ratio. -> brand_logo."
+        },
+        "secondary": {
+          "type": ["string", "null"],
+          "description": "Optional secondary logo / certification badge. A symbol reference (e.g. \"#icon-logo-secondary\", the template's built-in seal) or a swapped-in asset path. Set null/omit to hide it. -> brand_logo_secondary."
+        }
+      },
+      "additionalProperties": false
+    },
+    "decorativeGraphic": {
+      "type": ["string", "null"],
+      "description": "Optional decorative accent graphic next to the tagline. A symbol reference (e.g. \"#icon-decorative\") or a swapped-in asset path. -> brand_decorative_graphic."
+    },
+    "fonts": {
+      "type": "object",
+      "required": ["heading", "body"],
+      "properties": {
+        "heading": { "type": "string", "description": "Brand/product name font stack. -> brand_name, product_name." },
+        "subheading": { "type": "string", "description": "Optional; supporting-text font stack. Falls back to body if omitted. -> brand_subtitle, product_descriptor, purity_claim, lab_claim, qr_caption." },
+        "body": { "type": "string", "description": "Package-wide default font stack for any text without a more specific font." },
+        "mono": { "type": "string", "description": "Optional; tracking-block font stack. Falls back to body if omitted. -> lot_number, ubd, coa_url." }
+      },
+      "additionalProperties": false
+    },
+    "colors": {
+      "type": "object",
+      "required": ["background", "primary", "secondary", "accent", "border"],
+      "properties": {
+        "background": { "type": "string", "pattern": "^#[0-9A-Fa-f]{6}$", "description": "-> background." },
+        "primary": { "type": "string", "pattern": "^#[0-9A-Fa-f]{6}$", "description": "-> brand_name, product_name, product_strength, lot_number, ubd." },
+        "secondary": { "type": "string", "pattern": "^#[0-9A-Fa-f]{6}$", "description": "-> subtitle/descriptor/claims/labels/QR caption/COA url." },
+        "accent": { "type": "string", "pattern": "^#[0-9A-Fa-f]{6}$", "description": "-> divider lines, decorative graphic, tagline." },
+        "border": { "type": "string", "pattern": "^#[0-9A-Fa-f]{6}$", "description": "-> border stroke. Independent of primary." },
+        "iconColor": { "type": "string", "pattern": "^#[0-9A-Fa-f]{6}$", "description": "Optional; colors purity_icon/lab_icon/country_icon/brand_logo_secondary. Defaults to accent if omitted." }
+      },
+      "additionalProperties": false
+    },
+    "icons": {
+      "type": "object",
+      "description": "Optional custom icon graphics. Each is a symbol reference (e.g. \"#icon-purity\", one of the template's built-ins) or a swapped-in asset path. Omit either to keep the template default.",
+      "properties": {
+        "purity": { "type": ["string", "null"], "description": "-> purity_icon." },
+        "labTested": { "type": ["string", "null"], "description": "-> lab_icon." }
+      },
+      "additionalProperties": false
+    },
+    "qrStyle": {
+      "type": "object",
+      "description": "Brand-level default QR caption; a product-profile's own qrCaption (if set) overrides this per product.",
+      "properties": {
+        "caption": { "type": "string", "maxLength": 18, "description": "-> qr_caption default." }
+      },
+      "additionalProperties": false
+    },
+    "countryGraphic": {
+      "type": ["string", "null"],
+      "description": "Country/region-of-origin graphic. A symbol reference (e.g. \"#icon-origin\", the template's generic pennant) or a swapped-in asset path. -> country_icon."
+    },
+    "border": {
+      "type": "object",
+      "description": "Optional border geometry overrides.",
+      "properties": {
+        "thickness": { "type": "number", "minimum": 0, "description": "Stroke width in pt." },
+        "radius": { "type": "number", "minimum": 0, "description": "Corner radius in pt." }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

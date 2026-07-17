@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://la-peptides.example/schema/universal-label-field-map.schema.json",
+  "title": "LA Peptides Universal Label Field Map",
+  "description": "Optional. Values are matched against label-spec.json's \"fields\" registry by fieldKey — every fieldKey is identical to its SVG element id in master-label.svg and to its region id in layout.json. Not required to build the master template deliverables (those use placeholder content) — used when a future app/team fills in a specific brand partner's real values.",
+  "type": "object",
+  "properties": {
+    "brand_logo": { "type": "string" },
+    "brand_logo_secondary": { "type": "string" },
+    "brand_name": { "type": "string", "maxLength": 22 },
+    "brand_subtitle": { "type": "string", "maxLength": 18 },
+    "brand_tagline": { "type": "string", "maxLength": 24 },
+    "brand_decorative_graphic": { "type": "string" },
+    "product_name": { "type": "string", "maxLength": 20 },
+    "product_descriptor": { "type": "string", "maxLength": 26 },
+    "product_strength": { "type": "string", "maxLength": 10 },
+    "product_concentration": { "type": "string", "maxLength": 12 },
+    "product_vial_size": { "type": "string", "maxLength": 12 },
+    "purity_icon": { "type": "string" },
+    "purity_claim": { "type": "string", "maxLength": 16 },
+    "lab_icon": { "type": "string" },
+    "lab_claim": { "type": "string", "maxLength": 16 },
+    "country_icon": { "type": "string" },
+    "coa_qr": { "type": "string", "format": "uri" },
+    "qr_caption": { "type": "string", "maxLength": 18 },
+    "lot_label": { "type": "string", "maxLength": 8 },
+    "lot_number": { "type": "string", "maxLength": 14 },
+    "ubd_label": { "type": "string", "maxLength": 8 },
+    "ubd": { "type": "string", "maxLength": 10 },
+    "coa_url": { "type": "string", "maxLength": 26 }
+  },
+  "required": [
+    "brand_logo",
+    "brand_name",
+    "product_name",
+    "product_strength",
+    "coa_qr",
+    "lot_number",
+    "ubd"
+  ],
+  "additionalProperties": false
+}

@@ -1,0 +1,82 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://la-peptides.example/schema/product-profile.schema.json",
+  "title": "LA Peptides Product Profile",
+  "description": "One specific product/batch's content — peptide identity, claims, and tracking data. Changes far more often than a brand-profile.json (a new batch = a new product-profile.json; a brand partner's identity/styling stays the same across many of these). Combines with a brand-profile.json to render a finished label — see RENDERING-SPEC.md. Every property maps to a specific master-label.svg element id; the exact mapping is implemented in scripts/lib/composeProfiles.js and is 1:1 with label-spec.json's field registry.",
+  "type": "object",
+  "required": ["productProfileId", "peptideName", "strength", "coaQrDestination", "lot", "ubd"],
+  "properties": {
+    "productProfileId": {
+      "type": "string",
+      "pattern": "^[a-z0-9-]+$",
+      "description": "Stable identifier for this product/batch, e.g. \"tesamorelin-10mg-lot-ex010125\"."
+    },
+    "peptideName": {
+      "type": "string",
+      "maxLength": 20,
+      "description": "-> product_name (autofit: shrinks to fit if needed, see VALIDATION-RULES.md)."
+    },
+    "strength": {
+      "type": "string",
+      "maxLength": 10,
+      "description": "e.g. \"10MG\". -> product_strength."
+    },
+    "descriptor": {
+      "type": "string",
+      "maxLength": 26,
+      "description": "Optional short descriptor, e.g. \"PURE PEPTIDE\". -> product_descriptor."
+    },
+    "concentration": {
+      "type": "string",
+      "maxLength": 12,
+      "description": "Optional, e.g. \"5MG/ML\". -> product_concentration."
+    },
+    "vialSize": {
+      "type": "string",
+      "maxLength": 12,
+      "description": "Optional, e.g. \"2ML VIAL\". -> product_vial_size."
+    },
+    "purityClaim": {
+      "type": "string",
+      "maxLength": 16,
+      "description": "Optional, e.g. \"≥99% PURITY\". -> purity_claim."
+    },
+    "labTestedClaim": {
+      "type": "string",
+      "maxLength": 16,
+      "description": "Optional, e.g. \"LAB TESTED\". -> lab_claim."
+    },
+    "lot": {
+      "type": "string",
+      "maxLength": 14,
+      "description": "Lot / batch number. -> lot_number."
+    },
+    "ubd": {
+      "type": "string",
+      "maxLength": 10,
+      "pattern": "^\\d{2}/\\d{4}$",
+      "description": "Use-by date as MM/YYYY, e.g. \"06/2026\". -> ubd."
+    },
+    "coaQrDestination": {
+      "type": "string",
+      "format": "uri",
+      "description": "URL encoded into the QR code (typically a COA lookup page for this exact batch). Required even if coaUrl is also set — they are not assumed to be the same string. -> coa_qr (generates a real, scannable QR at build time)."
+    },
+    "coaUrl": {
+      "type": "string",
+      "maxLength": 26,
+      "description": "Optional human-readable URL printed as text in addition to the QR. Defaults to coaQrDestination with the scheme stripped if omitted. -> coa_url. Fixed-width column, does not auto-shrink."
+    },
+    "qrCaption": {
+      "type": "string",
+      "maxLength": 18,
+      "description": "Optional; overrides the brand-profile's qrStyle.caption for this product only. -> qr_caption."
+    },
+    "productCategory": {
+      "type": "string",
+      "maxLength": 20,
+      "description": "Optional classification (e.g. \"PEPTIDE\", \"BLEND\", \"CAPSULE\") for downstream systems — admin portal filtering, inventory, reporting. NOT currently bound to a visual element: this label format's 0.77in-tall layout has no remaining safe space for another visible field (see VALIDATION-RULES.md). Captured here so profile data stays forward-compatible with a future layout revision that does render it — composeProfiles.js does not map this to any fieldKey today."
+    }
+  },
+  "additionalProperties": false
+}

@@ -1,0 +1,70 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://la-peptides.example/schema/universal-label-layout.schema.json",
+  "title": "LA Peptides Universal Label Layout",
+  "description": "Percentage-based geometry for every editable region in master-label.svg. Region ids match label-spec.json fieldKeys/elementIds 1:1.",
+  "type": "object",
+  "required": ["templateId", "templateVersion", "canvas", "coordinateSystem", "regions"],
+  "properties": {
+    "templateId": { "type": "string" },
+    "templateVersion": { "type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+$" },
+    "sourceFile": { "type": "string" },
+    "description": { "type": "string" },
+    "canvas": {
+      "type": "object",
+      "required": ["widthPt", "heightPt"],
+      "properties": {
+        "widthPt": { "type": "number" },
+        "heightPt": { "type": "number" },
+        "widthPx300dpi": { "type": "number" },
+        "heightPx300dpi": { "type": "number" },
+        "aspectRatio": { "type": "number" }
+      }
+    },
+    "coordinateSystem": { "type": "object" },
+    "layers": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "label"],
+        "properties": {
+          "id": { "type": "string" },
+          "label": { "type": "string" }
+        }
+      }
+    },
+    "regions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "layer", "type", "x", "y", "width", "height"],
+        "properties": {
+          "id": { "type": "string" },
+          "layer": { "type": "string" },
+          "type": { "type": "string", "enum": ["text", "image", "shape", "use", "group"] },
+          "x": { "type": "number", "minimum": 0, "maximum": 100 },
+          "y": { "type": "number", "minimum": 0, "maximum": 100 },
+          "width": { "type": "number", "minimum": 0, "maximum": 100 },
+          "height": { "type": "number", "minimum": 0, "maximum": 100 },
+          "baselineYPct": { "type": "number" },
+          "textAnchor": { "type": "string", "enum": ["start", "middle", "end"] },
+          "locked": { "type": "boolean", "description": "true = structural/theme-only (no fieldKey in label-spec.json's \"fields\" — position and existence are fixed, not swappable by any profile). false = content (has a fieldKey; its value/asset is replaceable, though its position stays fixed)." },
+          "defaultPlaceholder": { "type": ["string", "null"], "description": "The master template's built-in default value: text content, image href, or use href, whichever applies. null for regions with no swappable content (background, border, dividers)." },
+          "alignment": { "type": ["string", "null"], "enum": ["left", "center", "right", null], "description": "Derived from textAnchor for text regions; null for non-text regions." },
+          "autoFit": {
+            "type": "object",
+            "required": ["enabled"],
+            "properties": {
+              "enabled": { "type": "boolean" },
+              "baseFontSizePt": { "type": "number", "description": "Font size used when the field's text fits within its region width at this size." },
+              "minFontSizePt": { "type": "number", "description": "Floor font-size scripts/lib/autoFit.js will not shrink below, even if text still doesn't fully fit." }
+            },
+            "description": "If enabled, scripts/lib/autoFit.js shrinks this region's font-size (down to minFontSizePt) when applied text would overflow the region's width at baseFontSizePt. See VALIDATION-RULES.md."
+          }
+        }
+      }
+    },
+    "themeLayer": { "type": "object" }
+  },
+  "additionalProperties": false
+}

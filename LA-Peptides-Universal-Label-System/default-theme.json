@@ -1,0 +1,29 @@
+{
+  "$schema": "./schema/theme.schema.json",
+  "themeId": "default",
+  "name": "Neutral Starter Palette",
+  "colors": {
+    "background": "#F7F4EC",
+    "primary": "#1B3A4B",
+    "secondary": "#20A0B0",
+    "accent": "#D4AF37",
+    "darkAccent": "#B8862A",
+    "border": "#1B3A4B"
+  },
+  "fonts": {
+    "heading": "\"Archivo\", \"Helvetica Neue\", Arial, sans-serif",
+    "subheading": "\"Inter\", \"Helvetica Neue\", Arial, sans-serif",
+    "body": "\"Inter\", \"Helvetica Neue\", Arial, sans-serif",
+    "mono": "\"Roboto Mono\", \"Courier New\", monospace"
+  },
+  "logo": {
+    "primary": "placeholder-logo.svg"
+  },
+  "border": {
+    "thickness": 1.2,
+    "radius": 4
+  },
+  "qrCaptionStyle": {
+    "text": "SCAN FOR COA"
+  }
+}

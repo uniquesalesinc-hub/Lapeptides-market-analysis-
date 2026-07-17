@@ -1,0 +1,38 @@
+{
+  "$schema": "../schema/brand-profile.schema.json",
+  "brandProfileId": "default",
+  "name": "BRAND NAME",
+  "subtitle": "BRAND SUBTITLE",
+  "tagline": "BRAND TAGLINE",
+  "logo": {
+    "primary": "placeholder-logo.svg",
+    "secondary": "#icon-logo-secondary"
+  },
+  "decorativeGraphic": "#icon-decorative",
+  "fonts": {
+    "heading": "\"Archivo\", \"Helvetica Neue\", Arial, sans-serif",
+    "subheading": "\"Inter\", \"Helvetica Neue\", Arial, sans-serif",
+    "body": "\"Inter\", \"Helvetica Neue\", Arial, sans-serif",
+    "mono": "\"Roboto Mono\", \"Courier New\", monospace"
+  },
+  "colors": {
+    "background": "#F7F4EC",
+    "primary": "#1B3A4B",
+    "secondary": "#20A0B0",
+    "accent": "#D4AF37",
+    "border": "#1B3A4B",
+    "iconColor": "#B8862A"
+  },
+  "icons": {
+    "purity": "#icon-purity",
+    "labTested": "#icon-lab-tested"
+  },
+  "qrStyle": {
+    "caption": "SCAN FOR COA"
+  },
+  "countryGraphic": "#icon-origin",
+  "border": {
+    "thickness": 1.2,
+    "radius": 4
+  }
+}

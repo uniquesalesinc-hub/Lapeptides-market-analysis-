@@ -1,0 +1,15 @@
+{
+  "$schema": "../schema/product-profile.schema.json",
+  "productProfileId": "example-long-name-stress-test",
+  "peptideName": "SEMAGLUTIDE ACETATE",
+  "strength": "10MG",
+  "descriptor": "PURE PEPTIDE",
+  "concentration": "5MG/ML",
+  "vialSize": "2ML VIAL",
+  "purityClaim": "≥99% PURITY",
+  "labTestedClaim": "LAB TESTED",
+  "lot": "SC020225",
+  "ubd": "02/2027",
+  "coaQrDestination": "https://example.com/coa/SC020225",
+  "coaUrl": "coa.example.com/SC020225"
+}

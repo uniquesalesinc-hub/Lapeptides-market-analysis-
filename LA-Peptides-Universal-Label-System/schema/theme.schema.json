@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://la-peptides.example/schema/universal-label-theme.schema.json",
+  "title": "LA Peptides Universal Label Theme",
+  "type": "object",
+  "required": ["themeId", "name", "colors", "fonts", "logo"],
+  "properties": {
+    "themeId": { "type": "string", "pattern": "^[a-z0-9-]+$" },
+    "name": { "type": "string" },
+    "description": { "type": "string" },
+    "colors": {
+      "type": "object",
+      "required": ["background", "primary", "secondary", "accent", "border"],
+      "properties": {
+        "background": { "type": "string" },
+        "primary": { "type": "string" },
+        "secondary": { "type": "string" },
+        "accent": { "type": "string" },
+        "darkAccent": { "type": "string", "description": "Icon color (purity/lab-tested/country/secondary-logo). Falls back to accent if omitted." },
+        "border": { "type": "string" }
+      },
+      "additionalProperties": { "type": "string" }
+    },
+    "fonts": {
+      "type": "object",
+      "required": ["heading", "body", "mono"],
+      "properties": {
+        "heading": { "type": "string", "description": "brand_name / product_name." },
+        "subheading": { "type": "string", "description": "brand_subtitle / product_descriptor / purity_claim / lab_claim / qr_caption. Falls back to body if omitted." },
+        "body": { "type": "string", "description": "Package-wide default for any text without a more specific font." },
+        "mono": { "type": "string", "description": "lot_number/ubd/coa_url tracking block." }
+      }
+    },
+    "logo": {
+      "type": "object",
+      "required": ["primary"],
+      "properties": {
+        "primary": { "type": "string", "description": "Relative path to the logo asset from the package root." }
+      }
+    },
+    "border": {
+      "type": "object",
+      "properties": {
+        "thickness": { "type": "number", "description": "Border stroke width in pt." },
+        "radius": { "type": "number", "description": "Border corner radius in pt." }
+      }
+    },
+    "qrCaptionStyle": {
+      "type": "object",
+      "properties": {
+        "text": { "type": "string" }
+      }
+    }
+  },
+  "additionalProperties": false
+}

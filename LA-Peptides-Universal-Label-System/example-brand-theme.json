@@ -1,0 +1,30 @@
+{
+  "$schema": "./schema/theme.schema.json",
+  "themeId": "example-brand-alt",
+  "name": "Example Alternate Palette",
+  "description": "A second, distinct palette proving the template reskins cleanly. This is a generic example — it is not a real or fictional brand identity, and pairs with the same neutral placeholder content as default-theme.json.",
+  "colors": {
+    "background": "#F2F3F5",
+    "primary": "#23303D",
+    "secondary": "#5C7A99",
+    "accent": "#C1652F",
+    "darkAccent": "#8F4A22",
+    "border": "#23303D"
+  },
+  "fonts": {
+    "heading": "\"Archivo\", \"Helvetica Neue\", Arial, sans-serif",
+    "subheading": "\"Inter\", \"Helvetica Neue\", Arial, sans-serif",
+    "body": "\"Inter\", \"Helvetica Neue\", Arial, sans-serif",
+    "mono": "\"Roboto Mono\", \"Courier New\", monospace"
+  },
+  "logo": {
+    "primary": "placeholder-logo.svg"
+  },
+  "border": {
+    "thickness": 1,
+    "radius": 3
+  },
+  "qrCaptionStyle": {
+    "text": "SCAN FOR COA"
+  }
+}
