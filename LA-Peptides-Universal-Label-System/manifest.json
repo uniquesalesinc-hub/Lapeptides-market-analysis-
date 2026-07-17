@@ -2,7 +2,7 @@
   "$schema": "./schema/manifest.schema.json",
   "manifestId": "la-peptides-universal-label-system",
   "templateId": "la-peptides-universal-label",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "name": "LA Peptides Universal Label System",
   "description": "Single, machine-readable entry point for this package. Read this file first: it lists every canonical source, derived deliverable, placeholder asset, schema, and doc in the package, plus the full set of editable region/field ids, so a web app, the sales app, the admin portal, production software, or a future API can discover what's here and how to use it without inspecting the filesystem.",
 

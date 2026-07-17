@@ -1,7 +1,7 @@
 {
   "$schema": "./schema/layout.schema.json",
   "templateId": "la-peptides-universal-label",
-  "templateVersion": "2.1.0",
+  "templateVersion": "2.2.0",
   "sourceFile": "./master-label.svg",
   "description": "Percentage-based coordinates for every editable region in master-label.svg, so a web application, the sales app, or a backend tool can position an overlay/editor or recompute pixel positions at any render resolution without parsing the SVG or redesigning the label. Every region's \"id\" is identical to its SVG element id and to its fieldKey in label-spec.json.",
   "canvas": {

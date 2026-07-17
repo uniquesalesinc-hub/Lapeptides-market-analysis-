@@ -32,7 +32,7 @@ LA-Peptides-Universal-Label-System/
 ├── master-label-print.pdf        committed master deliverable
 ├── master-label-editable.pdf     committed master deliverable
 ├── schema/                       JSON Schemas for every JSON file in this package
-├── scripts/                      build pipeline (see below)
+├── scripts/                      build pipeline + verify-all.js regression suite (see below)
 ├── README.md, QUICK-START.md, RENDERING-SPEC.md, VALIDATION-RULES.md,
 │   DEVELOPER-GUIDE.md (this file), PRODUCTION-GUIDE.md, BRAND-PARTNER-GUIDE.md
 ├── LICENSE.md, CHANGELOG.md, VERSION
@@ -90,6 +90,10 @@ await buildFromProfiles({ brand: 'brand-profiles/x.json', product: 'product-prof
 ```
 
 Or reuse the individual modules in `scripts/lib/` (`applyTheme`, `applyFields`, `autoFit`, `validateProfiles`, `generatePng`, `generatePdf`, `verifyPdf`) directly if you're building a different orchestration (e.g. a queue-based backend job).
+
+## Regression testing
+
+`npm test` runs `scripts/verify-all.js` — schema-validates every JSON file in the package (ajv, draft 2020-12), cross-checks id consistency across `label-spec.json`/`layout.json`/`manifest.json`/`components.json`, and re-runs every documented build path end to end (including the PDF exact-size check). Run it before committing any change to `master-label.svg`, a `schema/*.json` file, or a build script — it's the fastest way to know whether an edit broke something elsewhere in the package.
 
 ## Exporting a production-ready PDF for the Epson ColorWorks C6000
 

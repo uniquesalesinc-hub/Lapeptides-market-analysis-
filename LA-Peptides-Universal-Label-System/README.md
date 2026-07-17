@@ -1,6 +1,6 @@
 # LA Peptides Universal Label System
 
-**v2.1.0** — a portable, brand-neutral **white-label label design engine**, reusable across an unlimited number of future brand partners. This is a reusable design engine, not a label for any specific company — no app, website, database, login system, sales tool, or ordering portal is included. It is independent of the sales app, website, pricing tools, and market-analysis work elsewhere in this repository — no shared files or dependencies.
+**v2.2.0** — a portable, brand-neutral **white-label label design engine**, reusable across an unlimited number of future brand partners. This is a reusable design engine, not a label for any specific company — no app, website, database, login system, sales tool, or ordering portal is included. It is independent of the sales app, website, pricing tools, and market-analysis work elsewhere in this repository — no shared files or dependencies.
 
 **No real or fictional brand identity is represented anywhere in this package.** A set of reference photos of an existing printed label were used only to study layout structure (a three-section landscape design with divider lines, a QR/lot/UBD verification block, and small-caps micro-type) — every visual region from that reference was rebuilt from scratch as an independently editable object using neutral placeholder content (`YOUR LOGO`, `BRAND NAME`, `PEPTIDE NAME`, `00MG`, `LOT000000`, `MM/YYYY`, etc.). None of that reference's name, logo, tagline, colors, QR code, or lot number appear here.
 
@@ -170,6 +170,14 @@ Each build: composes/applies the theme, applies fields (generating a real, scann
 
 This tooling is supplementary — the required deliverable is the flat file set above, which any team (web, backend, production, or a future application) can consume directly from `label-spec.json` and `layout.json` without running any of this code.
 
+## Regression testing
+
+```bash
+npm test
+```
+
+Runs `scripts/verify-all.js`: validates every canonical/derived JSON file and every brand-profile/product-profile instance (including `examples/`) against its `schema/*.schema.json` with [ajv](https://ajv.js.org/), cross-checks that ids match across `label-spec.json`/`layout.json`/`manifest.json`/`components.json`, then actually runs every documented build path (master, legacy theme, brand+product profile, the long-name auto-fit case, all 3 example brands) end to end — including the exact-size PDF dimension check `scripts/lib/verifyPdf.js` already performs — and confirms each example brand's committed `preview.png` isn't stale. No network access, nothing outside this package. Run it after any change to `master-label.svg`, `label-spec.json`, `layout.json`, a schema, or a build script before committing.
+
 ## Printing on an Epson ColorWorks C6000
 
 See `PRODUCTION-GUIDE.md` for the full checklist. Summary: load media matching 1.77in × 0.77in, print at **100% / Actual Size** (never "Fit to page"), let the driver manage color unless a specific ICC profile applies, no margins/bleed/crop marks needed.
@@ -189,6 +197,14 @@ This engine is designed to be consumed — not extended or redesigned — by the
 ## Versioning
 
 Semantic versioning — see `CHANGELOG.md` and `VERSION`. `label-spec.json`, `layout.json`, `manifest.json`, and `master-label.svg`'s `data-template-version` attribute are kept in lockstep with `VERSION`.
+
+## Upgrading from v2.1.0
+
+v2.2.0 is additive, no breaking changes:
+
+- `npm test` (new) — regression suite, see "Regression testing" above.
+- Fixed: `$schema` is now an allow-listed property on `layout.json`, `manifest.json`, theme files, brand-profiles, and product-profiles (previously rejected by each schema's own `additionalProperties: false`, even though every instance file in the package sets it).
+- `ajv` / `ajv-formats` added as devDependencies (test-only).
 
 ## Upgrading from v2.0.0
 

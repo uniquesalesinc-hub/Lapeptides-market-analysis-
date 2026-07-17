@@ -5,6 +5,7 @@
   "type": "object",
   "required": ["themeId", "name", "colors", "fonts", "logo"],
   "properties": {
+    "$schema": { "type": "string" },
     "themeId": { "type": "string", "pattern": "^[a-z0-9-]+$" },
     "name": { "type": "string" },
     "description": { "type": "string" },

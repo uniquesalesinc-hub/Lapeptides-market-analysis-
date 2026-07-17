@@ -2,6 +2,8 @@
 
 What this system actually checks before and during a build, implemented in `scripts/lib/validateProfiles.js`, `scripts/lib/autoFit.js`, and `scripts/lib/verifyPdf.js`. Where a rule is a **documented convention** rather than an enforced check, that's stated explicitly — this file does not claim behavior the code doesn't have.
 
+Separately, `npm test` (`scripts/verify-all.js`) is a regression suite that validates every JSON file in the package against its schema and re-runs every documented build path — run it after any change, before committing. It checks the package's own internal consistency (schemas, ids, build success); it does not replace the profile-level checks described below, which run on every build regardless.
+
 ## Required fields
 
 Enforced by `validateProfiles()` (hard error, build aborts) and again by `applyFields()` as a second, independent check:

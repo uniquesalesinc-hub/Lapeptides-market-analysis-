@@ -2,6 +2,16 @@
 
 All notable changes to this template package are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versions follow [Semantic Versioning](https://semver.org/).
 
+## [2.2.0] — 2026-07-17
+
+### Added
+
+- `npm test` (`scripts/verify-all.js`) — a regression suite: validates every canonical/derived JSON file, plus every `brand-profiles/`/`product-profiles/`/`examples/*` instance, against its `schema/*.schema.json` with [ajv](https://ajv.js.org/) (draft 2020-12, `ajv-formats` for `format: "uri"`); cross-checks id consistency across `label-spec.json`/`layout.json`/`manifest.json`/`components.json`; and re-runs every documented build path end to end (master, legacy theme, brand+product profile, the long-name auto-fit case, all 3 example brands), including the PDF exact-size check, and confirms every example brand's committed `preview.png` isn't stale. `ajv`/`ajv-formats` added as devDependencies (test-only — not required to build or use a label).
+
+### Fixed
+
+- `schema/layout.schema.json`, `schema/manifest.schema.json`, `schema/theme.schema.json`, `schema/brand-profile.schema.json`, `schema/product-profile.schema.json` all set `additionalProperties: false` but didn't declare `$schema` as an allowed instance property — meaning every instance file in this package (which all set `"$schema": "./schema/....json"` for editor tooling) technically failed its own schema. Caught by writing the test suite above; fixed by allow-listing `$schema` in all five.
+
 ## [2.1.0] — 2026-07-17
 
 Reframes the package explicitly as a **component system**: every visible object is now enumerable, with its full editable property set, from one file — and adds concrete proof (not just a claim) that the same master template reskins cleanly across many brands.

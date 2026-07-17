@@ -6,6 +6,7 @@
   "type": "object",
   "required": ["productProfileId", "peptideName", "strength", "coaQrDestination", "lot", "ubd"],
   "properties": {
+    "$schema": { "type": "string" },
     "productProfileId": {
       "type": "string",
       "pattern": "^[a-z0-9-]+$",

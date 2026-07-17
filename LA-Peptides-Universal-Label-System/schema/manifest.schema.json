@@ -6,6 +6,7 @@
   "type": "object",
   "required": ["manifestId", "templateId", "version", "canonicalSources", "editableRegionIds", "contentFieldIds"],
   "properties": {
+    "$schema": { "type": "string" },
     "manifestId": { "type": "string" },
     "templateId": { "type": "string" },
     "version": { "type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+$" },

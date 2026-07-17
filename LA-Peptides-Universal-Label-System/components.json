@@ -4,7 +4,7 @@
     "label-spec.json",
     "layout.json"
   ],
-  "templateVersion": "2.1.0",
+  "templateVersion": "2.2.0",
   "note": "Derived file — regenerate with `npm run build:components`. Do not hand-edit; edit label-spec.json / layout.json instead. Every visible object in master-label.svg is listed here as one addressable component with its full editable property set: geometry, lock state, default placeholder, alignment, auto-fit bounds, field-map key (if content-editable), and every theme token that restyles it.",
   "components": [
     {
