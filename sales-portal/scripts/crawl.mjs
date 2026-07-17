@@ -1,5 +1,7 @@
-// Playwright verification crawl: logs in as admin and rep, visits every nav route,
-// fails (exit 1) on any pageerror, console error, or "Application error" body text.
+// Playwright verification crawl: logs in as admin, rep, and a store portal user, visits
+// every nav route, fails (exit 1) on any pageerror, console error, or "Application error"
+// body text. Also asserts cross-surface isolation: the client cookie never opens the staff
+// portal and a staff session never opens the client account area.
 // Usage: CRAWL_BASE=http://localhost:3111 node scripts/crawl.mjs
 import { chromium } from "playwright";
 
@@ -143,9 +145,182 @@ async function crawlUser(browser, { label, email, routes }) {
   await context.close();
 }
 
+// ---------------------------------------------------------------------------
+// STORE persona: the client portal surface. Separate auth world (lap_client_session
+// cookie, not NextAuth), so it gets its own crawl functions instead of a USERS entry.
+// ---------------------------------------------------------------------------
+const STORE_EMAIL = "test-portal-user@demo.lapeptides.net";
+
+function watchErrors(page, errors) {
+  page.on("pageerror", (err) => errors.push(`pageerror: ${err.message}`));
+  page.on("console", (msg) => {
+    if (msg.type() !== "error") return;
+    if (msg.text().startsWith("Failed to fetch RSC payload")) return;
+    errors.push(`console: ${msg.text()}`);
+  });
+}
+
+function report(label, route, errors) {
+  if (errors.length) {
+    failures.push({ label, route, errors: [...errors] });
+    console.log(`FAIL [${label}] ${route}`);
+    for (const e of errors) console.log(`     ${e}`);
+  } else {
+    console.log(`ok   [${label}] ${route}`);
+  }
+}
+
+async function crawlStore(browser) {
+  const label = "store";
+  const context = await browser.newContext();
+  const page = await context.newPage();
+  const errors = [];
+  watchErrors(page, errors);
+
+  const settleNetwork = () =>
+    page.waitForLoadState("networkidle", { timeout: 10000 }).catch(() => {});
+
+  async function visit(route, opts = {}) {
+    errors.length = 0;
+    try {
+      await page.goto(`${BASE}${route}`, { waitUntil: "load", timeout: 30000 });
+      await page.waitForTimeout(800);
+      const body = (await page.textContent("body")) || "";
+      if (body.includes("Application error")) errors.push('body: contains "Application error"');
+      await settleNetwork();
+      if (opts.allowRedirectTo) {
+        const landed = new URL(page.url()).pathname;
+        if (landed !== route && landed !== opts.allowRedirectTo) {
+          errors.push(`landed on unexpected path ${landed}`);
+        }
+      }
+    } catch (err) {
+      errors.push(`navigation: ${err.message}`);
+    }
+    report(label, route, errors);
+  }
+
+  // Client login (hydration wait mirrors the staff login above).
+  await page.goto(`${BASE}/store/login`, { waitUntil: "networkidle", timeout: 30000 });
+  await page.waitForTimeout(500);
+  await page.fill("#email", STORE_EMAIL);
+  await page.fill("#password", PASSWORD);
+  await page.click('button[type="submit"]');
+  await page.waitForURL("**/store/account", { timeout: 30000 });
+  await settleNetwork();
+
+  await visit("/store");
+
+  // Representative product detail page: first product link in the store grid.
+  const productHref = await page.$$eval('a[href^="/store/products/"]', (anchors) =>
+    anchors.map((a) => a.getAttribute("href")).find(Boolean)
+  );
+  if (productHref) {
+    await visit(productHref);
+  } else {
+    failures.push({ label, route: "/store/products/[id]", errors: ["no product link found on /store"] });
+    console.log(`FAIL [${label}] /store/products/[id] (no product link found)`);
+  }
+
+  await visit("/store/cart");
+  // An empty (or under-minimum) cart legitimately bounces checkout back to the cart;
+  // following that redirect without error text counts as a pass.
+  await visit("/store/checkout", { allowRedirectTo: "/store/cart" });
+  await visit("/store/account");
+  await visit("/store/account/brand");
+
+  // Cross-surface isolation: the client cookie must NOT open the staff portal. The
+  // middleware never consults it outside /store, so /dashboard must 307 to staff /login.
+  await page.goto(`${BASE}/dashboard`, { waitUntil: "load", timeout: 30000 });
+  await page.waitForTimeout(500);
+  await settleNetwork();
+  const staffLanded = new URL(page.url()).pathname;
+  if (staffLanded === "/login") {
+    console.log(`ok   [${label}] /dashboard redirected client cookie to ${staffLanded}`);
+  } else {
+    failures.push({ label, route: "/dashboard", errors: [`client cookie was NOT redirected to staff login (landed ${staffLanded})`] });
+    console.log(`FAIL [${label}] /dashboard (client cookie landed on ${staffLanded})`);
+  }
+
+  await context.close();
+}
+
+async function crawlStoreLoggedOut(browser) {
+  const label = "store-anon";
+  const context = await browser.newContext();
+  const page = await context.newPage();
+  const errors = [];
+  watchErrors(page, errors);
+
+  // /store must render publicly, gate every price behind "Login to view pricing", and
+  // show ZERO dollar amounts inside the product grid.
+  errors.length = 0;
+  try {
+    await page.goto(`${BASE}/store`, { waitUntil: "load", timeout: 30000 });
+    await page.waitForTimeout(800);
+    const body = (await page.textContent("body")) || "";
+    if (body.includes("Application error")) errors.push('body: contains "Application error"');
+    if (!body.includes("Login to view pricing")) {
+      errors.push('anonymous /store is missing "Login to view pricing"');
+    }
+    const gridText = (await page.textContent('[data-testid="store-grid"]').catch(() => null)) ?? null;
+    if (gridText === null) {
+      errors.push("no [data-testid=store-grid] found on anonymous /store");
+    } else if (/\$\d/.test(gridText)) {
+      errors.push("anonymous /store grid leaks a dollar amount");
+    }
+  } catch (err) {
+    errors.push(`navigation: ${err.message}`);
+  }
+  report(label, "/store", errors);
+
+  // Gated store routes must bounce anonymous visitors to the store login.
+  await page.goto(`${BASE}/store/account`, { waitUntil: "load", timeout: 30000 });
+  await page.waitForTimeout(500);
+  const landed = new URL(page.url()).pathname;
+  if (landed === "/store/login") {
+    console.log(`ok   [${label}] /store/account redirected anonymous visitor to ${landed}`);
+  } else {
+    failures.push({ label, route: "/store/account", errors: [`anonymous visitor was NOT redirected to /store/login (landed ${landed})`] });
+    console.log(`FAIL [${label}] /store/account (anonymous landed on ${landed})`);
+  }
+
+  await context.close();
+}
+
+// Cross-surface isolation from the staff side: a rep's NextAuth session is never consulted
+// for /store, so /store/account must 307 the rep to the STORE login, not let them in.
+async function crawlRepStoreIsolation(browser) {
+  const label = "rep-x-store";
+  const context = await browser.newContext();
+  const page = await context.newPage();
+
+  await page.goto(`${BASE}/login`, { waitUntil: "networkidle", timeout: 30000 });
+  await page.waitForTimeout(500);
+  await page.fill("#email", "rep1@demo.lapeptides.net");
+  await page.fill("#password", PASSWORD);
+  await page.click('button[type="submit"]');
+  await page.waitForURL("**/dashboard", { timeout: 30000 });
+
+  await page.goto(`${BASE}/store/account`, { waitUntil: "load", timeout: 30000 });
+  await page.waitForTimeout(500);
+  const landed = new URL(page.url()).pathname;
+  if (landed === "/store/login") {
+    console.log(`ok   [${label}] /store/account redirected rep session to ${landed}`);
+  } else {
+    failures.push({ label, route: "/store/account", errors: [`rep session was NOT redirected to /store/login (landed ${landed})`] });
+    console.log(`FAIL [${label}] /store/account (rep session landed on ${landed})`);
+  }
+
+  await context.close();
+}
+
 const browser = await chromium.launch();
 try {
   for (const user of USERS) await crawlUser(browser, user);
+  await crawlStore(browser);
+  await crawlStoreLoggedOut(browser);
+  await crawlRepStoreIsolation(browser);
 } finally {
   await browser.close();
 }
