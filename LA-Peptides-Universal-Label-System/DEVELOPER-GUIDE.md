@@ -19,10 +19,12 @@ LA-Peptides-Universal-Label-System/
 ├── label-spec.json               field/theme registry (element ids, applyAs, required, maxLength)
 ├── layout.json                   percentage-based region geometry + lock/placeholder/autofit metadata
 ├── manifest.json                 package table of contents — read this first
+├── components.json               derived component registry (join of label-spec.json + layout.json)
 ├── default-theme.json            neutral starter palette
 ├── example-brand-theme.json      second palette (legacy theme-file interface, still supported)
 ├── brand-profiles/               brand partner identity + styling (recommended authoring format)
 ├── product-profiles/             per-product/batch content (recommended authoring format)
+├── examples/                     3 worked brand+product pairs with committed preview renders
 ├── placeholder-logo.svg
 ├── placeholder-qr.svg
 ├── placeholder-icons.svg
@@ -40,11 +42,12 @@ LA-Peptides-Universal-Label-System/
 
 ## Loading the master template
 
-You almost never touch `master-label.svg` directly. The integration surface is three JSON files:
+You almost never touch `master-label.svg` directly. The integration surface is four JSON files:
 
 1. **`label-spec.json`** — read once. Tells you every element id, whether it's field-mappable (`fields[]`), and how theme tokens map to attributes (`themeTargets`).
 2. **`layout.json`** — read once. Gives you every region's position as a **percentage** (0–100) of the canvas, so you can position an HTML overlay, a WYSIWYG editor's selection box, or recompute pixel coordinates at any render resolution — without ever parsing the SVG.
 3. **`manifest.json`** — the discovery entry point. `editableRegionIds`, `contentFieldIds`, and `requiredContentFieldIds` are the three lists most integrations need first.
+4. **`components.json`** — a derived, one-stop join of the two above: every one of the 27 visible objects as a single component record (id, type, layer, position, lock state, default placeholder, alignment, auto-fit bounds, field key, every theme token that restyles it). Built by `scripts/build-components.js` — regenerate it (`npm run build:components`) any time `label-spec.json` or `layout.json` changes; never hand-edit it directly. If you're building a component-driven UI (a WYSIWYG label editor, an admin-portal preview panel), this is the file to iterate over instead of cross-referencing the other two.
 
 ## Replacing every asset type
 

@@ -1,10 +1,16 @@
 # LA Peptides Universal Label System
 
-**v2.0.0** — a portable, brand-neutral **white-label label design engine**, reusable across an unlimited number of future brand partners. This is a reusable design engine, not a label for any specific company — no app, website, database, login system, sales tool, or ordering portal is included. It is independent of the sales app, website, pricing tools, and market-analysis work elsewhere in this repository — no shared files or dependencies.
+**v2.1.0** — a portable, brand-neutral **white-label label design engine**, reusable across an unlimited number of future brand partners. This is a reusable design engine, not a label for any specific company — no app, website, database, login system, sales tool, or ordering portal is included. It is independent of the sales app, website, pricing tools, and market-analysis work elsewhere in this repository — no shared files or dependencies.
 
 **No real or fictional brand identity is represented anywhere in this package.** A set of reference photos of an existing printed label were used only to study layout structure (a three-section landscape design with divider lines, a QR/lot/UBD verification block, and small-caps micro-type) — every visual region from that reference was rebuilt from scratch as an independently editable object using neutral placeholder content (`YOUR LOGO`, `BRAND NAME`, `PEPTIDE NAME`, `00MG`, `LOT000000`, `MM/YYYY`, etc.). None of that reference's name, logo, tagline, colors, QR code, or lot number appear here.
 
 **Start here:** `manifest.json` is the package-level entry point — it lists every file, every editable region/field id, and what's required vs. optional. If you're new to this package, read `QUICK-START.md` first.
+
+## This is a component system, not a static SVG
+
+Every visible object on the label — every logo, divider, icon, QR code, text field, border, color, font, and decorative element — is an independently addressable component: a stable id, a percentage-based position, a layer, a lock state, a default placeholder, and (for content it carries) a field key and the theme tokens that restyle it. **`components.json`** is the single-file, at-a-glance view of all 27 of them — a derived join of `label-spec.json` + `layout.json`, regenerated with `npm run build:components`. Nothing about the label is baked into one opaque drawing; a future WYSIWYG editor, a website, or a sales app can enumerate and manipulate the label one component at a time from that one file.
+
+Populating a label end to end still only ever needs **two JSON objects** — a brand profile and a product profile (see `examples/` for three fully worked pairs proving this reskins cleanly across distinct identities) — the component system is what those two objects are populating underneath.
 
 ## Documentation map
 
@@ -80,12 +86,14 @@ Every id above is an independently editable SVG object — background, border (c
 | `master-label.svg` | **Canonical source.** The template structure — open and edit directly in Illustrator/Figma/Inkscape/a browser. Never brand-specific. |
 | `label-spec.json` | **Canonical source.** Physical geometry, safe area/bleed, and the field/theme registry mapping ids to elements — the machine-readable contract a future app reads. |
 | `layout.json` | **Canonical source.** Percentage-based `x`/`y`/`width`/`height` for every editable region, plus `locked`, `defaultPlaceholder`, `alignment`, and `autoFit` metadata — a renderer at any resolution can position an overlay/editor without parsing the SVG. |
+| `components.json` | **Derived.** One-file component registry — every visible object with its full editable property set, joined from `label-spec.json` + `layout.json`. Regenerate with `npm run build:components`; never hand-edit. |
 | `default-theme.json` / `example-brand-theme.json` | Legacy flat theme-file interface (still supported) — prefer a brand-profile for new work. |
 | `brand-profiles/` | One JSON file per brand partner — identity + styling. See `schema/brand-profile.schema.json`. |
 | `product-profiles/` | One JSON file per product/batch — content. See `schema/product-profile.schema.json`. |
+| `examples/` | Three fully worked brand+product pairs (distinct palettes/fonts/logos) with committed preview renders — proof the engine reskins cleanly. See `examples/README.md`. |
 | `placeholder-logo.svg` / `placeholder-qr.svg` / `placeholder-icons.svg` | Swappable default assets (visually read "replace me"; the QR placeholder is not scannable). |
 | `master-label-preview.png` / `master-label-print.pdf` / `master-label-editable.pdf` | Committed master deliverables — default theme, all placeholders. Reproducible any time via `npm run build:master`. |
-| `schema/*.json` | JSON Schemas for every JSON file in this package. |
+| `schema/*.json` | JSON Schemas for every JSON file in this package, including `components.schema.json`. |
 | `scripts/` | Reusable Node build pipeline (see `DEVELOPER-GUIDE.md`). |
 | `LICENSE.md` | Usage terms (proprietary, LA Peptides). |
 
@@ -181,6 +189,14 @@ This engine is designed to be consumed — not extended or redesigned — by the
 ## Versioning
 
 Semantic versioning — see `CHANGELOG.md` and `VERSION`. `label-spec.json`, `layout.json`, `manifest.json`, and `master-label.svg`'s `data-template-version` attribute are kept in lockstep with `VERSION`.
+
+## Upgrading from v2.0.0
+
+v2.1.0 is additive, no breaking changes:
+
+- `components.json` (new, derived) — the single-file component registry described above.
+- `examples/` (new) — three fully worked brand+product pairs with committed preview renders.
+- `npm run build:components` (new script).
 
 ## Upgrading from v1.1.0
 

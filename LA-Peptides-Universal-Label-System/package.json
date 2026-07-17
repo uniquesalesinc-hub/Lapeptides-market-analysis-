@@ -1,6 +1,6 @@
 {
   "name": "la-peptides-universal-label-system",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "private": true,
   "description": "Portable, brand-neutral white-label design engine (1.77in x 0.77in vial label, three-panel layout). Generate the master deliverables, or a specific brand partner's finished label, from master-label.svg + a brand-profile.json + a product-profile.json.",
   "type": "commonjs",
@@ -9,6 +9,7 @@
   },
   "scripts": {
     "build:master": "node scripts/build-master.js",
+    "build:components": "node scripts/build-components.js",
     "build:example-brand": "node scripts/build.js --theme example-brand-theme.json --out .build/example-brand --zip",
     "build:profile-example": "node scripts/build-profile.js --brand brand-profiles/example-partner.brand-profile.json --product product-profiles/example.product-profile.json --out .build/profile-example --zip",
     "build:profile-long-name": "node scripts/build-profile.js --brand brand-profiles/example-partner.brand-profile.json --product product-profiles/example-long-name.product-profile.json --out .build/profile-long-name --zip"

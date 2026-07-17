@@ -1,0 +1,933 @@
+{
+  "$schema": "./schema/components.schema.json",
+  "generatedFrom": [
+    "label-spec.json",
+    "layout.json"
+  ],
+  "templateVersion": "2.1.0",
+  "note": "Derived file — regenerate with `npm run build:components`. Do not hand-edit; edit label-spec.json / layout.json instead. Every visible object in master-label.svg is listed here as one addressable component with its full editable property set: geometry, lock state, default placeholder, alignment, auto-fit bounds, field-map key (if content-editable), and every theme token that restyles it.",
+  "components": [
+    {
+      "id": "background",
+      "type": "shape",
+      "layer": "background_layer",
+      "role": "background color",
+      "position": {
+        "xPct": 0,
+        "yPct": 0,
+        "widthPct": 100,
+        "heightPct": 100
+      },
+      "textAnchor": null,
+      "alignment": null,
+      "baselineYPct": null,
+      "locked": true,
+      "defaultPlaceholder": null,
+      "autoFit": {
+        "enabled": false
+      },
+      "field": null,
+      "themeTokens": [
+        {
+          "token": "colors.background",
+          "attr": "fill"
+        }
+      ],
+      "fontRole": null
+    },
+    {
+      "id": "border",
+      "type": "shape",
+      "layer": "background_layer",
+      "role": "border color, thickness, radius",
+      "position": {
+        "xPct": 1.177,
+        "yPct": 2.706,
+        "widthPct": 97.646,
+        "heightPct": 94.589
+      },
+      "textAnchor": null,
+      "alignment": null,
+      "baselineYPct": null,
+      "locked": true,
+      "defaultPlaceholder": null,
+      "autoFit": {
+        "enabled": false
+      },
+      "field": null,
+      "themeTokens": [
+        {
+          "token": "colors.border",
+          "attr": "stroke"
+        },
+        {
+          "token": "border.thickness",
+          "attr": "stroke-width"
+        },
+        {
+          "token": "border.radius",
+          "attr": "rx"
+        },
+        {
+          "token": "border.radius",
+          "attr": "ry"
+        }
+      ],
+      "fontRole": null
+    },
+    {
+      "id": "divider_left",
+      "type": "shape",
+      "layer": "divider_layer",
+      "role": "brand/product vertical divider",
+      "position": {
+        "xPct": 32.957,
+        "yPct": 10.823,
+        "widthPct": 0.471,
+        "heightPct": 78.463
+      },
+      "textAnchor": null,
+      "alignment": null,
+      "baselineYPct": null,
+      "locked": true,
+      "defaultPlaceholder": null,
+      "autoFit": {
+        "enabled": false
+      },
+      "field": null,
+      "themeTokens": [
+        {
+          "token": "colors.accent",
+          "attr": "stroke"
+        }
+      ],
+      "fontRole": null
+    },
+    {
+      "id": "divider_right",
+      "type": "shape",
+      "layer": "divider_layer",
+      "role": "product/verification vertical divider",
+      "position": {
+        "xPct": 69.052,
+        "yPct": 10.823,
+        "widthPct": 0.471,
+        "heightPct": 78.463
+      },
+      "textAnchor": null,
+      "alignment": null,
+      "baselineYPct": null,
+      "locked": true,
+      "defaultPlaceholder": null,
+      "autoFit": {
+        "enabled": false
+      },
+      "field": null,
+      "themeTokens": [
+        {
+          "token": "colors.accent",
+          "attr": "stroke"
+        }
+      ],
+      "fontRole": null
+    },
+    {
+      "id": "brand_logo",
+      "type": "image",
+      "layer": "brand_layer",
+      "role": "primary brand logo placeholder",
+      "position": {
+        "xPct": 4.708,
+        "yPct": 10.823,
+        "widthPct": 10.201,
+        "heightPct": 23.449
+      },
+      "textAnchor": null,
+      "alignment": null,
+      "baselineYPct": null,
+      "locked": false,
+      "defaultPlaceholder": "placeholder-logo.svg",
+      "autoFit": {
+        "enabled": false
+      },
+      "field": {
+        "fieldKey": "brand_logo",
+        "required": true,
+        "maxLength": null,
+        "applyAs": "attr:href",
+        "description": "Relative path to the primary brand logo asset (svg/png)."
+      },
+      "themeTokens": [],
+      "fontRole": null
+    },
+    {
+      "id": "brand_logo_secondary",
+      "type": "use",
+      "layer": "brand_layer",
+      "role": "optional secondary logo/certification badge",
+      "position": {
+        "xPct": 16.871,
+        "yPct": 13.528,
+        "widthPct": 6.277,
+        "heightPct": 14.43
+      },
+      "textAnchor": null,
+      "alignment": null,
+      "baselineYPct": null,
+      "locked": false,
+      "defaultPlaceholder": "#icon-logo-secondary",
+      "autoFit": {
+        "enabled": false
+      },
+      "field": {
+        "fieldKey": "brand_logo_secondary",
+        "required": false,
+        "maxLength": null,
+        "applyAs": "attr:href",
+        "description": "Optional secondary logo/certification badge — points at a symbol id (e.g. \"#icon-logo-secondary\") or a swapped-in asset."
+      },
+      "themeTokens": [
+        {
+          "token": "colors.darkAccent",
+          "attr": "fill"
+        },
+        {
+          "token": "colors.darkAccent",
+          "attr": "stroke"
+        }
+      ],
+      "fontRole": null
+    },
+    {
+      "id": "brand_name",
+      "type": "text",
+      "layer": "brand_layer",
+      "role": "brand name",
+      "position": {
+        "xPct": 4.708,
+        "yPct": 39.394,
+        "widthPct": 26.679,
+        "heightPct": 10.786
+      },
+      "textAnchor": "start",
+      "alignment": "left",
+      "baselineYPct": 46.898,
+      "locked": false,
+      "defaultPlaceholder": "BRAND NAME",
+      "autoFit": {
+        "enabled": true,
+        "baseFontSizePt": 5.2,
+        "minFontSizePt": 3.2
+      },
+      "field": {
+        "fieldKey": "brand_name",
+        "required": true,
+        "maxLength": 22,
+        "applyAs": "text",
+        "description": "Brand name."
+      },
+      "themeTokens": [
+        {
+          "token": "colors.primary",
+          "attr": "fill"
+        }
+      ],
+      "fontRole": "heading"
+    },
+    {
+      "id": "brand_subtitle",
+      "type": "text",
+      "layer": "brand_layer",
+      "role": "brand subtitle",
+      "position": {
+        "xPct": 4.708,
+        "yPct": 51.154,
+        "widthPct": 26.679,
+        "heightPct": 6.854
+      },
+      "textAnchor": "start",
+      "alignment": "left",
+      "baselineYPct": 55.916,
+      "locked": false,
+      "defaultPlaceholder": "BRAND SUBTITLE",
+      "autoFit": {
+        "enabled": false
+      },
+      "field": {
+        "fieldKey": "brand_subtitle",
+        "required": false,
+        "maxLength": 18,
+        "applyAs": "text",
+        "description": "Brand subtitle, shown under the brand name. Fixed-width column, does not auto-shrink."
+      },
+      "themeTokens": [
+        {
+          "token": "colors.secondary",
+          "attr": "fill"
+        }
+      ],
+      "fontRole": "subheading"
+    },
+    {
+      "id": "brand_decorative_graphic",
+      "type": "use",
+      "layer": "brand_layer",
+      "role": "optional decorative brand accent graphic",
+      "position": {
+        "xPct": 4.708,
+        "yPct": 60.606,
+        "widthPct": 2.511,
+        "heightPct": 5.772
+      },
+      "textAnchor": null,
+      "alignment": null,
+      "baselineYPct": null,
+      "locked": false,
+      "defaultPlaceholder": "#icon-decorative",
+      "autoFit": {
+        "enabled": false
+      },
+      "field": {
+        "fieldKey": "brand_decorative_graphic",
+        "required": false,
+        "maxLength": null,
+        "applyAs": "attr:href",
+        "description": "Optional decorative accent graphic — points at a symbol id or a swapped-in asset."
+      },
+      "themeTokens": [
+        {
+          "token": "colors.accent",
+          "attr": "fill"
+        },
+        {
+          "token": "colors.accent",
+          "attr": "stroke"
+        }
+      ],
+      "fontRole": null
+    },
+    {
+      "id": "brand_tagline",
+      "type": "text",
+      "layer": "brand_layer",
+      "role": "brand tagline",
+      "position": {
+        "xPct": 8.318,
+        "yPct": 61.688,
+        "widthPct": 23.07,
+        "heightPct": 6.223
+      },
+      "textAnchor": "start",
+      "alignment": "left",
+      "baselineYPct": 66.017,
+      "locked": false,
+      "defaultPlaceholder": "BRAND TAGLINE",
+      "autoFit": {
+        "enabled": true,
+        "baseFontSizePt": 3,
+        "minFontSizePt": 2.2
+      },
+      "field": {
+        "fieldKey": "brand_tagline",
+        "required": false,
+        "maxLength": 24,
+        "applyAs": "text",
+        "description": "Short brand tagline next to the decorative accent graphic. Auto-fit: shrinks font-size if needed (see scripts/lib/autoFit.js) — this maxLength is a soft guideline, not a hard cutoff."
+      },
+      "themeTokens": [
+        {
+          "token": "colors.accent",
+          "attr": "fill"
+        }
+      ],
+      "fontRole": null
+    },
+    {
+      "id": "product_name",
+      "type": "text",
+      "layer": "product_layer",
+      "role": "peptide/product name",
+      "position": {
+        "xPct": 36.095,
+        "yPct": 22.547,
+        "widthPct": 31.387,
+        "heightPct": 10.372
+      },
+      "textAnchor": "start",
+      "alignment": "left",
+      "baselineYPct": 29.762,
+      "locked": false,
+      "defaultPlaceholder": "PEPTIDE NAME",
+      "autoFit": {
+        "enabled": true,
+        "baseFontSizePt": 5,
+        "minFontSizePt": 3
+      },
+      "field": {
+        "fieldKey": "product_name",
+        "required": true,
+        "maxLength": 20,
+        "applyAs": "text",
+        "description": "Peptide/product name."
+      },
+      "themeTokens": [
+        {
+          "token": "colors.primary",
+          "attr": "fill"
+        }
+      ],
+      "fontRole": "heading"
+    },
+    {
+      "id": "product_descriptor",
+      "type": "text",
+      "layer": "product_layer",
+      "role": "product descriptor",
+      "position": {
+        "xPct": 36.095,
+        "yPct": 34.127,
+        "widthPct": 31.387,
+        "heightPct": 5.393
+      },
+      "textAnchor": "start",
+      "alignment": "left",
+      "baselineYPct": 37.879,
+      "locked": false,
+      "defaultPlaceholder": "PRODUCT DESCRIPTOR",
+      "autoFit": {
+        "enabled": false
+      },
+      "field": {
+        "fieldKey": "product_descriptor",
+        "required": false,
+        "maxLength": 26,
+        "applyAs": "text",
+        "description": "Short product descriptor, e.g. \"PURE PEPTIDE\"."
+      },
+      "themeTokens": [
+        {
+          "token": "colors.secondary",
+          "attr": "fill"
+        }
+      ],
+      "fontRole": "subheading"
+    },
+    {
+      "id": "product_strength",
+      "type": "text",
+      "layer": "product_layer",
+      "role": "strength, e.g. 10MG",
+      "position": {
+        "xPct": 36.095,
+        "yPct": 42.208,
+        "widthPct": 31.387,
+        "heightPct": 19.706
+      },
+      "textAnchor": "start",
+      "alignment": "left",
+      "baselineYPct": 55.916,
+      "locked": false,
+      "defaultPlaceholder": "00MG",
+      "autoFit": {
+        "enabled": false
+      },
+      "field": {
+        "fieldKey": "product_strength",
+        "required": true,
+        "maxLength": 10,
+        "applyAs": "text",
+        "description": "Strength, e.g. \"10MG\"."
+      },
+      "themeTokens": [
+        {
+          "token": "colors.primary",
+          "attr": "fill"
+        }
+      ],
+      "fontRole": null
+    },
+    {
+      "id": "product_concentration",
+      "type": "text",
+      "layer": "product_layer",
+      "role": "concentration, e.g. 5MG/ML",
+      "position": {
+        "xPct": 36.095,
+        "yPct": 60.75,
+        "widthPct": 15.694,
+        "heightPct": 6.016
+      },
+      "textAnchor": "start",
+      "alignment": "left",
+      "baselineYPct": 64.935,
+      "locked": false,
+      "defaultPlaceholder": "0MG/ML",
+      "autoFit": {
+        "enabled": false
+      },
+      "field": {
+        "fieldKey": "product_concentration",
+        "required": false,
+        "maxLength": 12,
+        "applyAs": "text",
+        "description": "Concentration, e.g. \"5MG/ML\"."
+      },
+      "themeTokens": [
+        {
+          "token": "colors.secondary",
+          "attr": "fill"
+        }
+      ],
+      "fontRole": null
+    },
+    {
+      "id": "product_vial_size",
+      "type": "text",
+      "layer": "product_layer",
+      "role": "vial size, e.g. 2ML VIAL",
+      "position": {
+        "xPct": 53.358,
+        "yPct": 60.75,
+        "widthPct": 14.124,
+        "heightPct": 6.016
+      },
+      "textAnchor": "start",
+      "alignment": "left",
+      "baselineYPct": 64.935,
+      "locked": false,
+      "defaultPlaceholder": "0ML VIAL",
+      "autoFit": {
+        "enabled": false
+      },
+      "field": {
+        "fieldKey": "product_vial_size",
+        "required": false,
+        "maxLength": 12,
+        "applyAs": "text",
+        "description": "Vial size, e.g. \"2ML VIAL\"."
+      },
+      "themeTokens": [
+        {
+          "token": "colors.secondary",
+          "attr": "fill"
+        }
+      ],
+      "fontRole": null
+    },
+    {
+      "id": "purity_icon",
+      "type": "use",
+      "layer": "product_layer",
+      "role": "purity icon placeholder",
+      "position": {
+        "xPct": 36.095,
+        "yPct": 68.543,
+        "widthPct": 2.511,
+        "heightPct": 5.772
+      },
+      "textAnchor": null,
+      "alignment": null,
+      "baselineYPct": null,
+      "locked": false,
+      "defaultPlaceholder": "#icon-purity",
+      "autoFit": {
+        "enabled": false
+      },
+      "field": {
+        "fieldKey": "purity_icon",
+        "required": false,
+        "maxLength": null,
+        "applyAs": "attr:href",
+        "description": "Purity icon — points at a symbol id or a swapped-in asset."
+      },
+      "themeTokens": [
+        {
+          "token": "colors.darkAccent",
+          "attr": "fill"
+        },
+        {
+          "token": "colors.darkAccent",
+          "attr": "stroke"
+        }
+      ],
+      "fontRole": null
+    },
+    {
+      "id": "purity_claim",
+      "type": "text",
+      "layer": "product_layer",
+      "role": "purity claim text",
+      "position": {
+        "xPct": 39.47,
+        "yPct": 69.769,
+        "widthPct": 28.013,
+        "heightPct": 6.016
+      },
+      "textAnchor": "start",
+      "alignment": "left",
+      "baselineYPct": 73.954,
+      "locked": false,
+      "defaultPlaceholder": "≥99% PURITY",
+      "autoFit": {
+        "enabled": false
+      },
+      "field": {
+        "fieldKey": "purity_claim",
+        "required": false,
+        "maxLength": 16,
+        "applyAs": "text",
+        "description": "Purity claim, e.g. \"≥99% PURITY\"."
+      },
+      "themeTokens": [
+        {
+          "token": "colors.secondary",
+          "attr": "fill"
+        }
+      ],
+      "fontRole": "subheading"
+    },
+    {
+      "id": "lab_icon",
+      "type": "use",
+      "layer": "product_layer",
+      "role": "lab-tested icon placeholder",
+      "position": {
+        "xPct": 36.095,
+        "yPct": 77.561,
+        "widthPct": 2.511,
+        "heightPct": 5.772
+      },
+      "textAnchor": null,
+      "alignment": null,
+      "baselineYPct": null,
+      "locked": false,
+      "defaultPlaceholder": "#icon-lab-tested",
+      "autoFit": {
+        "enabled": false
+      },
+      "field": {
+        "fieldKey": "lab_icon",
+        "required": false,
+        "maxLength": null,
+        "applyAs": "attr:href",
+        "description": "Lab-tested icon — points at a symbol id or a swapped-in asset."
+      },
+      "themeTokens": [
+        {
+          "token": "colors.darkAccent",
+          "attr": "fill"
+        },
+        {
+          "token": "colors.darkAccent",
+          "attr": "stroke"
+        }
+      ],
+      "fontRole": null
+    },
+    {
+      "id": "lab_claim",
+      "type": "text",
+      "layer": "product_layer",
+      "role": "lab-tested claim text",
+      "position": {
+        "xPct": 39.47,
+        "yPct": 78.788,
+        "widthPct": 28.013,
+        "heightPct": 6.016
+      },
+      "textAnchor": "start",
+      "alignment": "left",
+      "baselineYPct": 82.973,
+      "locked": false,
+      "defaultPlaceholder": "LAB TESTED",
+      "autoFit": {
+        "enabled": false
+      },
+      "field": {
+        "fieldKey": "lab_claim",
+        "required": false,
+        "maxLength": 16,
+        "applyAs": "text",
+        "description": "Lab-tested claim, e.g. \"LAB TESTED\"."
+      },
+      "themeTokens": [
+        {
+          "token": "colors.secondary",
+          "attr": "fill"
+        }
+      ],
+      "fontRole": "subheading"
+    },
+    {
+      "id": "country_icon",
+      "type": "use",
+      "layer": "verification_layer",
+      "role": "country/region of origin (flag) placeholder",
+      "position": {
+        "xPct": 71.798,
+        "yPct": 10.823,
+        "widthPct": 4.394,
+        "heightPct": 10.101
+      },
+      "textAnchor": null,
+      "alignment": null,
+      "baselineYPct": null,
+      "locked": false,
+      "defaultPlaceholder": "#icon-origin",
+      "autoFit": {
+        "enabled": false
+      },
+      "field": {
+        "fieldKey": "country_icon",
+        "required": false,
+        "maxLength": null,
+        "applyAs": "attr:href",
+        "description": "Country/region-of-origin (flag) graphic — points at a symbol id or a swapped-in asset. Ships as a generic pennant, not a specific country's flag."
+      },
+      "themeTokens": [
+        {
+          "token": "colors.darkAccent",
+          "attr": "fill"
+        },
+        {
+          "token": "colors.darkAccent",
+          "attr": "stroke"
+        }
+      ],
+      "fontRole": null
+    },
+    {
+      "id": "coa_qr",
+      "type": "image",
+      "layer": "verification_layer",
+      "role": "QR placeholder / generated QR linking to COA",
+      "position": {
+        "xPct": 76.114,
+        "yPct": 15.332,
+        "widthPct": 14.124,
+        "heightPct": 32.468
+      },
+      "textAnchor": null,
+      "alignment": null,
+      "baselineYPct": null,
+      "locked": false,
+      "defaultPlaceholder": "placeholder-qr.svg",
+      "autoFit": {
+        "enabled": false
+      },
+      "field": {
+        "fieldKey": "coa_qr",
+        "required": true,
+        "maxLength": null,
+        "applyAs": "qr",
+        "description": "URL encoded into the QR image (typically a COA lookup page)."
+      },
+      "themeTokens": [],
+      "fontRole": null
+    },
+    {
+      "id": "qr_caption",
+      "type": "text",
+      "layer": "verification_layer",
+      "role": "QR caption",
+      "position": {
+        "xPct": 71.798,
+        "yPct": 50.216,
+        "widthPct": 25.502,
+        "heightPct": 5.601
+      },
+      "textAnchor": "middle",
+      "alignment": "center",
+      "baselineYPct": 54.113,
+      "locked": false,
+      "defaultPlaceholder": "SCAN FOR COA",
+      "autoFit": {
+        "enabled": false
+      },
+      "field": {
+        "fieldKey": "qr_caption",
+        "required": false,
+        "maxLength": 18,
+        "applyAs": "text",
+        "description": "Caption under the QR code."
+      },
+      "themeTokens": [
+        {
+          "token": "colors.secondary",
+          "attr": "fill"
+        }
+      ],
+      "fontRole": "subheading"
+    },
+    {
+      "id": "lot_label",
+      "type": "text",
+      "layer": "verification_layer",
+      "role": "LOT field label",
+      "position": {
+        "xPct": 71.798,
+        "yPct": 59.885,
+        "widthPct": 5.885,
+        "heightPct": 5.186
+      },
+      "textAnchor": "start",
+      "alignment": "left",
+      "baselineYPct": 63.492,
+      "locked": false,
+      "defaultPlaceholder": "LOT",
+      "autoFit": {
+        "enabled": false
+      },
+      "field": {
+        "fieldKey": "lot_label",
+        "required": false,
+        "maxLength": 8,
+        "applyAs": "text",
+        "description": "Label preceding the lot value, e.g. \"LOT\"."
+      },
+      "themeTokens": [
+        {
+          "token": "colors.secondary",
+          "attr": "fill"
+        }
+      ],
+      "fontRole": null
+    },
+    {
+      "id": "lot_number",
+      "type": "text",
+      "layer": "verification_layer",
+      "role": "lot number",
+      "position": {
+        "xPct": 78.861,
+        "yPct": 59.019,
+        "widthPct": 18.44,
+        "heightPct": 6.43
+      },
+      "textAnchor": "start",
+      "alignment": "left",
+      "baselineYPct": 63.492,
+      "locked": false,
+      "defaultPlaceholder": "LOT000000",
+      "autoFit": {
+        "enabled": false
+      },
+      "field": {
+        "fieldKey": "lot_number",
+        "required": true,
+        "maxLength": 14,
+        "applyAs": "text",
+        "description": "Lot / batch number."
+      },
+      "themeTokens": [
+        {
+          "token": "colors.primary",
+          "attr": "fill"
+        }
+      ],
+      "fontRole": null
+    },
+    {
+      "id": "ubd_label",
+      "type": "text",
+      "layer": "verification_layer",
+      "role": "UBD field label",
+      "position": {
+        "xPct": 71.798,
+        "yPct": 68.543,
+        "widthPct": 5.885,
+        "heightPct": 5.186
+      },
+      "textAnchor": "start",
+      "alignment": "left",
+      "baselineYPct": 72.15,
+      "locked": false,
+      "defaultPlaceholder": "UBD",
+      "autoFit": {
+        "enabled": false
+      },
+      "field": {
+        "fieldKey": "ubd_label",
+        "required": false,
+        "maxLength": 8,
+        "applyAs": "text",
+        "description": "Label preceding the UBD value, e.g. \"UBD\"."
+      },
+      "themeTokens": [
+        {
+          "token": "colors.secondary",
+          "attr": "fill"
+        }
+      ],
+      "fontRole": null
+    },
+    {
+      "id": "ubd",
+      "type": "text",
+      "layer": "verification_layer",
+      "role": "use-by date",
+      "position": {
+        "xPct": 78.861,
+        "yPct": 67.677,
+        "widthPct": 18.44,
+        "heightPct": 6.43
+      },
+      "textAnchor": "start",
+      "alignment": "left",
+      "baselineYPct": 72.15,
+      "locked": false,
+      "defaultPlaceholder": "MM/YYYY",
+      "autoFit": {
+        "enabled": false
+      },
+      "field": {
+        "fieldKey": "ubd",
+        "required": true,
+        "maxLength": 10,
+        "applyAs": "text",
+        "description": "Use-by date, e.g. \"06/2026\"."
+      },
+      "themeTokens": [
+        {
+          "token": "colors.primary",
+          "attr": "fill"
+        }
+      ],
+      "fontRole": null
+    },
+    {
+      "id": "coa_url",
+      "type": "text",
+      "layer": "verification_layer",
+      "role": "printed COA URL",
+      "position": {
+        "xPct": 71.406,
+        "yPct": 79.365,
+        "widthPct": 25.895,
+        "heightPct": 4.149
+      },
+      "textAnchor": "start",
+      "alignment": "left",
+      "baselineYPct": 82.251,
+      "locked": false,
+      "defaultPlaceholder": "coa.example.com/LOT000000",
+      "autoFit": {
+        "enabled": false
+      },
+      "field": {
+        "fieldKey": "coa_url",
+        "required": false,
+        "maxLength": 26,
+        "applyAs": "text",
+        "description": "Human-readable COA URL printed as text (in addition to the QR). Fixed-width column, does not auto-shrink."
+      },
+      "themeTokens": [
+        {
+          "token": "colors.secondary",
+          "attr": "fill"
+        }
+      ],
+      "fontRole": null
+    }
+  ]
+}

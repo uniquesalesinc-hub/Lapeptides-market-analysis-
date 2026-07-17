@@ -1,7 +1,7 @@
 {
   "$schema": "./schema/label-spec.schema.json",
   "templateId": "la-peptides-universal-label",
-  "templateVersion": "2.0.0",
+  "templateVersion": "2.1.0",
   "sourceFile": "./master-label.svg",
   "layoutFile": "./layout.json",
   "description": "Canonical, portable, brand-neutral vial-label template with a left/center/right (brand/product/verification) layout. This file is the single source of truth for physical dimensions and the field/theme registry tying field-map keys and theme tokens to element ids inside master-label.svg. Every field's fieldKey is identical to its SVG element id and to its region id in layout.json — one flat, snake_case identifier used consistently across all three files, so a web app, the sales app, or a backend tool can populate the template without redesigning it. Every derived deliverable (preview PNG, editable PDF, exact-size print PDF, a specific brand partner's finished label) must be reproducible from master-label.svg + a theme JSON + (optionally) a field-map JSON.",

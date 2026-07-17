@@ -25,7 +25,7 @@
 -->
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
      viewBox="0 0 127.44 55.44" width="127.44pt" height="55.44pt"
-     id="master-label" data-template-id="la-peptides-universal-label" data-template-version="2.0.0">
+     id="master-label" data-template-id="la-peptides-universal-label" data-template-version="2.1.0">
 
   <title>LA Peptides Universal White-Label Vial Label</title>
   <desc>Three-panel (brand / product / verification), theme- and field-driven vial label template. Element ids are the integration surface — see label-spec.json and layout.json.</desc>

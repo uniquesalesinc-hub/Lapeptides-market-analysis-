@@ -14,6 +14,8 @@
     "canonicalSources": { "type": "object" },
     "profiles": { "type": "object" },
     "derivedDeliverables": { "type": "object" },
+    "componentSystem": { "type": "object" },
+    "examples": { "type": "object" },
     "placeholders": { "type": "object" },
     "schemas": { "type": "object" },
     "documentation": { "type": "object" },

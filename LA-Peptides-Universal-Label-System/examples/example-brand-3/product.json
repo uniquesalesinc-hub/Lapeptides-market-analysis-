@@ -1,0 +1,16 @@
+{
+  "$schema": "../../schema/product-profile.schema.json",
+  "productProfileId": "example-brand-3-ghk-cu-50mg",
+  "productCategory": "PEPTIDE",
+  "peptideName": "GHK-CU",
+  "strength": "50MG",
+  "descriptor": "PURE PEPTIDE",
+  "concentration": "10MG/ML",
+  "vialSize": "5ML VIAL",
+  "purityClaim": "≥99% PURITY",
+  "labTestedClaim": "LAB TESTED",
+  "lot": "EB3030325",
+  "ubd": "03/2027",
+  "coaQrDestination": "https://example.com/coa/EB3030325",
+  "coaUrl": "coa.example.com/EB3030325"
+}

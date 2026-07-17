@@ -1,0 +1,38 @@
+{
+  "$schema": "../../schema/brand-profile.schema.json",
+  "brandProfileId": "example-brand-1",
+  "name": "EXAMPLE BRAND 1",
+  "subtitle": "DEMO IDENTITY",
+  "tagline": "PROOF OF CONCEPT",
+  "logo": {
+    "primary": "examples/example-brand-1/logo.svg",
+    "secondary": null
+  },
+  "decorativeGraphic": "#icon-decorative",
+  "fonts": {
+    "heading": "\"Archivo\", \"Helvetica Neue\", Arial, sans-serif",
+    "subheading": "\"Inter\", \"Helvetica Neue\", Arial, sans-serif",
+    "body": "\"Inter\", \"Helvetica Neue\", Arial, sans-serif",
+    "mono": "\"Roboto Mono\", \"Courier New\", monospace"
+  },
+  "colors": {
+    "background": "#F5F7F8",
+    "primary": "#14324A",
+    "secondary": "#2E8B9E",
+    "accent": "#C9A227",
+    "border": "#14324A",
+    "iconColor": "#1F5A6B"
+  },
+  "icons": {
+    "purity": "#icon-purity",
+    "labTested": "#icon-lab-tested"
+  },
+  "qrStyle": {
+    "caption": "SCAN FOR COA"
+  },
+  "countryGraphic": "#icon-origin",
+  "border": {
+    "thickness": 1,
+    "radius": 3
+  }
+}
