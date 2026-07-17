@@ -1,0 +1,31 @@
+{
+  "$schema": "../spec/schema/theme.schema.json",
+  "themeId": "la-peptides-default",
+  "name": "LA Peptides — Default",
+  "colors": {
+    "background": "#FFFFFF",
+    "border": "#0B2545",
+    "brandPrimary": "#0B2545",
+    "brandAccent": "#1E88E5",
+    "textSecondary": "#4A4A4A",
+    "icon": "#0B2545",
+    "qrCaption": "#4A4A4A"
+  },
+  "fonts": {
+    "brandFont": "\"Archivo\", \"Helvetica Neue\", Arial, sans-serif",
+    "bodyFont": "\"Inter\", \"Helvetica Neue\", Arial, sans-serif",
+    "monoFont": "\"Roboto Mono\", \"Courier New\", monospace"
+  },
+  "logo": {
+    "primary": "assets/logos/la-peptides-logo.svg"
+  },
+  "qrCaptionStyle": {
+    "text": "SCAN FOR COA",
+    "fontSizePt": 4.5,
+    "letterSpacing": "0.4",
+    "uppercase": true
+  },
+  "defaultClaims": [
+    "FOR RESEARCH USE ONLY. NOT FOR HUMAN CONSUMPTION."
+  ]
+}

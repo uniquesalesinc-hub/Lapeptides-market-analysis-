@@ -1,0 +1,30 @@
+{
+  "note": "This template ships with NO embedded font binaries so the package stays free of font-license restrictions and safe to redistribute. All fonts below are open-licensed and safe to self-host if you want the exact intended look; every text style also carries a system-font fallback so the label renders correctly even if none of these are installed.",
+  "fonts": [
+    {
+      "role": "brandFont",
+      "family": "Archivo",
+      "weights": [700, 800],
+      "license": "SIL Open Font License 1.1",
+      "source": "https://fonts.google.com/specimen/Archivo",
+      "fallbackStack": "\"Helvetica Neue\", Arial, sans-serif"
+    },
+    {
+      "role": "bodyFont",
+      "family": "Inter",
+      "weights": [400, 600],
+      "license": "SIL Open Font License 1.1",
+      "source": "https://fonts.google.com/specimen/Inter",
+      "fallbackStack": "\"Helvetica Neue\", Arial, sans-serif"
+    },
+    {
+      "role": "monoFont",
+      "family": "Roboto Mono",
+      "weights": [500, 600],
+      "license": "Apache License 2.0",
+      "source": "https://fonts.google.com/specimen/Roboto+Mono",
+      "fallbackStack": "\"Courier New\", monospace"
+    }
+  ],
+  "howToEmbedForPrint": "For press/rasterized output, install the desired font family locally (or embed it in Illustrator via Type > Add Fonts from your OS/Adobe Fonts) before opening master-label.svg — sharp/pdfkit in scripts/build.js render text as system fonts are available at build time, so install fonts on the build machine as well if you need exact typography in automated PNG/PDF output."
+}

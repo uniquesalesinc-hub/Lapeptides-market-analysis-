@@ -1,0 +1,31 @@
+{
+  "$schema": "../spec/schema/theme.schema.json",
+  "themeId": "white-label-example-true-north",
+  "name": "White-Label Example — True North",
+  "colors": {
+    "background": "#FCFBF7",
+    "border": "#0F3D3E",
+    "brandPrimary": "#0F3D3E",
+    "brandAccent": "#C9A84C",
+    "textSecondary": "#5B5B54",
+    "icon": "#C9A84C",
+    "qrCaption": "#5B5B54"
+  },
+  "fonts": {
+    "brandFont": "\"Archivo\", \"Helvetica Neue\", Arial, sans-serif",
+    "bodyFont": "\"Inter\", \"Helvetica Neue\", Arial, sans-serif",
+    "monoFont": "\"Roboto Mono\", \"Courier New\", monospace"
+  },
+  "logo": {
+    "primary": "assets/logos/client-logo-placeholder.svg"
+  },
+  "qrCaptionStyle": {
+    "text": "SCAN FOR COA",
+    "fontSizePt": 4.5,
+    "letterSpacing": "0.4",
+    "uppercase": true
+  },
+  "defaultClaims": [
+    "FOR RESEARCH USE ONLY. NOT FOR HUMAN CONSUMPTION."
+  ]
+}

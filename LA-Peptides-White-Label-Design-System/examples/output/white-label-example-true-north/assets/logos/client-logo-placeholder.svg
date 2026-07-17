@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  <!-- Icon-only brand mark. The wordmark is NOT baked in here — it is set
+       separately via the "branding-name" text field so themes/field-maps can
+       restyle brand text without touching this asset. -->
+  <g id="logo-mark" fill="#0F3D3E">
+    <path d="M16 4 L28 26 L4 26 Z"/>
+  </g>
+</svg>

@@ -1,0 +1,11 @@
+{
+  "$schema": "../spec/schema/field-map.schema.json",
+  "branding.logo.primary": "assets/logos/la-peptides-logo.svg",
+  "branding.name": "LA PEPTIDES",
+  "branding.tagline": "LAB-VERIFIED PURITY.",
+  "product.name": "BPC-157",
+  "product.strength": "5MG",
+  "tracking.qr.destination": "https://example.com/coa/LAP050124",
+  "tracking.lotValue": "LAP050124",
+  "tracking.ubdValue": "05/2027"
+}

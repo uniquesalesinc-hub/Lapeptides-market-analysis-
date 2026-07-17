@@ -1,0 +1,93 @@
+{
+  "$schema": "./schema/label-spec.schema.json",
+  "templateId": "la-peptides-master-label",
+  "templateVersion": "1.0.0",
+  "sourceFile": "../src/master-label.svg",
+  "description": "Canonical, portable vial-label template. This file is the single source of truth for physical dimensions, print production geometry, and the field/theme registry that ties dotted field-map keys and theme tokens to element ids inside master-label.svg. All derived deliverables (PNG, print PDF, AI, packaged ZIP) must be reproducible from src/master-label.svg + a theme JSON + a field-map JSON using scripts/build.js.",
+
+  "physicalSize": { "width": 3.5, "height": 1.5, "unit": "in" },
+  "bleed": { "top": 0.0625, "right": 0.0625, "bottom": 0.0625, "left": 0.0625, "unit": "in" },
+  "safeArea": { "inset": 0.09375, "unit": "in", "note": "Keep all live text/logo content this far inside the trim edge." },
+
+  "coordinateSystem": {
+    "userUnitsPerInch": 72,
+    "viewBox": "0 0 252 108",
+    "note": "1 SVG user unit == 1pt. The exact-size print PDF page box is generated at physicalSize with no unit conversion, then verified against this value by scripts/lib/verifyPdf.js."
+  },
+
+  "colorProfile": {
+    "authoring": "sRGB",
+    "print": "Convert to the printer/press CMYK profile at RIP time. See docs/EPSON-PRINTING-INSTRUCTIONS.md. Do not bake CMYK conversion into the canonical SVG."
+  },
+
+  "fonts": {
+    "manifest": "../assets/fonts/font-manifest.json",
+    "note": "Font family names are theme tokens (fonts.brandFont / fonts.bodyFont / fonts.monoFont) applied to the <style id=\"label-fonts\"> block in master-label.svg by scripts/lib/applyTheme.js."
+  },
+
+  "elements": [
+    { "id": "bg-fill",               "type": "shape", "role": "background fill" },
+    { "id": "border-frame",          "type": "shape", "role": "border stroke" },
+    { "id": "branding-logo-primary", "type": "image",  "role": "client/brand logo" },
+    { "id": "branding-name",         "type": "text",  "role": "brand name" },
+    { "id": "branding-tagline",      "type": "text",  "role": "brand tagline" },
+    { "id": "product-name",          "type": "text",  "role": "product name" },
+    { "id": "product-strength",      "type": "text",  "role": "product strength/size" },
+    { "id": "icon-primary",          "type": "group", "role": "decorative brand icon" },
+    { "id": "tracking-lot-value",    "type": "text",  "role": "lot number" },
+    { "id": "tracking-ubd-value",    "type": "text",  "role": "use-by date" },
+    { "id": "tracking-qr",           "type": "image", "role": "QR code linking to COA" },
+    { "id": "tracking-qr-caption",   "type": "text",  "role": "QR caption" },
+    { "id": "branding-default-claim","type": "text",  "role": "default regulatory/legal claim" }
+  ],
+
+  "fields": [
+    { "fieldKey": "branding.logo.primary",     "elementId": "branding-logo-primary", "applyAs": "attr:href", "attrs": ["href", "xlink:href"], "required": true,  "description": "Relative path to the client/brand logo asset (svg/png)." },
+    { "fieldKey": "branding.name",              "elementId": "branding-name",         "applyAs": "text",      "required": true,  "maxLength": 28, "description": "Brand or company name shown on the label." },
+    { "fieldKey": "branding.tagline",           "elementId": "branding-tagline",      "applyAs": "text",      "required": false, "maxLength": 42, "description": "Short brand tagline. Keep at or below maxLength — the tagline column is fixed-width (ends where the tracking column begins at x=150) and does not auto-shrink." },
+    { "fieldKey": "branding.defaultClaim",      "elementId": "branding-default-claim","applyAs": "text",      "required": false, "maxLength": 90, "description": "Overrides the theme's default regulatory/legal claim for this specific label if set." },
+    { "fieldKey": "product.name",               "elementId": "product-name",          "applyAs": "text",      "required": true,  "maxLength": 24, "description": "Product/peptide name." },
+    { "fieldKey": "product.strength",           "elementId": "product-strength",      "applyAs": "text",      "required": true,  "maxLength": 16, "description": "Strength/size, e.g. \"10MG\"." },
+    { "fieldKey": "tracking.qr.destination",    "elementId": "tracking-qr",           "applyAs": "qr",        "attrs": ["href", "xlink:href"], "required": true,  "description": "URL encoded into the QR image (typically a COA lookup page)." },
+    { "fieldKey": "tracking.lotValue",          "elementId": "tracking-lot-value",    "applyAs": "text",      "required": true,  "maxLength": 20, "description": "Lot / batch number." },
+    { "fieldKey": "tracking.ubdValue",          "elementId": "tracking-ubd-value",    "applyAs": "text",      "required": true,  "maxLength": 12, "description": "Use-by date, e.g. \"06/2026\"." }
+  ],
+
+  "themeTargets": [
+    { "token": "colors.background",  "elementId": "bg-fill",                "attr": "fill" },
+    { "token": "colors.border",      "elementId": "border-frame",           "attr": "stroke" },
+    { "token": "colors.brandPrimary","elementId": "branding-name",          "attr": "fill" },
+    { "token": "colors.brandPrimary","elementId": "product-name",          "attr": "fill" },
+    { "token": "colors.brandPrimary","elementId": "product-strength",      "attr": "fill" },
+    { "token": "colors.brandPrimary","elementId": "tracking-lot-value",    "attr": "fill" },
+    { "token": "colors.brandPrimary","elementId": "tracking-ubd-value",    "attr": "fill" },
+    { "token": "colors.textSecondary","elementId": "branding-tagline",     "attr": "fill" },
+    { "token": "colors.textSecondary","elementId": "tracking-lot-label",   "attr": "fill" },
+    { "token": "colors.textSecondary","elementId": "tracking-ubd-label",   "attr": "fill" },
+    { "token": "colors.textSecondary","elementId": "tracking-qr-caption",  "attr": "fill" },
+    { "token": "colors.textSecondary","elementId": "branding-default-claim","attr": "fill" },
+    { "token": "colors.icon",        "elementId": "icon-primary",           "attr": "fill" }
+  ],
+
+  "fontTargets": {
+    "styleElementId": "label-fonts",
+    "note": "scripts/lib/applyTheme.js rewrites the font-family lists inside <style id=\"label-fonts\"> using theme.fonts.brandFont/bodyFont for #master-label text and theme.fonts.monoFont for #master-label .mono."
+  },
+
+  "qrCaptionStyle": {
+    "elementId": "tracking-qr-caption",
+    "themeToken": "qrCaptionStyle",
+    "note": "theme.qrCaptionStyle.text overrides the caption's default text content; fontSizePt/letterSpacing/uppercase are documented conventions for hand-editing in Illustrator/Figma (not auto-applied by build.js in v1.0.0)."
+  },
+
+  "defaultClaims": {
+    "themeToken": "defaultClaims",
+    "elementId": "branding-default-claim",
+    "note": "If a field-map does not set branding.defaultClaim, build.js falls back to theme.defaultClaims[0]."
+  },
+
+  "outputs": {
+    "png": { "targetDpi": 300, "widthPx": 1050, "heightPx": 450 },
+    "pdf": { "exactSize": true, "unit": "pt", "width": 252, "height": 108 }
+  }
+}

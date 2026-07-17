@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://la-peptides.example/schema/field-map.schema.json",
+  "title": "LA Peptides Label Field Map",
+  "description": "Values are matched against spec/label-spec.json's \"fields\" registry by fieldKey. See docs/FIELD-ID-REFERENCE.md.",
+  "type": "object",
+  "properties": {
+    "branding.logo.primary": { "type": "string" },
+    "branding.name": { "type": "string", "maxLength": 28 },
+    "branding.tagline": { "type": "string", "maxLength": 42 },
+    "branding.defaultClaim": { "type": "string", "maxLength": 90 },
+    "product.name": { "type": "string", "maxLength": 24 },
+    "product.strength": { "type": "string", "maxLength": 16 },
+    "tracking.qr.destination": { "type": "string", "format": "uri" },
+    "tracking.lotValue": { "type": "string", "maxLength": 20 },
+    "tracking.ubdValue": { "type": "string", "maxLength": 12 }
+  },
+  "required": [
+    "branding.logo.primary",
+    "branding.name",
+    "product.name",
+    "product.strength",
+    "tracking.qr.destination",
+    "tracking.lotValue",
+    "tracking.ubdValue"
+  ],
+  "additionalProperties": false
+}

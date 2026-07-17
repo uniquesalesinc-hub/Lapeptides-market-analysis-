@@ -1,0 +1,40 @@
+{
+  "templateId": "la-peptides-master-label",
+  "templateVersion": "1.0.0",
+  "builtAt": "2026-07-17T16:53:05.397Z",
+  "theme": {
+    "themeId": "la-peptides-default",
+    "source": "themes/la-peptides-default.theme.json"
+  },
+  "fieldMap": {
+    "source": "field-maps/la-peptides-default.field-map.json",
+    "appliedFields": {
+      "branding.logo.primary": "assets/logos/la-peptides-logo.svg",
+      "branding.name": "LA PEPTIDES",
+      "branding.tagline": "LAB-VERIFIED PURITY.",
+      "branding.defaultClaim": "FOR RESEARCH USE ONLY. NOT FOR HUMAN CONSUMPTION.",
+      "product.name": "BPC-157",
+      "product.strength": "5MG",
+      "tracking.qr.destination": "https://example.com/coa/LAP050124",
+      "tracking.lotValue": "LAP050124",
+      "tracking.ubdValue": "05/2027"
+    }
+  },
+  "outputs": {
+    "svg": "label.svg",
+    "png": "label-preview.png",
+    "pdf": "label-print.pdf"
+  },
+  "pdfVerification": {
+    "ok": true,
+    "actual": {
+      "width": 252,
+      "height": 108
+    },
+    "expected": {
+      "width": 252,
+      "height": 108
+    },
+    "unit": "pt"
+  }
+}

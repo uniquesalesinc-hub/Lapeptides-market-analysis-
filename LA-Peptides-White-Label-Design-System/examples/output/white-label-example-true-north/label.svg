@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  MASTER LABEL — canonical source (see ../spec/label-spec.json for the field/element registry)
+
+  Physical size: 3.5in x 1.5in. 1 SVG user unit = 1pt (72 units/in), so this
+  viewBox maps directly onto a PDF page of the same physical size with no
+  unit conversion. Do not change the viewBox without updating label-spec.json.
+
+  All values shown below are neutral placeholders. Real brand/product/tracking
+  values are applied by scripts/build.js from a field-map JSON file, matched by
+  element id (see docs/FIELD-ID-REFERENCE.md). Colors, fonts and the logo path
+  are applied from a theme JSON file (see docs/THEME-TOKEN-REFERENCE.md).
+
+  This file is safe to open directly in Adobe Illustrator, Figma, Inkscape or
+  any browser — the placeholder values render as a complete, valid label.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 252 108" width="252pt" height="108pt" id="master-label" data-template-id="la-peptides-master-label" data-template-version="1.0.0">
+
+  <title>LA Peptides White-Label Master Label</title>
+  <desc>Canonical, theme- and field-driven vial label template. Element ids are the integration surface — see label-spec.json.</desc>
+
+  <defs>
+    <style id="label-fonts">
+      
+        #master-label text {
+          font-family: "Inter", "Helvetica Neue", Arial, sans-serif;
+        }
+        #master-label .mono {
+          font-family: "Roboto Mono", "Courier New", monospace;
+        }
+      
+    </style>
+  </defs>
+
+  <!-- ============ BACKGROUND / FRAME (themable: colors.background, colors.border) ============ -->
+  <rect id="bg-fill" x="0" y="0" width="252" height="108" fill="#FCFBF7"/>
+  <rect id="border-frame" x="3" y="3" width="246" height="102" rx="4" ry="4" fill="none" stroke="#0F3D3E" stroke-width="1.5"/>
+
+  <!-- ============ BRANDING ============ -->
+  <g id="branding-group">
+    <image id="branding-logo-primary" x="12" y="9" width="15" height="15" href="assets/logos/client-logo-placeholder.svg" xlink:href="assets/logos/client-logo-placeholder.svg" preserveAspectRatio="xMinYMid meet"/>
+
+    <text id="branding-name" x="31" y="20.5" font-size="9" font-weight="700" letter-spacing="0.3" fill="#0F3D3E" font-family="&quot;Archivo&quot;, &quot;Helvetica Neue&quot;, Arial, sans-serif">TRUE NORTH</text>
+
+    <text id="branding-tagline" x="12" y="32" font-size="4.6" letter-spacing="0.2" fill="#5B5B54">PRECISION WELLNESS. GUIDED BY SCIENCE.</text>
+  </g>
+
+  <!-- ============ PRODUCT ============ -->
+  <g id="product-group">
+    <text id="product-name" x="12" y="58" font-size="15" font-weight="800" letter-spacing="0.2" fill="#0F3D3E" font-family="&quot;Archivo&quot;, &quot;Helvetica Neue&quot;, Arial, sans-serif">TESAMORELIN</text>
+
+    <text id="product-strength" x="12" y="73" font-size="9" font-weight="600" fill="#0F3D3E">10MG</text>
+  </g>
+
+  <!-- ============ ICON (themable: colors.icon) ============ -->
+  <g id="icon-primary" fill="#C9A84C" transform="translate(150,10)">
+    <circle cx="6" cy="6" r="6"/>
+    <path d="M3 6 L6 9 L10 3" stroke="#FFFFFF" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+
+  <!-- ============ TRACKING (lot / UBD / QR) ============ -->
+  <g id="tracking-group" class="mono">
+    <text id="tracking-lot-label" x="150" y="30" font-size="5" letter-spacing="0.3" fill="#5B5B54">LOT</text>
+    <text id="tracking-lot-value" x="150" y="38" font-size="7" font-weight="600" fill="#0F3D3E">TN062224</text>
+
+    <text id="tracking-ubd-label" x="150" y="50" font-size="5" letter-spacing="0.3" fill="#5B5B54">UBD</text>
+    <text id="tracking-ubd-value" x="150" y="58" font-size="7" font-weight="600" fill="#0F3D3E">06/2026</text>
+  </g>
+
+  <g id="tracking-qr-group">
+    <image id="tracking-qr" x="204" y="18" width="36" height="36" href="assets/qr/tracking-qr.png" xlink:href="assets/qr/tracking-qr.png" preserveAspectRatio="xMidYMid meet"/>
+    <text id="tracking-qr-caption" x="222" y="60" text-anchor="middle" font-size="4.5" letter-spacing="0.4" fill="#5B5B54">SCAN FOR COA</text>
+  </g>
+
+  <!-- ============ DEFAULT CLAIM ============ -->
+  <text id="branding-default-claim" x="126" y="99" text-anchor="middle" font-size="4.3" letter-spacing="0.15" fill="#5B5B54">FOR RESEARCH USE ONLY. NOT FOR HUMAN CONSUMPTION.</text>
+
+</svg>

@@ -1,0 +1,25 @@
+{
+  "name": "la-peptides-white-label-design-system",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Portable, theme-driven vial-label template system. Build PNG/print-PDF deliverables from src/master-label.svg + a theme JSON + a field-map JSON.",
+  "type": "commonjs",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "build": "node scripts/build.js",
+    "build:default": "node scripts/build.js --theme themes/la-peptides-default.theme.json --fields field-maps/la-peptides-default.field-map.json --out dist/la-peptides-default",
+    "build:example": "node scripts/build.js --theme themes/white-label-example-true-north.theme.json --fields field-maps/white-label-example-true-north.field-map.json --out dist/white-label-example-true-north"
+  },
+  "dependencies": {
+    "@xmldom/xmldom": "^0.8.10",
+    "archiver": "^7.0.1",
+    "pdf-lib": "^1.17.1",
+    "pdfkit": "^0.15.1",
+    "qrcode": "^1.5.4",
+    "sharp": "^0.33.5",
+    "svg-to-pdfkit": "^0.1.8",
+    "xpath": "^0.0.34"
+  }
+}

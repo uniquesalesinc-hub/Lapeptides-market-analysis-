@@ -1,0 +1,55 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://la-peptides.example/schema/theme.schema.json",
+  "title": "LA Peptides White-Label Theme",
+  "type": "object",
+  "required": ["themeId", "name", "colors", "fonts", "logo"],
+  "properties": {
+    "themeId": { "type": "string", "pattern": "^[a-z0-9-]+$" },
+    "name": { "type": "string" },
+    "colors": {
+      "type": "object",
+      "required": ["background", "border", "brandPrimary", "textSecondary", "icon"],
+      "properties": {
+        "background": { "type": "string" },
+        "border": { "type": "string" },
+        "brandPrimary": { "type": "string" },
+        "brandAccent": { "type": "string" },
+        "textSecondary": { "type": "string" },
+        "icon": { "type": "string" },
+        "qrCaption": { "type": "string" }
+      },
+      "additionalProperties": { "type": "string" }
+    },
+    "fonts": {
+      "type": "object",
+      "required": ["brandFont", "bodyFont", "monoFont"],
+      "properties": {
+        "brandFont": { "type": "string" },
+        "bodyFont": { "type": "string" },
+        "monoFont": { "type": "string" }
+      }
+    },
+    "logo": {
+      "type": "object",
+      "required": ["primary"],
+      "properties": {
+        "primary": { "type": "string", "description": "Relative path to the logo asset from the package root." }
+      }
+    },
+    "qrCaptionStyle": {
+      "type": "object",
+      "properties": {
+        "text": { "type": "string" },
+        "fontSizePt": { "type": "number" },
+        "letterSpacing": { "type": "string" },
+        "uppercase": { "type": "boolean" }
+      }
+    },
+    "defaultClaims": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  },
+  "additionalProperties": false
+}
